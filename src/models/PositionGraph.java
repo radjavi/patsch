@@ -8,17 +8,28 @@ public class PositionGraph {
 
   public PositionGraph(int[] waitingTimes) {
     int m = waitingTimes.length - 1;
-    graph = triangleGraph(m);
+    HashSet<Position> vertices = triangleVertices(m);
+    graph = triangleVerticesWithNeighbours(vertices);
   }
 
-  private static HashMap<Position, ArrayList<Position>> triangleGraph(int m) {
-    HashMap<Position, ArrayList<Position>> map = new HashMap<>();
+  /**
+   * Returns the vertices of a triangle graph.
+   */
+  private static HashSet<Position> triangleVertices(int m) {
     HashSet<Position> vertices = new HashSet<>();
     for (int x = 0; x <= m; x++) {
       for (int y = 0; y <= x; y++) {
         vertices.add(new Position(x, y));
       }
     }
+    return vertices;
+  }
+
+  /**
+   * Returns a mapping of each vertex in a triangle graph to its adjacent vertices.
+   */
+  private static HashMap<Position, ArrayList<Position>> triangleVerticesWithNeighbours(HashSet<Position> vertices) {
+    HashMap<Position, ArrayList<Position>> map = new HashMap<>();
     vertices.forEach(pos -> {
       ArrayList<Position> neighbours = new ArrayList<>();
       for (int x = pos.getX() - 1; x <= pos.getX() + 1; x++) {
