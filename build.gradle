@@ -12,6 +12,12 @@ plugins {
     id 'application'
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
 application {
     mainClass = 'app.App' // Set App.java as entry-point
 }
