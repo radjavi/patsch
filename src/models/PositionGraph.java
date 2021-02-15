@@ -22,7 +22,7 @@ public class PositionGraph {
       for (int x=pos.getX() - 1; x <= pos.getX() + 1; x++) {
         for (int y=pos.getY() - 1; y <= pos.getY() + 1; y++) {
           Position neighbour = new Position(x,y);
-          if (vertices.contains(neighbour)) {
+          if (vertices.contains(neighbour) && !pos.equals(neighbour)) {
             neighbours.add(neighbour);
           }
         }
@@ -35,13 +35,15 @@ public class PositionGraph {
   @Override
   public String toString() {
     String s = "";
-    graph.forEach((pos, n) -> {
+    for (Map.Entry<Position, ArrayList<Position>> e : graph.entrySet()) {
+      Position pos = e.getKey();
+      ArrayList<Position> neighbours = e.getValue();
       s += pos + ": ";
-      n.forEach(p -> {
-        s += p + ", ";
-      });
+      for (Position n : neighbours) {
+        s += n + ", ";
+      }
       s += "\n";
-    });
+    }
     return s;
   }
 }
