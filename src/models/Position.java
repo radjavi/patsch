@@ -1,4 +1,4 @@
-package Models;
+package models;
 
 public class Position {
   private int x;
@@ -42,5 +42,10 @@ public class Position {
     hash = 31 * hash + x;
     hash = 31 * hash + y;
     return hash;
+  }
+
+  @Override
+  public String toString() {
+    return "(" + x + "," + y + ")";
   }
 }

@@ -1,8 +1,9 @@
-import Models.*;
+import models.*;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        Path path = new Path(2);
-        System.out.println(path.a);
+        int[] times = {1,2,3,4};
+        PositionGraph graph = new PositionGraph(times);
+        System.out.println(graph);
     }
 }
