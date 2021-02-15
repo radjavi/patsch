@@ -6,4 +6,4 @@ dist: trusty
 jdk: openjdk11
 
 script:
-  - ./gradlew build --scan -s
+  - ./gradlew build
