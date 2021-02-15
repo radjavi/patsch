@@ -1,2 +1,2 @@
-# patsch
-Critical Patrolling Schedules for Two Robots on a Line
+# Patsch: Critical Patrolling Schedules for Two Robots on a Line
+
