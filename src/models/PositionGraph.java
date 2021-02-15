@@ -36,6 +36,10 @@ public class PositionGraph {
     return graph;
   }
 
+  public boolean hasPosition(Position pos) {
+    return graph.get(pos) != null;
+  }
+
   @Override
   public String toString() {
     String s = "";
