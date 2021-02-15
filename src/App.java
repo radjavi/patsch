@@ -5,5 +5,6 @@ public class App {
         int[] times = {1,2,3,4};
         PositionGraph graph = new PositionGraph(times);
         System.out.println(graph);
+        
     }
 }
