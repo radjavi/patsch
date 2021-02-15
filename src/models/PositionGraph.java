@@ -2,7 +2,7 @@ package models;
 import java.util.*;
 
 public class PositionGraph {
-  HashMap<Position, ArrayList<Position>> graph;
+  private HashMap<Position, ArrayList<Position>> graph;
     
   public PositionGraph(int[] waitingTimes) {
     int m = waitingTimes.length - 1;
@@ -32,6 +32,10 @@ public class PositionGraph {
     return map;
   }
 
+  public HashMap<Position, ArrayList<Position>> getGraph() {
+    return graph;
+  }
+
   @Override
   public String toString() {
     String s = "";
@@ -47,5 +51,3 @@ public class PositionGraph {
     return s;
   }
 }
-
-// (0,0): (0,1), ...
