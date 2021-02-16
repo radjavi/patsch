@@ -4,7 +4,8 @@ import java.util.*;
 
 public class PositionGraph {
 
-  private HashMap<Position, ArrayList<Position>> graph;
+  private HashMap<Position, HashSet<Position>> graph;
+  //private ArrayList<Property> properties;
 
   public PositionGraph(int[] waitingTimes) {
     int m = waitingTimes.length - 1;
@@ -28,10 +29,10 @@ public class PositionGraph {
   /**
    * Returns a mapping of each vertex in a triangle graph to its adjacent vertices.
    */
-  private static HashMap<Position, ArrayList<Position>> triangleVerticesWithNeighbours(HashSet<Position> vertices) {
-    HashMap<Position, ArrayList<Position>> map = new HashMap<>();
+  private static HashMap<Position, HashSet<Position>> triangleVerticesWithNeighbours(HashSet<Position> vertices) {
+    HashMap<Position, HashSet<Position>> map = new HashMap<>();
     vertices.forEach(pos -> {
-      ArrayList<Position> neighbours = new ArrayList<>();
+      HashSet<Position> neighbours = new HashSet<>();
       for (int x = pos.getX() - 1; x <= pos.getX() + 1; x++) {
         for (int y = pos.getY() - 1; y <= pos.getY() + 1; y++) {
           Position neighbour = new Position(x, y);
@@ -45,7 +46,7 @@ public class PositionGraph {
     return map;
   }
 
-  public HashMap<Position, ArrayList<Position>> getGraph() {
+  public HashMap<Position, HashSet<Position>> getGraph() {
     return graph;
   }
 
@@ -58,7 +59,7 @@ public class PositionGraph {
     String s = "";
     SortedSet<Position> keySet = new TreeSet<>(graph.keySet());
     for (Position pos : keySet) {
-      ArrayList<Position> neighbours = graph.get(pos);
+      HashSet<Position> neighbours = graph.get(pos);
       s += pos + ": ";
       for (Position n : neighbours) {
         s += n + ", ";
