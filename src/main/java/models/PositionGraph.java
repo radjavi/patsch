@@ -5,12 +5,13 @@ import java.util.*;
 public class PositionGraph {
 
   private HashMap<Position, HashSet<Position>> graph;
-  //private ArrayList<Property> properties;
+  private HashSet<Property> properties;
 
   public PositionGraph(int[] waitingTimes) {
     int m = waitingTimes.length - 1;
     HashSet<Position> vertices = triangleVertices(m);
     graph = triangleVerticesWithNeighbours(vertices);
+    //properties=createProperties(waitingTimes);
   }
 
   /**
