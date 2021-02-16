@@ -1,6 +1,6 @@
-package Models;
+package models;
 
-public class Position {
+public class Position implements Comparable{
   private int x;
   private int y;
 
@@ -27,6 +27,20 @@ public class Position {
   }
 
   @Override
+  public int compareTo(Object o) {
+    
+    Position pos = (Position) o;
+    if (this.x==pos.x && this.y==pos.y) return 0;
+    if (this.x>pos.x) return 1;
+    if (this.x==pos.x) {
+      if (this.y>pos.y) return 1;
+      else return -1;
+    }
+
+    return -1;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o)
       return true;
@@ -36,11 +50,18 @@ public class Position {
     return x == pos.x && y == pos.y;
   }
 
+  
+
   @Override
   public int hashCode() {
     int hash = 7;
     hash = 31 * hash + x;
     hash = 31 * hash + y;
     return hash;
+  }
+
+  @Override
+  public String toString() {
+    return "(" + x + "," + y + ")";
   }
 }
