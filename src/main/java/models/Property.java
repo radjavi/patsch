@@ -6,11 +6,13 @@ public class Property {
     private HashSet<Position> pos;
     private int waitingTime;
     private int propertyIndex;
+    private Range range;
 
     public Property(int m, int waitingTime, int index) {
         pos = positions(m, index);
         propertyIndex = index;
         this.waitingTime = waitingTime;
+        range = new Range(m, waitingTime, index);
     }
 
     private HashSet<Position> positions(int m, int index) {
@@ -32,13 +34,18 @@ public class Property {
         return pos.contains(p);
     }
 
+    public Range getRange() {
+        return range;
+    }
+
     @Override
     public String toString() {
-        String s = propertyIndex + ":";
+        String s = "Index:" + propertyIndex + ", " +  "WatingTime:" + waitingTime + ", Positions: ";
         for (Position position : pos) {
-            s += position + ", ";
-
+            s +=  position ;
+            
         }
+        s +=" \n\n";
         return s;
     }
 }

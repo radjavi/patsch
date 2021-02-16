@@ -3,34 +3,16 @@ package models;
 import java.util.*;
 
 public class PositionGraph {
-
   private HashMap<Position, HashSet<Position>> graph;
-  private HashSet<Property> properties;
 
-  public PositionGraph(int[] waitingTimes) {
-    int m = waitingTimes.length - 1;
-    HashSet<Position> vertices = triangleVertices(m);
-    graph = triangleVerticesWithNeighbours(vertices);
-    //properties=createProperties(waitingTimes);
-  }
-
-  /**
-   * Returns the vertices of a triangle graph.
-   */
-  private static HashSet<Position> triangleVertices(int m) {
-    HashSet<Position> vertices = new HashSet<>();
-    for (int x = 0; x <= m; x++) {
-      for (int y = 0; y <= x; y++) {
-        vertices.add(new Position(x, y));
-      }
-    }
-    return vertices;
+  public PositionGraph(HashSet<Position> vertices) {
+    graph = connectVertices(vertices);
   }
 
   /**
    * Returns a mapping of each vertex in a triangle graph to its adjacent vertices.
    */
-  private static HashMap<Position, HashSet<Position>> triangleVerticesWithNeighbours(HashSet<Position> vertices) {
+  private static HashMap<Position, HashSet<Position>> connectVertices(HashSet<Position> vertices) {
     HashMap<Position, HashSet<Position>> map = new HashMap<>();
     vertices.forEach(pos -> {
       HashSet<Position> neighbours = new HashSet<>();
@@ -63,7 +45,7 @@ public class PositionGraph {
       HashSet<Position> neighbours = graph.get(pos);
       s += pos + ": ";
       for (Position n : neighbours) {
-        s += n + ", ";
+        s += n;
       }
       s += "\n";
     }

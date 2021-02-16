@@ -1,21 +1,18 @@
 package app;
 
 import models.*;
+import java.util.*;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        int[] times = { 2, 2, 2, 2 };
-        int m = times.length-1;
-        PositionGraph graph = new PositionGraph(times);
-        System.out.println(graph.toStringTriangle());
-        System.out.println(graph);
-        Property prop0 = new Property(m,times[0],0);
-        System.out.println(prop0);
-        Property prop1 = new Property(m,times[1],1);
-        System.out.println(prop1);
-        Property prop2 = new Property(m,times[2],2);
-        System.out.println(prop2);
-        Property prop3 = new Property(m,times[3],3);
-        System.out.println(prop3);
+        int[] times = { 7, 5,5,4,6,4,6,8};
+        int m = times.length - 1;
+        Instance instance = new Instance(times);
+        Property[] properties = instance.getProperties();
+        //System.out.println(Arrays.toString(properties));
+        //System.out.println(instance.getTriangleGraph().toStringTriangle());
+        //System.out.println(instance.getValidGraph());
+        //System.out.println(instance.getA());
+        //System.out.println(instance.getB());
     }
 }
