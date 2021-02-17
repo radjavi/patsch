@@ -3,14 +3,16 @@ package models;
 import java.util.*;
 
 public class Instance {
+    private int m;
     private PositionGraph triangleGraph;
     private Property[] properties;
     private PositionGraph validGraph;
-    int a;
-    int b;
+    private int a;
+    private int b;
 
-    public Instance(int [] waitingTimes){
-        int m = waitingTimes.length - 1;
+    public Instance(int[] waitingTimes) {
+        m = waitingTimes.length - 1;
+
         triangleGraph = new PositionGraph(trianglePositions(m));
         properties = createProperties(waitingTimes);
         a = computeA(properties);
@@ -33,7 +35,7 @@ public class Instance {
 
     private static int computeA(Property[] properties) {
         int a = 0;
-        for (int i=0; i < properties.length; i++) {
+        for (int i = 0; i < properties.length; i++) {
             int temp = properties[i].getRange().getA();
             if (temp > a)
                 a = temp;
@@ -43,7 +45,7 @@ public class Instance {
 
     private static int computeB(Property[] properties) {
         int b = Integer.MAX_VALUE;
-        for (int i=0; i < properties.length; i++) {
+        for (int i = 0; i < properties.length; i++) {
             int temp = properties[i].getRange().getB();
             if (temp < b)
                 b = temp;
@@ -59,10 +61,24 @@ public class Instance {
     private static HashSet<Position> validPositions(Property[] properties) {
         HashSet<Position> vertices = new HashSet<>();
         vertices.addAll(properties[0].getRange().getPositions());
-        for (int i=1; i < properties.length; i++) {
-        vertices.retainAll(properties[i].getRange().getPositions());
+        for (int i = 1; i < properties.length; i++) {
+            vertices.retainAll(properties[i].getRange().getPositions());
         }
         return vertices;
+    }
+
+    public Path solve() {
+        // TODO
+
+        if (a > b) {
+            // return path from Proposition 1
+        }
+        return null;
+        // construct solution cycle
+    }
+
+    public int getM() {
+        return m;
     }
 
     public PositionGraph getTriangleGraph() {
@@ -85,14 +101,13 @@ public class Instance {
         return b;
     }
 
-    private Property[] createProperties(int[] waitingTimes){
-        int m = waitingTimes.length-1;
-        Property[] properties = new Property[m+1];
-        for (int i=0; i<= m; i++){
-            properties[i] = new Property(m,waitingTimes[i],i);
+    private Property[] createProperties(int[] waitingTimes) {
+        int m = waitingTimes.length - 1;
+        Property[] properties = new Property[m + 1];
+        for (int i = 0; i <= m; i++) {
+            properties[i] = new Property(m, waitingTimes[i], i);
         }
         return properties;
     }
 
-    
 }

@@ -56,17 +56,17 @@ public class PositionGraph {
     String s = "";
     SortedSet<Position> keySet = new TreeSet<>(Collections.reverseOrder());
     keySet.addAll(graph.keySet());
-    int y = keySet.first().getY();
-    String [] [] matrix = new String [y+1][y+1];
+    int x = keySet.first().getX();
+    String [] [] matrix = new String [x+1][x+1];
     for (String[] row: matrix)
       Arrays.fill(row, " ".repeat(5));
 
     for (Position pos : keySet) {
-      matrix[y-pos.getY()][pos.getX()] = "(" + (pos.getX() + "," + pos.getY() + ")" );
+      matrix[x-pos.getY()][pos.getX()] = "(" + (pos.getX() + "," + pos.getY() + ")" );
     }
 
-    for(int i=0;i<y+1;i++){    
-      for(int j=0;j<y+1;j++){   
+    for(int i=0;i<x+1;i++){    
+      for(int j=0;j<x+1;j++){   
         System.out.print(matrix[i][j]+ "\t");
       }
       System.out.println();

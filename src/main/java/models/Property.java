@@ -5,12 +5,12 @@ import java.util.HashSet;
 public class Property {
     private HashSet<Position> pos;
     private int waitingTime;
-    private int propertyIndex;
+    private int index;
     private Range range;
 
     public Property(int m, int waitingTime, int index) {
         pos = positions(m, index);
-        propertyIndex = index;
+        this.index = index;
         this.waitingTime = waitingTime;
         range = new Range(m, waitingTime, index);
     }
@@ -38,9 +38,13 @@ public class Property {
         return range;
     }
 
+    public int getIndex(){
+        return index;
+    }
+
     @Override
     public String toString() {
-        String s = "Index:" + propertyIndex + ", " +  "WatingTime:" + waitingTime + ", Positions: ";
+        String s = "Index:" + index + ", " +  "WatingTime:" + waitingTime + ", Positions: ";
         for (Position position : pos) {
             s +=  position ;
             
