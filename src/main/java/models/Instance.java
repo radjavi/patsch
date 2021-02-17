@@ -67,6 +67,74 @@ public class Instance {
         return vertices;
     }
 
+    /**
+     * @return the shortest distance to p
+     */
+    public int distance(Position from, Position to) {
+        return shortestPath(from, to).getLength();
+    }
+
+    /**
+     * May be improved.
+     */
+    public Path shortestPath(Position from, Position to) {
+        // Path path = new Path(instance);
+        // path.addPositionToEnd(from);
+        // return path;
+
+        HashMap<Position, Integer> gScore = new HashMap<>();
+        validGraph.getPositions().forEach(p -> gScore.put(p, Integer.MAX_VALUE));
+        gScore.put(from, 0);
+
+        HashMap<Position, Integer> fScore = new HashMap<>();
+        validGraph.getPositions().forEach(p -> fScore.put(p, Integer.MAX_VALUE));
+        fScore.put(from, from.maxDeltaXY(to));
+
+        PriorityQueue<Position> openSet = new PriorityQueue<>((p1, p2) -> {
+            if (fScore.get(p1) < fScore.get(p2))
+                return -1;
+            if (fScore.get(p1) > fScore.get(p2))
+                return 1;
+            return 0;
+        });
+        openSet.add(from);
+
+        HashMap<Position, Position> cameFrom = new HashMap<>();
+
+        while (!openSet.isEmpty()) {
+            Position current = openSet.remove();
+            if (current.equals(to))
+                return reconstructPath(cameFrom, current);
+
+            HashSet<Position> neighbours = validGraph.getNeighbours(current);
+
+            for (Position neighbour : neighbours) {
+                int tentativeGScore = gScore.get(current) + 1;
+                if (tentativeGScore < gScore.get(neighbour)) {
+                    cameFrom.put(neighbour, current);
+                    gScore.put(neighbour, tentativeGScore);
+                    fScore.put(neighbour, tentativeGScore + neighbour.maxDeltaXY(to));
+                    if (!openSet.contains(neighbour))
+                        openSet.add(neighbour);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Path reconstructPath(HashMap<Position, Position> cameFrom, Position end) {
+        Path path = new Path(this);
+        path.addPositionFirst(end);
+        Position current = end;
+        while (cameFrom.get(current) != null) {
+            Position previous = cameFrom.get(current);
+            path.addPositionFirst(previous);
+            current = previous;
+        }
+        return path;
+    }
+
     public Path solve() {
         // TODO
 

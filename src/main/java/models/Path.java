@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Path {
 
-  ArrayList<Position> path;
+  LinkedList<Position> path;
   Instance instance;
   /**
    * Maps property index to index of first position that has this property.
@@ -17,27 +17,36 @@ public class Path {
 
   public Path(Instance instance) {
     this.instance = instance;
-    path = new ArrayList<Position>();
+    path = new LinkedList<Position>();
     s_i = initIntArray(instance.getM() + 1, -1);
     f_i = initIntArray(instance.getM() + 1, -1);
   }
 
-  public Path(ArrayList<Position> path, Instance instance) {
+  public Path(LinkedList<Position> path, Instance instance) {
     this.instance = instance;
-    this.path = new ArrayList<Position>();
+    this.path = new LinkedList<Position>();
     this.path.addAll(path);
     s_i = initIntArray(instance.getM() + 1, -1);
     f_i = initIntArray(instance.getM() + 1, -1);
     computeIndices();
   }
 
-  public void addPositionToEnd(Position position) {
-    path.add(position);
+  public void addPositionLast(Position position) {
+    path.addLast(position);
     computeIndices();
   }
 
-  public ArrayList<Position> getPath() {
+  public void addPositionFirst(Position position) {
+    path.addFirst(position);
+    computeIndices();
+  }
+
+  public LinkedList<Position> getPath() {
     return path;
+  }
+
+  public int getLength() {
+    return path.size() - 1;
   }
 
   public boolean valid() {
