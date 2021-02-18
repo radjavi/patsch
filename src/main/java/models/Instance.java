@@ -70,14 +70,14 @@ public class Instance {
     /**
      * @return the shortest distance to p
      */
-    public <F, T> int distance(F from, T to) {
+    public <F, T> int distance(F from, T to) throws Exception {
         return shortestPath(from, to).getLength();
     }
 
     /**
      * May be improved.
      */
-    public <F, T> Path shortestPath(F from, T to) {
+    public <F, T> Path shortestPath(F from, T to) throws Exception {
         if (from instanceof Position && to instanceof Position)
             return shortestPath((Position) from, (Position) to);
         HashSet<Position> fromSet = new HashSet<>();
@@ -119,7 +119,7 @@ public class Instance {
     /**
      * May be improved.
      */
-    private Path shortestPath(Position from, Position to) {
+    private Path shortestPath(Position from, Position to) throws Exception {
         // Path path = new Path(instance);
         // path.addPositionToEnd(from);
         // return path;
@@ -165,7 +165,7 @@ public class Instance {
         return null;
     }
 
-    private Path reconstructPath(HashMap<Position, Position> cameFrom, Position end) {
+    private Path reconstructPath(HashMap<Position, Position> cameFrom, Position end) throws Exception {
         Path path = new Path(this);
         path.addPositionFirst(end);
         Position current = end;

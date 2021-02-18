@@ -22,8 +22,7 @@ public class App {
         System.out.println("b: " + instance.getB());
         Position from = new Position(3, 0);
         Position to = new Position(7, 3);
-        //Path shortestPath = instance.shortestPath(from, to);
-        Path shortestPath = instance.shortestPath(instance.getProperties()[5], instance.getProperties()[7]);
+        Path shortestPath = instance.shortestPath(from, to);
         System.out.println("path " + from + " -> " + to + ":\n \t" + shortestPath);
         System.out.println("Path length: " + shortestPath.getLength());
         int[] s_i = shortestPath.getS_i();

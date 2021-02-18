@@ -31,12 +31,24 @@ public class Path {
     computeIndices();
   }
 
-  public void addPositionLast(Position position) {
+  public void addPositionLast(Position position) throws Exception {
+    PositionGraph validGraph = instance.getValidGraph();
+    if (!validGraph.hasPosition(position))
+      throw new Exception("Position " + position + " not in valid graph.");
+    if (!path.isEmpty() && !validGraph.getNeighbours(this.getLast()).contains(position)) {
+      throw new Exception("Position " + position + " is not neighbour to " + this.getLast() + ".");
+    }
     path.addLast(position);
     updateIndices(position, path.size() - 1);
   }
 
-  public void addPositionFirst(Position position) {
+  public void addPositionFirst(Position position) throws Exception {
+    PositionGraph validGraph = instance.getValidGraph();
+    if (!validGraph.hasPosition(position))
+      throw new Exception("Position " + position + " not in valid graph.");
+    if (!path.isEmpty() && !validGraph.getNeighbours(position).contains(this.getFirst())) {
+      throw new Exception("Position " + position + " is not neighbour to " + this.getFirst() + ".");
+    }
     path.addFirst(position);
     updateIndices(position, 0);
   }
