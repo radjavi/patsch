@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 
 public class PathTest {
   @Test
-  public void testPropertyIndices() {
+  public void testPropertyIndices() throws Exception {
     int[] times = { 7, 5, 5, 4, 6, 4, 6, 8 };
     Instance instance = new Instance(times);
     Position from = new Position(3, 0);
