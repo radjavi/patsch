@@ -70,14 +70,56 @@ public class Instance {
     /**
      * @return the shortest distance to p
      */
-    public int distance(Position from, Position to) {
+    public <F, T> int distance(F from, T to) {
         return shortestPath(from, to).getLength();
     }
 
     /**
      * May be improved.
      */
-    public Path shortestPath(Position from, Position to) {
+    public <F, T> Path shortestPath(F from, T to) {
+        if (from instanceof Position && to instanceof Position)
+            return shortestPath((Position) from, (Position) to);
+        HashSet<Position> fromSet = new HashSet<>();
+        HashSet<Position> toSet = new HashSet<>();
+        if (from instanceof Position)
+            fromSet.add((Position) from);
+        else if (from instanceof Property) {
+            Property property = (Property) from;
+            for (Position p : property.getPositions()) {
+                if (validGraph.hasPosition(p))
+                    fromSet.add(p);
+            }
+        }
+        if (to instanceof Position)
+            toSet.add((Position) to);
+        else if (to instanceof Property) {
+            Property property = (Property) to;
+            for (Position p : property.getPositions()) {
+                if (validGraph.hasPosition(p))
+                    toSet.add(p);
+            }
+        }
+        
+        int shortestDistance = Integer.MAX_VALUE;
+        Path shortestPath = null;
+        for (Position f : fromSet) {
+            for (Position t : toSet) {
+                Path path = shortestPath(f, t);
+                if (path.getLength() < shortestDistance) {
+                    shortestDistance = path.getLength();
+                    shortestPath = path;
+                }
+            }
+        }
+
+        return shortestPath;
+    }
+
+    /**
+     * May be improved.
+     */
+    private Path shortestPath(Position from, Position to) {
         // Path path = new Path(instance);
         // path.addPositionToEnd(from);
         // return path;
@@ -167,6 +209,10 @@ public class Instance {
 
     public int getB() {
         return b;
+    }
+
+    public void removeValidPosition(Position p) {
+        validGraph.removePosition(p);
     }
 
     private Property[] createProperties(int[] waitingTimes) {

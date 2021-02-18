@@ -1,7 +1,5 @@
 package models;
 
-import java.util.*;
-
 public class Position implements Comparable {
   private int x;
   private int y;

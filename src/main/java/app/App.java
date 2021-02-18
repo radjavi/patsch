@@ -10,6 +10,7 @@ public class App {
 
         int m = times.length - 1;
         Instance instance = new Instance(times);
+        //instance.removeValidPosition(new Position(6, 1));
         Property[] properties = instance.getProperties();
         for (Property prop : properties) {
             System.out.println(prop.getIndex() + ":" + prop.getPositions());
@@ -21,11 +22,8 @@ public class App {
         System.out.println("b: " + instance.getB());
         Position from = new Position(3, 0);
         Position to = new Position(7, 3);
-        Path shortestPath = instance.shortestPath(from, to);
-        shortestPath.addPositionLast(new Position(6, 2));
-        shortestPath.addPositionLast(new Position(5, 1));
-        shortestPath.addPositionLast(new Position(4, 0));
-        shortestPath.addPositionLast(new Position(3, 0));
+        //Path shortestPath = instance.shortestPath(from, to);
+        Path shortestPath = instance.shortestPath(instance.getProperties()[5], instance.getProperties()[7]);
         System.out.println("path " + from + " -> " + to + ":\n \t" + shortestPath);
         System.out.println("Path length: " + shortestPath.getLength());
         int[] s_i = shortestPath.getS_i();

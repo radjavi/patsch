@@ -13,7 +13,7 @@ public class PositionGraph {
    * Returns a mapping of each vertex in a triangle graph to its adjacent
    * vertices.
    */
-  private static HashMap<Position, HashSet<Position>> connectVertices(HashSet<Position> positions) {
+  private static HashMap<Position, HashSet<Position>> connectVertices(Set<Position> positions) {
     HashMap<Position, HashSet<Position>> map = new HashMap<>();
     positions.forEach(pos -> {
       HashSet<Position> neighbours = new HashSet<>();
@@ -44,6 +44,14 @@ public class PositionGraph {
 
   public boolean hasPosition(Position pos) {
     return graph.get(pos) != null;
+  }
+
+  public void removePosition(Position position) {
+    if (graph.get(position) == null)
+      return;
+    Set<Position> newPositions = graph.keySet();
+    newPositions.remove(position);
+    graph = connectVertices(newPositions);
   }
 
   @Override
