@@ -177,14 +177,39 @@ public class Instance {
         return path;
     }
 
-    public Path solve() {
-        // TODO
-
+    public Path solve() throws Exception {
         if (a > b) {
             // return path from Proposition 1
         }
+        LinkedList<Path> paths = new LinkedList<>();
+
+        for (Position u : validGraph.getPositions()) {
+            for (Position v : validGraph.getNeighbours(u)) {
+                Path path = new Path(this);
+                path.addPositionLast(u);
+                path.addPositionLast(v);
+                paths.add(path);
+            }
+        }
+
+        while (!paths.isEmpty()) {
+            Path p = paths.pop();
+            //System.out.println(p);
+            for (Position q : validGraph.getNeighbours(p.getLast())) {
+                //System.out.println(p + ", " + q);
+                Path pq = new Path(p);
+                pq.addPositionLast(q);
+                if (pq.valid()) {
+                    if (pq.isCycle() && pq.visitsAllProperties()) {
+                        return pq;
+                    } else {
+                        paths.add(pq);
+                    }
+                }
+            }
+        }
+
         return null;
-        // construct solution cycle
     }
 
     public int getM() {

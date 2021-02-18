@@ -42,6 +42,10 @@ public class Property {
         return index;
     }
 
+    public int getWaitingTime() {
+        return waitingTime;
+    }
+
     @Override
     public String toString() {
         String s = "Index:" + index + ", " +  "WatingTime:" + waitingTime + ", Positions: ";

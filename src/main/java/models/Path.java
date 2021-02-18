@@ -31,6 +31,13 @@ public class Path {
     computeIndices();
   }
 
+  public Path(Path path) {
+    this.path = (LinkedList<Position>) path.getPath().clone();
+    this.instance = path.instance;
+    this.s_i = path.s_i.clone();
+    this.f_i = path.f_i.clone();
+  }
+
   public void addPositionLast(Position position) throws Exception {
     PositionGraph validGraph = instance.getValidGraph();
     if (!validGraph.hasPosition(position))
@@ -61,9 +68,47 @@ public class Path {
     return path.size() - 1;
   }
 
-  public boolean valid() {
-    for (Position pos : path) {
+  public boolean valid() throws Exception {
+    Property[] properties = instance.getProperties();
+    Position s = this.getFirst();
+    Position f = this.getLast();
+    for (int p = 0; p < properties.length; p++) {
+      Property property = properties[p];
+      int waitingTime = property.getWaitingTime();
+      if (s_i[p] < 0 && f_i[p] < 0) {
+        int propToS = instance.distance(property, s);
+        int fToProp = instance.distance(f, property);
+        if (propToS + this.getLength() + fToProp > waitingTime)
+          return false;
+      } else {
+        int propToSi = instance.distance(property, s) + s_i[p];
+        if (propToSi > waitingTime)
+          return false;
+        int fiToProp = ((path.size() - 1) - f_i[p]) + instance.distance(f, property);
+        if (fiToProp > waitingTime)
+          return false;
+        if (!consecutivePathsValid(property, p, waitingTime))
+          return false;
+      }
+    }
+    return true;
+  }
 
+  private boolean consecutivePathsValid(Property property, int propertyIndex, int waitingTime) {
+    ListIterator<Position> iterator = path.listIterator(s_i[propertyIndex]);
+    int iterationCount = f_i[propertyIndex] - s_i[propertyIndex] + 1;
+    int time = waitingTime;
+    //System.out.println(property);
+    for (int i=0; i < iterationCount; i++) {
+      Position current = iterator.next();
+      if (property.hasPosition(current))
+        time = waitingTime;
+      else {
+        time--;
+        if (time == 0)
+          return false;
+      }
+      //System.out.println(current + ": " + time);
     }
     return true;
   }
@@ -117,24 +162,24 @@ public class Path {
     for (Integer p : propertyIndices) {
       if (s_i[p] < 0 || positionIndex < s_i[p])
         s_i[p] = positionIndex;
-      
+
       if (f_i[p] < 0 || positionIndex > f_i[p])
         f_i[p] = positionIndex;
     }
-    
+
   }
 
   /**
    * Get s
    */
-  private Position getFirst() {
+  public Position getFirst() {
     return path.get(0);
   }
 
   /**
    * Get f
    */
-  private Position getLast() {
+  public Position getLast() {
     return path.get(path.size() - 1);
   }
 
@@ -150,6 +195,20 @@ public class Path {
    */
   public int[] getF_i() {
     return f_i;
+  }
+
+  public boolean isCycle() {
+    if (this.getFirst() == this.getLast())
+      return true;
+    return false;
+  }
+
+  public boolean visitsAllProperties() {
+    for (int i = 0; i <= this.instance.getM(); i++) {
+      if (s_i[i] < 0 || f_i[i] < 0)
+        return false;
+    }
+    return true;
   }
 
   @Override
