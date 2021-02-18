@@ -95,6 +95,12 @@ public class Path {
   }
 
   private boolean consecutivePathsValid(Property property, int propertyIndex, int waitingTime) {
+    if (this.isCycle()) {
+      int fiToF = ((path.size() - 1) - f_i[propertyIndex]);
+      int sToSi = s_i[propertyIndex];
+      if (fiToF + sToSi > waitingTime)
+        return false;
+    }
     ListIterator<Position> iterator = path.listIterator(s_i[propertyIndex]);
     int iterationCount = f_i[propertyIndex] - s_i[propertyIndex] + 1;
     int time = waitingTime;
@@ -198,7 +204,7 @@ public class Path {
   }
 
   public boolean isCycle() {
-    if (this.getFirst() == this.getLast())
+    if (this.getFirst().equals(this.getLast()))
       return true;
     return false;
   }
