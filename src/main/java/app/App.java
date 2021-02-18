@@ -19,9 +19,20 @@ public class App {
         System.out.println(instance.getValidGraph().toStringTriangle());
         System.out.println("a: " + instance.getA());
         System.out.println("b: " + instance.getB());
-        Position from = new Position(5, 0);
-        Position to = new Position(7, 1);
-        System.out.println("path " + from + " -> " + to + ":\n \t" + instance.shortestPath(from, to));
-        System.out.println("Distance:" + instance.distance(from, to));
+        Position from = new Position(3, 0);
+        Position to = new Position(7, 3);
+        Path shortestPath = instance.shortestPath(from, to);
+        shortestPath.addPositionLast(new Position(6, 2));
+        shortestPath.addPositionLast(new Position(5, 1));
+        shortestPath.addPositionLast(new Position(4, 0));
+        shortestPath.addPositionLast(new Position(3, 0));
+        System.out.println("path " + from + " -> " + to + ":\n \t" + shortestPath);
+        System.out.println("Path length: " + shortestPath.getLength());
+        int[] s_i = shortestPath.getS_i();
+        int[] f_i = shortestPath.getF_i();
+        for (int i=0; i < s_i.length; i++) {
+            System.out.println("s_" + i + ": " + s_i[i]);
+            System.out.println("f_" + i + ": " + f_i[i]);
+        }
     }
 }

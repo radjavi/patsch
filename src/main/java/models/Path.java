@@ -22,7 +22,7 @@ public class Path {
     f_i = initIntArray(instance.getM() + 1, -1);
   }
 
-  public Path(LinkedList<Position> path, Instance instance) {
+  public Path(Instance instance, LinkedList<Position> path) {
     this.instance = instance;
     this.path = new LinkedList<Position>();
     this.path.addAll(path);
@@ -33,12 +33,12 @@ public class Path {
 
   public void addPositionLast(Position position) {
     path.addLast(position);
-    computeIndices();
+    updateIndices(position, path.size() - 1);
   }
 
   public void addPositionFirst(Position position) {
     path.addFirst(position);
-    computeIndices();
+    updateIndices(position, 0);
   }
 
   public LinkedList<Position> getPath() {
@@ -68,7 +68,7 @@ public class Path {
    */
   private void computeIndices() {
     Property[] properties = instance.getProperties();
-    for (int p = 0; p < instance.getM(); p++) {
+    for (int p = 0; p <= instance.getM(); p++) {
       for (int i = 0; i < path.size(); i++) {
         if (properties[p].hasPosition(path.get(i))) {
           s_i[p] = i;
@@ -82,6 +82,34 @@ public class Path {
         }
       }
     }
+  }
+
+  /**
+   * May be improved.
+   */
+  private void updateIndices(Position newPosition, int positionIndex) {
+    ArrayList<Integer> propertyIndices = new ArrayList<>();
+    Property[] properties = instance.getProperties();
+    for (int p = 0; p <= instance.getM(); p++) {
+      Property property = properties[p];
+      if (property.hasPosition(newPosition)) {
+        propertyIndices.add(p);
+      }
+    }
+    for (int p = 0; p < s_i.length; p++) {
+      if (s_i[p] >= positionIndex)
+        s_i[p]++;
+      if (f_i[p] >= positionIndex)
+        f_i[p]++;
+    }
+    for (Integer p : propertyIndices) {
+      if (s_i[p] < 0 || positionIndex < s_i[p])
+        s_i[p] = positionIndex;
+      
+      if (f_i[p] < 0 || positionIndex > f_i[p])
+        f_i[p] = positionIndex;
+    }
+    
   }
 
   /**
