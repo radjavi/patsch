@@ -179,6 +179,7 @@ public class Instance {
 
     public Path solve() throws Exception {
         if (a > b) {
+            System.out.println("a: " + a + ", b: " + b);
             // return path from Proposition 1
         }
         LinkedList<Path> paths = new LinkedList<>();
