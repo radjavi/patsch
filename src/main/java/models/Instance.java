@@ -101,19 +101,23 @@ public class Instance {
             }
         }
         
-        int shortestDistance = Integer.MAX_VALUE;
-        Path shortestPath = null;
+        int shortestHeuristic = Integer.MAX_VALUE;
+        Position bestF = null;
+        Position bestT = null;
         for (Position f : fromSet) {
             for (Position t : toSet) {
-                Path path = shortestPath(f, t);
-                if (path.getLength() < shortestDistance) {
-                    shortestDistance = path.getLength();
-                    shortestPath = path;
+                int heuristic = f.maxDeltaXY(t);
+                if (heuristic < shortestHeuristic) {
+                    shortestHeuristic = heuristic;
+                    bestF = f;
+                    bestT = t;
                 }
             }
         }
 
-        return shortestPath;
+        if (bestF == null || bestT == null)
+            return null;
+        return shortestPath(bestF, bestT);
     }
 
     /**
