@@ -37,3 +37,6 @@ build
 *.project
 *.settings
 
+#intelliJ
+.idea/*
+

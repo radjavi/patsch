@@ -9,10 +9,12 @@ public class Instance {
     private PositionGraph validGraph;
     private int a;
     private int b;
+    private boolean critical;
+    private int[] waitingTimes;
 
     public Instance(int[] waitingTimes) {
         m = waitingTimes.length - 1;
-
+        this.waitingTimes = waitingTimes.clone();
         triangleGraph = new PositionGraph(trianglePositions(m));
         properties = createProperties(waitingTimes);
         a = computeA(properties);
@@ -100,7 +102,7 @@ public class Instance {
                     toSet.add(p);
             }
         }
-        
+
         int shortestHeuristic = Integer.MAX_VALUE;
         Position bestF = null;
         Position bestT = null;
@@ -199,9 +201,9 @@ public class Instance {
 
         while (!paths.isEmpty()) {
             Path p = paths.pop();
-            //System.out.println(p);
+            // System.out.println(p);
             for (Position q : validGraph.getNeighbours(p.getLast())) {
-                //System.out.println(p + ", " + q);
+                // System.out.println(p + ", " + q);
                 Path pq = new Path(p);
                 pq.addPositionLast(q);
                 if (pq.valid()) {
@@ -217,8 +219,77 @@ public class Instance {
         return null;
     }
 
+    public Path billiardBallPath(int d) throws Exception {
+        int slopeX = 1;
+        int slopeY = 1;
+        int x = d + 1;
+        int y = 0;
+        Position p1 = new Position(x, y);
+        Path path = new Path(this);
+        path.addPositionFirst(p1);
+        boolean flagX = false;
+        boolean flagY = false;
+
+        while (!(flagX && flagY)) {
+            x += slopeX;
+            y += slopeY;
+
+            Position current = new Position(x, y);
+            path.addPositionLast(current);
+
+            if (!flagX && x == m)
+                flagX = true;
+            if (!flagY && y == d)
+                flagY = true;
+            if (x == d + 1 || x == m)
+                slopeX *= -1;
+            if (y == d || y == 0)
+                slopeY *= -1;
+
+        }
+        Path copyPath = new Path(path);
+        Iterator<Position> reversePathIterator = copyPath.getPath().descendingIterator();
+        reversePathIterator.next(); // skip first
+        while (reversePathIterator.hasNext()) {
+            Position pos = reversePathIterator.next();
+            path.addPositionLast(pos);
+        }
+        return path;
+    }
+
+    public static Instance lowerBoundInstance(int m, int a, int b) {
+        int[] waitingTimes = new int[m + 1];
+
+        for (int i = 0; i < a; i++) {
+            waitingTimes[i] = Math.max(2 * i, 2 * (b - i));
+        }
+        for (int j = b + 1; j <= m; j++) {
+            waitingTimes[j] = Math.max(2 * (m - j), 2 * (j - a));
+        }
+
+        for (int i = a; i <= b; i++) {
+            waitingTimes[i] = (b - a); // TODO
+        }
+
+        return new Instance(waitingTimes);
+    }
+
     public int getM() {
         return m;
+    }
+
+    public String waitingTimesToString() {
+        String s = "[";
+        for (Integer i : waitingTimes) {
+            s += i + ",";
+        }
+        s = s.substring(0, s.length() - 1);
+        s += "]";
+        return s;
+    }
+
+    public int[] getWaitingTimes() {
+        return waitingTimes;
     }
 
     public PositionGraph getTriangleGraph() {
