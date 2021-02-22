@@ -6,7 +6,7 @@ import java.util.*;
 public class Search {
 
     public static HashMap<Instance, Path> searchForCriticalInstances(int m) throws Exception {
-        HashMap<Instance, Path> U = new HashMap<>();
+        LinkedList<Instance> U = new LinkedList<>();
         HashMap<Instance, Path> C = new HashMap<>();
 
         // INIT
@@ -14,11 +14,33 @@ public class Search {
         for (int b = 0; b <= m; b++) {
             for (int a = 0; a <= b; a++) {
                 Instance g = Instance.lowerBoundInstance(m, a, b);
-
-                // compare c to g
+                for (Instance c : C.keySet()) {
+                    if (g.lessThan(c))
+                        U.add(g);
+                }
             }
         }
+        // SEARCH
+        while (!U.isEmpty()) {
+            Instance u = U.pop();
+            Path solvedU = u.solve();
+            if (solvedU != null)
+                C.put(u, solvedU);
+            else {
+                for (int i = 0; i < m; i++) {
+                    int[] newWaitingTimes = u.getWaitingTimes().clone();
+                    newWaitingTimes[i]++;
+                    Instance v = new Instance(newWaitingTimes);
+
+                    if (v.lessThanAll(C.keySet()))
+                        U.add(v);
+
+                }
+            }
+        }
+
         return C;
+
     }
 
     private static HashMap<Instance, Path> criticalsWithEmptyIntersection(int m) throws Exception {

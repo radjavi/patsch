@@ -6,19 +6,16 @@ import java.util.*;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        int[] times = { 2, 2, 4, 2, 4 };
-        int[] times2 = { 2, 2, 5, 2, 4 };
+        // int[] times = { 2, 2, 4, 2, 4 };
+        // int[] times2 = { 2, 2, 5, 2, 4 };
 
-        // int[] times = new int[100];
-        // Arrays.fill(times, 1000);
-        Instance instance = new Instance(times);
-        Instance instance2 = new Instance(times2);
-
-        System.out.println(instance.lessThan(instance2));
-
-        // HashMap<Instance, Path> criticalInstancesForM = Search.searchForCriticalInstances(50);
+        HashMap<Instance, Path> critcals = Search.searchForCriticalInstances(5);
+        for (Instance instance : critcals.keySet()) {
+            System.out.println(instance.waitingTimesToString());
+        }
         // criticalInstancesForM
-        //         .forEach((i, p) -> System.out.println("Instance:" + i.waitingTimesToString() + ",Path:" + p));
+        // .forEach((i, p) -> System.out.println("Instance:" + i.waitingTimesToString()
+        // + ",Path:" + p));
         // criticalInstanceForM = Search.searchForCriticalInstances(3);
         // System.out.println(instance.getValidGraph().toStringTriangle());
         // Path solution = instance.solve();
