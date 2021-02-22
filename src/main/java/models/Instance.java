@@ -329,9 +329,16 @@ public class Instance {
         return properties;
     }
 
-    public boolean lessThanAll(Set<Instance> instances) {
+    /**
+     * Checks if this instance is greater than or equal to some instance in `instances`.
+     * 
+     * @param instances The set of instances
+     * @return `true` if this instance is greater than or equal to some instance in `instances`, and
+     *         `false` otherwise.
+     */
+    public boolean geqToSomeIn(Set<Instance> instances) {
         for (Instance ins : instances) {
-            if (!this.lessThan(ins))
+            if (ins.lessThanOrEqualTo(this))
                 return false;
         }
         return true;
