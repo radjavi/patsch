@@ -14,25 +14,29 @@ public class Search {
         for (int b = 0; b <= m; b++) {
             for (int a = 0; a <= b; a++) {
                 Instance g = Instance.lowerBoundInstance(m, a, b);
-                for (Instance c : C.keySet()) {
-                    if (g.lessThan(c))
-                        U.add(g);
-                }
+                if (!g.geqToSomeIn(C.keySet()))
+                    U.add(g);
             }
         }
+
         // SEARCH
-        while (!U.isEmpty()) {
+        while (!U.isEmpty())
+
+        {
             Instance u = U.pop();
             Path solvedU = u.solve();
-            if (solvedU != null)
+            if (solvedU != null) {
                 C.put(u, solvedU);
+                System.out.println("found critical: " + u.waitingTimesToString());
+            }
+
             else {
-                for (int i = 0; i < m; i++) {
+                for (int i = 0; i <= m; i++) {
                     int[] newWaitingTimes = u.getWaitingTimes().clone();
                     newWaitingTimes[i]++;
                     Instance v = new Instance(newWaitingTimes);
 
-                    if (v.lessThanAll(C.keySet()))
+                    if (!v.geqToSomeIn(C.keySet()))
                         U.add(v);
 
                 }
