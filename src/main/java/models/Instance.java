@@ -268,7 +268,10 @@ public class Instance {
         }
 
         for (int i = a; i <= b; i++) {
-            waitingTimes[i] = (b - a); // TODO
+            int waitingtime_a = (i - a) * 2;
+            int waitingtime_b = (b - i) * 2;
+            int abMax = Math.max(waitingtime_a, waitingtime_b);
+            waitingTimes[i] = Math.max(abMax, 1);
         }
 
         return new Instance(waitingTimes);

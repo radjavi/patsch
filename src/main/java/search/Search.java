@@ -14,6 +14,8 @@ public class Search {
         for (int b = 0; b <= m; b++) {
             for (int a = 0; a <= b; a++) {
                 Instance g = Instance.lowerBoundInstance(m, a, b);
+
+                // compare c to g
             }
         }
         return C;
