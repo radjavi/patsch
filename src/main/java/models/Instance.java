@@ -339,9 +339,9 @@ public class Instance {
     public boolean geqToSomeIn(Set<Instance> instances) {
         for (Instance ins : instances) {
             if (ins.lessThanOrEqualTo(this))
-                return false;
+                return true;
         }
-        return true;
+        return false;
     }
 
     public boolean lessThanOrEqualTo(Instance ins) {
@@ -363,7 +363,7 @@ public class Instance {
         if (!componentLessThan)
             return false;
         for (int i = 0; i <= m; i++) {
-            if (!(this.waitingTimes[i] <= ins.waitingTimes[i]
+            if (!(this.waitingTimes[i] == ins.waitingTimes[i]
                     || this.waitingTimes[i] < ins.waitingTimes[i]))
                 return false;
         }
