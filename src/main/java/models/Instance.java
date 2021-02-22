@@ -171,7 +171,8 @@ public class Instance {
         return null;
     }
 
-    private Path reconstructPath(HashMap<Position, Position> cameFrom, Position end) throws Exception {
+    private Path reconstructPath(HashMap<Position, Position> cameFrom, Position end)
+            throws Exception {
         Path path = new Path(this);
         path.addPositionFirst(end);
         Position current = end;
@@ -325,4 +326,62 @@ public class Instance {
         return properties;
     }
 
+    public boolean lessThanAll(Set<Instance> instances) {
+        for (Instance ins : instances) {
+            if (!this.lessThan(ins))
+                return false;
+        }
+        return true;
+    }
+
+    public boolean lessThanOrEqualTo(Instance ins) {
+        for (int i = 0; i <= m; i++) {
+            if (!(this.waitingTimes[i] <= ins.waitingTimes[i]))
+                return false;
+        }
+        return true;
+    }
+
+    public boolean lessThan(Instance ins) {
+        boolean componentLessThan = false;
+        for (int i = 0; i <= m; i++) {
+            if (this.waitingTimes[i] < ins.waitingTimes[i]) {
+                componentLessThan = true;
+                break;
+            }
+        }
+        if (!componentLessThan)
+            return false;
+        for (int i = 0; i <= m; i++) {
+            if (!(this.waitingTimes[i] <= ins.waitingTimes[i]
+                    || this.waitingTimes[i] < ins.waitingTimes[i]))
+                return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if ((o == null) || (o.getClass() != this.getClass()))
+            return false;
+        Instance ins = (Instance) o;
+        if (this.m != ins.m) // Must have same length
+            return false;
+        for (int i = 0; i <= this.m; i++) {
+            if (this.waitingTimes[i] != ins.waitingTimes[i])
+                return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        for (Integer waitingTime : this.waitingTimes) {
+            hash = 31 * hash + waitingTime;
+        }
+        return hash;
+    }
 }

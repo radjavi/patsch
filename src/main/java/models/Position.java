@@ -1,6 +1,6 @@
 package models;
 
-public class Position implements Comparable {
+public class Position implements Comparable<Position> {
   private int x;
   private int y;
 
@@ -36,9 +36,7 @@ public class Position implements Comparable {
   }
 
   @Override
-  public int compareTo(Object o) {
-
-    Position pos = (Position) o;
+  public int compareTo(Position pos) {
     if (this.x == pos.x && this.y == pos.y)
       return 0;
     if (this.x > pos.x)
