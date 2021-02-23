@@ -22,7 +22,9 @@ public class Search {
         }
         
         System.out.println("-------- C --------");
-        C.keySet().forEach(i -> System.out.println(i.waitingTimesToString()));
+        C.forEach((i, s) -> {
+            System.out.println(i.waitingTimesToString() + ": " + s);
+        });
         System.out.println("-------- U --------");
         U.forEach(i -> System.out.println(i.waitingTimesToString()));
         System.out.println("-------------------");
@@ -34,8 +36,8 @@ public class Search {
             Instance u = U.pop();
             //System.out.println(u.waitingTimesToString());
             Path solvedU = u.solve();
-            System.out.print(u.waitingTimesToString() + ": ");
-            System.out.println(solvedU != null ? "feasible" : "infeasible");
+            //System.out.print(u.waitingTimesToString() + ": ");
+            //System.out.println(solvedU != null ? "feasible" : "infeasible");
             if (solvedU != null && !u.geqToSomeIn(C.keySet())) {
                 C.put(u, solvedU);
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -90,25 +92,94 @@ public class Search {
 
         HashMap<Instance, Path> C = new HashMap<>();
         for (int d = 0; d <= m - 1; d++) {
-            int[] waitingTimes = new int[m + 1];
-            for (int i = 0; i <= m; i++) {
-                if (i <= d)
-                    waitingTimes[i] = Math.max(1, 2 * Math.max(i, d - i));
-                else
-                    waitingTimes[i] = Math.max(1, 2 * Math.max(i - d - 1, m - i));
-            }
-            Instance instance = new Instance(waitingTimes);
+            Instance instance = criticalWithEmptyIntersection(m, d);
             Path solution = instance.billiardBallPath(d);
             C.put(instance, solution);
         }
         return C;
     }
 
+    public static Instance criticalWithEmptyIntersection(int m, int d) {
+        int[] waitingTimes = new int[m + 1];
+        for (int i = 0; i <= m; i++) {
+            if (i <= d)
+                waitingTimes[i] = Math.max(1, 2 * Math.max(i, d - i));
+            else
+                waitingTimes[i] = Math.max(1, 2 * Math.max(i - d - 1, m - i));
+        }
+        return new Instance(waitingTimes);
+    }
+
     private static HashMap<Instance, Path> criticalsWithShortWaitingTimes(int m) throws Exception {
         HashMap<Instance, Path> C = new HashMap<>();
         if (m < 5) return C;
 
-        // TODO: Theorem 1
+        // t_k = 1 for 1 <= k <= m-1
+        for (int k = 1; k < m; k++) {
+            int[] waitingTimes = new int[m + 1];
+            for (int i = 0; i <= m; i++) {
+                if (i < k)
+                    waitingTimes[i] = 2 * Math.max(i, m - i - 1);
+                else if (i == k)
+                    waitingTimes[i] = 1;
+                else
+                    waitingTimes[i] = 2 * Math.max(i - 1, m - i);
+            }
+            Instance instance = new Instance(waitingTimes);
+            Path solution = instance.solve();
+            C.put(instance, solution);
+        }
+
+        // t_k = t_{k+1} = 2 for 1 <= k < k+1 <= m-1
+        for (int k = 1; k < m; k++) {
+            int[] waitingTimes = new int[m + 1];
+            for (int i = 0; i <= m; i++) {
+                if (i < k)
+                    waitingTimes[i] = 2 * Math.max(i, m - i - 2);
+                else if (i == k)
+                    waitingTimes[i] = 2;
+                else if (i == k + 1)
+                    waitingTimes[i] = 2;
+                else
+                    waitingTimes[i] = 2 * Math.max(i - 2, m - i);
+            }
+            Instance instance = new Instance(waitingTimes);
+            Path solution = instance.solve();
+            C.put(instance, solution);
+        }
+
+        // t_k = 2 && t_{k+1} = 3 for 1 <= k <= (m-1)/2
+        for (int k = 1; k <= (m - 1) / 2; k++) {
+            int[] waitingTimes = new int[m + 1];
+            if (k == 1) {
+                waitingTimes[0] = 2 * (m - 3);
+                waitingTimes[1] = 2;
+                waitingTimes[2] = 3;
+                for (int i = 3; i <= m; i++) {
+                    waitingTimes[i] = 2 * Math.max(i - 2, m - i);
+                }
+            } else {
+                for (int i = 0; i <= m; i++) {
+                    if (i <= k - 2)
+                        waitingTimes[i] = 2 * Math.max(i, m - i - 1);
+                    else if (i == k - 1)
+                        waitingTimes[i] = 2 * Math.max(k - 1, m - k - 1);
+                    else if (i == k)
+                        waitingTimes[i] = 2;
+                    else if (i == k + 1)
+                        waitingTimes[i] = 3;
+                    else
+                        waitingTimes[i] = 2 * Math.max(i - 1, m - i);
+                }
+            }
+            Instance instance = new Instance(waitingTimes);
+            Path solution = instance.solve();
+            C.put(instance, solution);
+        }
+
+        // TODO:
+
+        // TODO: 
 
         return C;
     }

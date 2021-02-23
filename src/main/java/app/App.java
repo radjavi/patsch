@@ -14,6 +14,8 @@ public class App {
         // set.add(instance);
         // System.out.println(instance2.geqToSomeIn(set));
 
+        Instance ins = new Instance(new int []{8,2,2,3,6,8});
+        System.out.println(ins.getValidGraph().toStringTriangle());
         HashMap<Instance, Path> criticals = Search.searchForCriticalInstances(5);
         System.out.println("----- " + criticals.size() + " CRITICAL INSTANCES -----");
         for (Instance instance : criticals.keySet()) {

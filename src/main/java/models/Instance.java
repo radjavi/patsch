@@ -1,6 +1,7 @@
 package models;
 
 import java.util.*;
+import search.Search;
 
 public class Instance {
     private int m;
@@ -70,6 +71,7 @@ public class Instance {
     }
 
     /**
+     * May be improved (check if shortestPath == null)
      * @return the shortest distance to p
      */
     public <F, T> int distance(F from, T to) throws Exception {
@@ -186,8 +188,14 @@ public class Instance {
 
     public Path solve() throws Exception {
         if (a > b) {
-            System.out.println("a: " + a + ", b: " + b);
-            // return path from Proposition 1
+            System.out.println("a > b: " + a + " > " + b);
+            // Find correct d to return path from Proposition 1.
+            for (int d = 0; d <= m; d++) {
+                Instance critical = Search.criticalWithEmptyIntersection(m, d);
+                if (critical.lessThanOrEqualTo(this))
+                    return billiardBallPath(d);
+            }
+            return null;
         }
         LinkedList<Path> paths = new LinkedList<>();
 
