@@ -14,8 +14,9 @@ public class App {
         // set.add(instance);
         // System.out.println(instance2.geqToSomeIn(set));
 
-        HashMap<Instance, Path> critcals = Search.searchForCriticalInstances(4);
-        for (Instance instance : critcals.keySet()) {
+        HashMap<Instance, Path> criticals = Search.searchForCriticalInstances(5);
+        System.out.println("----- " + criticals.size() + " CRITICAL INSTANCES -----");
+        for (Instance instance : criticals.keySet()) {
             System.out.println(instance.waitingTimesToString());
         }
         // criticalInstancesForM
