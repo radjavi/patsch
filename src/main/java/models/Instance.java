@@ -221,8 +221,14 @@ public class Instance {
     }
 
     public Path billiardBallPath(int d) throws Exception {
-        int slopeX = 1;
-        int slopeY = 1;
+        int slopeXConstant = -1;
+        int slopeYConstant = -1;
+        if (d == 0)
+            slopeYConstant = 0;
+        if (d == m - 1)
+            slopeXConstant = 0;
+        int slopeX = -1 * slopeXConstant;
+        int slopeY = -1 * slopeYConstant;
         int x = d + 1;
         int y = 0;
         Position p1 = new Position(x, y);
@@ -243,9 +249,9 @@ public class Instance {
             if (!flagY && y == d)
                 flagY = true;
             if (x == d + 1 || x == m)
-                slopeX *= -1;
+                slopeX *= slopeXConstant;
             if (y == d || y == 0)
-                slopeY *= -1;
+                slopeY *= slopeYConstant;
 
         }
         Path copyPath = new Path(path);
@@ -336,8 +342,10 @@ public class Instance {
      * @return `true` if this instance is greater than or equal to some instance in `instances`, and
      *         `false` otherwise.
      */
-    public boolean geqToSomeIn(Set<Instance> instances) {
-        for (Instance ins : instances) {
+    public boolean geqToSomeIn(Iterable<Instance> instances) {
+        Iterator<Instance> iter = instances.iterator();
+        while (iter.hasNext()) {
+            Instance ins = iter.next();
             if (ins.lessThanOrEqualTo(this))
                 return true;
         }

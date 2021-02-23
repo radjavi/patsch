@@ -6,10 +6,15 @@ import java.util.*;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        // int[] times = { 2, 2, 4, 2, 4 };
-        // int[] times2 = { 2, 2, 5, 2, 4 };
+        // int[] times = { 4, 2, 2, 2, 4 };
+        // int[] times2 = { 5, 2, 2, 2, 4 };
+        // Instance instance = new Instance(times);
+        // Instance instance2 = new Instance(times2);
+        // HashSet<Instance> set = new HashSet<>();
+        // set.add(instance);
+        // System.out.println(instance2.geqToSomeIn(set));
 
-        HashMap<Instance, Path> critcals = Search.searchForCriticalInstances(5);
+        HashMap<Instance, Path> critcals = Search.searchForCriticalInstances(4);
         for (Instance instance : critcals.keySet()) {
             System.out.println(instance.waitingTimesToString());
         }
