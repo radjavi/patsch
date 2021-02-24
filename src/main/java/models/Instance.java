@@ -165,40 +165,30 @@ public class Instance {
     private Path shortestPath(Position from, Position to) throws Exception {
         Path path1 = new Path(this);
         path1.addPositionLast(from);
-        
-       
-       
-        
-       
-        
         Position currentPos = new Position (from.getX(), from.getY());
         
         while (!(currentPos.getX() == to.getX() && currentPos.getY() == to.getY())){
             
             //NE
-            //System.out.println(getCoordinate(currentPos, to));
             if (getCoordinate(currentPos, to).equals("NE") ){
                 Position posToCheck = new Position (currentPos.getX()+1, currentPos.getY()+1);
                 if (validGraph.hasPosition(posToCheck)) {
                     path1.addPositionLast(posToCheck);
-                    
                     currentPos = posToCheck;
                 }
                 else {
                     posToCheck = new Position (currentPos.getX()+1, currentPos.getY());
                     if (validGraph.hasPosition(posToCheck)) {
-                        
                         path1.addPositionLast(posToCheck);
                         currentPos = posToCheck;
                     }
-                        
                     else {
-                        path1.addPositionLast(new Position (currentPos.getX(), currentPos.getY()+1));
-                        
-                        currentPos = new Position (currentPos.getX(), currentPos.getY()+1);
+                        Position posToadd = new Position (currentPos.getX(), currentPos.getY()+1);
+                        path1.addPositionLast(posToadd);
+                        currentPos = posToadd;
                     }
-                        
                 }
+
             }
              //NW
             if (getCoordinate(currentPos, to).equals("NW") ){
@@ -213,13 +203,11 @@ public class Instance {
                          path1.addPositionLast(posToCheck);
                          currentPos = posToCheck;
                      }
-                         
                      else {
-                         path1.addPositionLast(new Position (currentPos.getX(), currentPos.getY()+1));
-                         
-                         currentPos = new Position (currentPos.getX(), currentPos.getY()+1);
-                     }
-                         
+                         Position posToAdd = new Position (currentPos.getX(), currentPos.getY()+1);
+                         path1.addPositionLast(posToAdd);
+                         currentPos = posToAdd;
+                     }    
                  }
              }
              
@@ -259,11 +247,12 @@ public class Instance {
                     }
                         
                     else {
-                        path1.addPositionLast(new Position (currentPos.getX(), currentPos.getY()-1));
-                        currentPos = new Position (currentPos.getX(), currentPos.getY()-1);
-                    }
-                        
+                        Position posToAdd = new Position (currentPos.getX(), currentPos.getY()-1);
+                        path1.addPositionLast(posToAdd);
+                        currentPos = posToAdd;
+                    } 
                 }
+                
             }
              //SE
              if (getCoordinate(currentPos, to).equals("SE") ){
@@ -280,12 +269,12 @@ public class Instance {
                     }
                         
                     else {
-                        path1.addPositionLast( new Position (currentPos.getX(), currentPos.getY()-1));
-                      
-                        currentPos = new Position (currentPos.getX(), currentPos.getY()-1);
-                    }
-                        
+                        Position posToAdd = new Position (currentPos.getX(), currentPos.getY()-1);
+                        path1.addPositionLast( posToAdd);
+                        currentPos =posToAdd;
+                    }     
                 }
+                
             }
              //S
              if (getCoordinate(currentPos, to).equals("S") ){
