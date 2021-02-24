@@ -14,13 +14,11 @@ public class App {
         // set.add(instance);
         // System.out.println(instance2.geqToSomeIn(set));
 
-        Instance ins = new Instance(new int []{8,2,2,3,6,8});
-        System.out.println(ins.getValidGraph().toStringTriangle());
-        HashMap<Instance, Path> criticals = Search.searchForCriticalInstances(5);
+        HashMap<Instance, Path> criticals = Search.searchForCriticalInstances(4);
         System.out.println("----- " + criticals.size() + " CRITICAL INSTANCES -----");
-        for (Instance instance : criticals.keySet()) {
-            System.out.println(instance.waitingTimesToString());
-        }
+        criticals.forEach((i, s) -> {
+            System.out.println(i.waitingTimesToString() + ": " + s);
+        });
         // criticalInstancesForM
         // .forEach((i, p) -> System.out.println("Instance:" + i.waitingTimesToString()
         // + ",Path:" + p));
@@ -29,5 +27,4 @@ public class App {
         // Path solution = instance.solve();
         // System.out.println(solution != null ? solution : "Instance is infeasible.");
     }
-
 }

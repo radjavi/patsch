@@ -23,7 +23,9 @@ public class Search {
         // Generate lower bound instances
         HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
         for (Instance lowerBoundInstance : lowerBoundInstances) {
-            U.add(lowerBoundInstance);
+            Instance lowerBoundInstanceRev = lowerBoundInstance.getReversed();
+            if (!lowerBoundInstance.geqToSomeIn(C.keySet()) && !lowerBoundInstanceRev.geqToSomeIn(C.keySet()))
+                U.add(lowerBoundInstance);
         }
 
         System.out.println("-------- C --------");
@@ -34,15 +36,16 @@ public class Search {
         U.forEach(i -> System.out.println(i.waitingTimesToString()));
         System.out.println("-------------------");
         // SEARCH
-        HashSet<ArrayList<Integer>> visitedInstances = new HashSet<>();
+        HashSet<Instance> visitedInstances = new HashSet<>();
         while (!U.isEmpty()) {
-            System.out.println(U.size() + " visited:" + visitedInstances.size());
-            Instance u = U.pop();
+            //System.out.println(U.size() + " visited:" + visitedInstances.size());
+            Instance u = new Instance(U.pop().getWaitingTimes());
+            Instance uR = u.getReversed();
             // System.out.println(u.waitingTimesToString());
             Path solvedU = u.solve();
             // System.out.print(u.waitingTimesToString() + ": ");
             // System.out.println(solvedU != null ? "feasible" : "infeasible");
-            if (solvedU != null && !u.geqToSomeIn(C.keySet())) {
+            if (solvedU != null && !u.geqToSomeIn(C.keySet()) && !uR.geqToSomeIn(C.keySet())) {
                 C.put(u, solvedU);
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
                 System.out.println(
@@ -53,23 +56,28 @@ public class Search {
                         continue;
                     int[] newWaitingTimes = u.getWaitingTimes().clone();
                     newWaitingTimes[i]++;
-                    ArrayList<Integer> intList = new ArrayList<Integer>(newWaitingTimes.length);
-                    for (int r : newWaitingTimes) {
-                        intList.add(r);
-                    }
                     Instance v = new Instance(newWaitingTimes);
+                    Instance vR = v.getReversed();
 
-                    ArrayList<Integer> intListReversed = (ArrayList<Integer>) intList.clone();
-                    Collections.reverse(intListReversed);
-
-                    if (!visitedInstances.contains(intList) && !v.geqToSomeIn(C.keySet())
-                            && !visitedInstances.contains(intListReversed)) {
+                    if (!visitedInstances.contains(v) && !v.geqToSomeIn(C.keySet())
+                            && !visitedInstances.contains(vR) && !vR.geqToSomeIn(C.keySet())) {
                         U.add(v);
-                        visitedInstances.add(intList);
+                        visitedInstances.add(v);
                     }
                 }
             }
         }
+
+        // Add reversed critical instances
+        HashMap<Instance, Path> CReversed = new HashMap<>();
+        for (Instance critical : C.keySet()) {
+            Instance criticalReversed = critical.getReversed();
+            if (!critical.equals(criticalReversed)) {
+                Path solution = criticalReversed.solve();
+                CReversed.put(criticalReversed, solution);
+            }
+        }
+        C.putAll(CReversed);
 
         return C;
 
@@ -106,7 +114,9 @@ public class Search {
         for (int d = 0; d <= m - 1; d++) {
             Instance instance = criticalWithEmptyIntersection(m, d);
             Path solution = instance.billiardBallPath(d);
-            C.put(instance, solution);
+            Instance reversedInstance = instance.getReversed();
+            if (!C.keySet().contains(reversedInstance))
+                C.put(instance, solution);
         }
         return C;
     }

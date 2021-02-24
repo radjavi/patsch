@@ -349,6 +349,17 @@ public class Instance {
         return properties;
     }
 
+    public Instance getReversed() {
+        int[] waitingTimes = this.getWaitingTimes();
+        int m = this.m;
+        int[] reversedWaitingTimes = new int[m + 1];
+        for (int i = 0; i <= m / 2; i++) {
+            reversedWaitingTimes[i] = waitingTimes[m - i];
+            reversedWaitingTimes[m - i] = waitingTimes[i];
+        }
+        return new Instance(reversedWaitingTimes);
+    }
+
     public int getA() {
         if (a == null)
             initA();
