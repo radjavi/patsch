@@ -29,10 +29,10 @@ public class Search {
         U.forEach(i -> System.out.println(i.waitingTimesToString()));
         System.out.println("-------------------");
         // SEARCH
-        HashSet<Instance> visitedInstances = new HashSet<>();
+        HashSet<int[]> visitedInstances = new HashSet<>();
         while (!U.isEmpty())
         {
-            //System.out.println(U.size() + " " + visitedInstances.size());
+            System.out.println(U.size() + " visited:" + visitedInstances.size());
             Instance u = U.pop();
             //System.out.println(u.waitingTimesToString());
             Path solvedU = u.solve();
@@ -50,10 +50,18 @@ public class Search {
                     int[] newWaitingTimes = u.getWaitingTimes().clone();
                     newWaitingTimes[i]++;
                     Instance v = new Instance(newWaitingTimes);
-
-                    if (!visitedInstances.contains(v) && !v.geqToSomeIn(C.keySet())) {
+                    int [] cloned = newWaitingTimes.clone();
+                    for(int c = 0; c < cloned.length / 2; c++)
+                    {
+                        int temp = cloned[c];
+                        cloned[c] = cloned[cloned.length - c - 1];
+                        cloned[cloned.length - c - 1] = temp;
+                    }
+                    //Instance vReverse = new Instance(cloned);
+                   System.out.println(""+newWaitingTimes.toString() + cloned);
+                    if (!visitedInstances.contains(newWaitingTimes) && !v.geqToSomeIn(C.keySet()) && !visitedInstances.contains(cloned) ) {
                         U.add(v);
-                        visitedInstances.add(v);
+                        visitedInstances.add(newWaitingTimes);
                     }
                 }
             }
