@@ -149,11 +149,157 @@ public class Instance {
     /**
      * May be improved.
      */
-    private Path shortestPath(Position from, Position to) throws Exception {
-        // Path path = new Path(instance);
-        // path.addPositionToEnd(from);
-        // return path;
 
+     private String getCoordinate(Position from, Position to){
+        String  dir = "";
+        if (to.getY()>from.getY()) 
+            dir += "N";
+        else if (to.getY()<from.getY())
+            dir += "S";
+        if (to.getX()>from.getX()) 
+            dir += "E";
+        else if (to.getX()<from.getX()) 
+            dir  += "W";
+        return dir;
+     }
+    private Path shortestPath(Position from, Position to) throws Exception {
+        //Path path1 = new Path(this);
+        //path1.addPositionLast(from);
+        
+        String path1 = "";
+        path1 += from;
+       
+        
+       
+        
+        Position currentPos = new Position (from.getX(), from.getY());
+        
+        while (!(currentPos.getX() == to.getX() && currentPos.getY() == to.getY())){
+            
+            //NE
+            System.out.println(getCoordinate(currentPos, to));
+            if (getCoordinate(currentPos, to).equals("NE") ){
+                Position posToCheck = new Position (currentPos.getX()+1, currentPos.getY()+1);
+                if (validGraph.hasPosition(posToCheck)) {
+                    path1 += (posToCheck);
+                    currentPos = posToCheck;
+                }
+                else {
+                    posToCheck = new Position (currentPos.getX()+1, currentPos.getY());
+                    if (validGraph.hasPosition(posToCheck)) {
+                        path1 += (posToCheck);
+                        currentPos = posToCheck;
+                    }
+                        
+                    else {
+                        path1 += new Position (currentPos.getX(), currentPos.getY()+1);
+                        currentPos = new Position (currentPos.getX(), currentPos.getY()+1);
+                    }
+                        
+                }
+            }
+             //NW
+            if (getCoordinate(currentPos, to).equals("NW") ){
+                 Position posToCheck = new Position (currentPos.getX()-1, currentPos.getY()+1);
+                 if (validGraph.hasPosition(posToCheck)) {
+                     path1 += (posToCheck);
+                     currentPos = posToCheck;
+                 }
+                 else {
+                     posToCheck = new Position (currentPos.getX()-1, currentPos.getY());
+                     if (validGraph.hasPosition(posToCheck)) {
+                         path1 += (posToCheck);
+                         currentPos = posToCheck;
+                     }
+                         
+                     else {
+                         path1 += new Position (currentPos.getX(), currentPos.getY()+1);
+                         currentPos = new Position (currentPos.getX(), currentPos.getY()+1);
+                     }
+                         
+                 }
+             }
+             
+
+            //N
+            if (getCoordinate(currentPos, to).equals("N") ){
+                Position posToCheck = new Position (currentPos.getX(), currentPos.getY()+1);
+                path1 += (posToCheck);
+                currentPos = posToCheck; 
+            }
+
+            //W
+            if (getCoordinate(currentPos, to).equals("W") ){
+                Position posToCheck = new Position (currentPos.getX()-1, currentPos.getY());
+                path1 += (posToCheck);
+                currentPos = posToCheck; 
+            }
+             //E
+             if (getCoordinate(currentPos, to).equals("E") ){
+                Position posToCheck = new Position (currentPos.getX()+1, currentPos.getY());
+                path1 += (posToCheck);
+                currentPos = posToCheck; 
+            }
+
+            //SW
+            if (getCoordinate(currentPos, to).equals("SW") ){
+                Position posToCheck = new Position (currentPos.getX()-1, currentPos.getY()-1);
+                if (validGraph.hasPosition(posToCheck)) {
+                    path1 += (posToCheck);
+                    currentPos = posToCheck;
+                }
+                else {
+                    posToCheck = new Position (currentPos.getX()-1, currentPos.getY());
+                    if (validGraph.hasPosition(posToCheck)) {
+                        path1 += (posToCheck);
+                        currentPos = posToCheck;
+                    }
+                        
+                    else {
+                        path1 += new Position (currentPos.getX(), currentPos.getY()-1);
+                        currentPos = new Position (currentPos.getX(), currentPos.getY()-1);
+                    }
+                        
+                }
+            }
+             //SE
+             if (getCoordinate(currentPos, to).equals("SE") ){
+                Position posToCheck = new Position (currentPos.getX()+1, currentPos.getY()-1);
+                if (validGraph.hasPosition(posToCheck)) {
+                    path1 += (posToCheck);
+                    currentPos = posToCheck;
+                }
+                else {
+                    posToCheck = new Position (currentPos.getX()+1, currentPos.getY());
+                    if (validGraph.hasPosition(posToCheck)) {
+                        path1 += (posToCheck);
+                        currentPos = posToCheck;
+                    }
+                        
+                    else {
+                        path1 += new Position (currentPos.getX(), currentPos.getY()-1);
+                        currentPos = new Position (currentPos.getX(), currentPos.getY()-1);
+                    }
+                        
+                }
+            }
+             //S
+             if (getCoordinate(currentPos, to).equals("S") ){
+                Position posToCheck = new Position (currentPos.getX(), currentPos.getY()-1);
+                path1 += (posToCheck);
+                currentPos = posToCheck; 
+            }
+            
+
+        }
+       
+            
+
+        System.out.println(path1);
+        
+
+
+        //___________---------------------
         HashMap<Position, Integer> gScore = new HashMap<>();
         this.getValidGraph().getPositions().forEach(p -> gScore.put(p, Integer.MAX_VALUE));
         gScore.put(from, 0);
