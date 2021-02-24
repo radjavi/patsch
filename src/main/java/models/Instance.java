@@ -8,18 +8,39 @@ public class Instance {
     private PositionGraph triangleGraph;
     private Property[] properties;
     private PositionGraph validGraph;
-    private int a;
-    private int b;
+    private Integer a;
+    private Integer b;
     private boolean critical;
     private int[] waitingTimes;
 
     public Instance(int[] waitingTimes) {
         m = waitingTimes.length - 1;
         this.waitingTimes = waitingTimes.clone();
+    }
+
+    private void initTriangleGraph() {
         triangleGraph = new PositionGraph(trianglePositions(m));
+    }
+
+    private void initProperties() {
         properties = createProperties(waitingTimes);
+    }
+
+    private void initA() {
+        if (properties == null)
+            initProperties();
         a = computeA(properties);
+    }
+
+    private void initB() {
+        if (properties == null)
+            initProperties();
         b = computeB(properties);
+    }
+
+    private void initValidGraph() {
+        if (properties == null)
+            initProperties();
         validGraph = new PositionGraph(validPositions(properties));
     }
 
@@ -72,6 +93,7 @@ public class Instance {
 
     /**
      * May be improved (check if shortestPath == null)
+     * 
      * @return the shortest distance to p
      */
     public <F, T> int distance(F from, T to) throws Exception {
@@ -91,7 +113,7 @@ public class Instance {
         else if (from instanceof Property) {
             Property property = (Property) from;
             for (Position p : property.getPositions()) {
-                if (validGraph.hasPosition(p))
+                if (this.getValidGraph().hasPosition(p))
                     fromSet.add(p);
             }
         }
@@ -100,7 +122,7 @@ public class Instance {
         else if (to instanceof Property) {
             Property property = (Property) to;
             for (Position p : property.getPositions()) {
-                if (validGraph.hasPosition(p))
+                if (this.getValidGraph().hasPosition(p))
                     toSet.add(p);
             }
         }
@@ -133,11 +155,11 @@ public class Instance {
         // return path;
 
         HashMap<Position, Integer> gScore = new HashMap<>();
-        validGraph.getPositions().forEach(p -> gScore.put(p, Integer.MAX_VALUE));
+        this.getValidGraph().getPositions().forEach(p -> gScore.put(p, Integer.MAX_VALUE));
         gScore.put(from, 0);
 
         HashMap<Position, Integer> fScore = new HashMap<>();
-        validGraph.getPositions().forEach(p -> fScore.put(p, Integer.MAX_VALUE));
+        this.getValidGraph().getPositions().forEach(p -> fScore.put(p, Integer.MAX_VALUE));
         fScore.put(from, from.maxDeltaXY(to));
 
         PriorityQueue<Position> openSet = new PriorityQueue<>((p1, p2) -> {
@@ -156,7 +178,7 @@ public class Instance {
             if (current.equals(to))
                 return reconstructPath(cameFrom, current);
 
-            HashSet<Position> neighbours = validGraph.getNeighbours(current);
+            HashSet<Position> neighbours = this.getValidGraph().getNeighbours(current);
 
             for (Position neighbour : neighbours) {
                 int tentativeGScore = gScore.get(current) + 1;
@@ -173,8 +195,7 @@ public class Instance {
         return null;
     }
 
-    private Path reconstructPath(HashMap<Position, Position> cameFrom, Position end)
-            throws Exception {
+    private Path reconstructPath(HashMap<Position, Position> cameFrom, Position end) throws Exception {
         Path path = new Path(this);
         path.addPositionFirst(end);
         Position current = end;
@@ -187,8 +208,8 @@ public class Instance {
     }
 
     public Path solve() throws Exception {
-        if (a > b) {
-            System.out.println("a > b: " + a + " > " + b);
+        if (this.getA() > this.getB()) {
+            System.out.println("a > b: " + this.getA() + " > " + this.getB());
             // Find correct d to return path from Proposition 1.
             for (int d = 0; d <= m; d++) {
                 Instance critical = Search.criticalWithEmptyIntersection(m, d);
@@ -199,8 +220,8 @@ public class Instance {
         }
         LinkedList<Path> paths = new LinkedList<>();
 
-        for (Position u : validGraph.getPositions()) {
-            for (Position v : validGraph.getNeighbours(u)) {
+        for (Position u : this.getValidGraph().getPositions()) {
+            for (Position v : this.getValidGraph().getNeighbours(u)) {
                 Path path = new Path(this);
                 path.addPositionLast(u);
                 path.addPositionLast(v);
@@ -211,7 +232,7 @@ public class Instance {
         while (!paths.isEmpty()) {
             Path p = paths.pop();
             // System.out.println(p);
-            for (Position q : validGraph.getNeighbours(p.getLast())) {
+            for (Position q : this.getValidGraph().getNeighbours(p.getLast())) {
                 // System.out.println(p + ", " + q);
                 Path pq = new Path(p);
                 pq.addPositionLast(q);
@@ -311,27 +332,37 @@ public class Instance {
     }
 
     public PositionGraph getTriangleGraph() {
+        if (triangleGraph == null)
+            initTriangleGraph();
         return triangleGraph;
     }
 
     public PositionGraph getValidGraph() {
+        if (validGraph == null)
+            initValidGraph();
         return validGraph;
     }
 
     public Property[] getProperties() {
+        if (properties == null)
+            initProperties();
         return properties;
     }
 
     public int getA() {
+        if (a == null)
+            initA();
         return a;
     }
 
     public int getB() {
+        if (b == null)
+            initB();
         return b;
     }
 
     public void removeValidPosition(Position p) {
-        validGraph.removePosition(p);
+        this.getValidGraph().removePosition(p);
     }
 
     private Property[] createProperties(int[] waitingTimes) {
@@ -344,11 +375,12 @@ public class Instance {
     }
 
     /**
-     * Checks if this instance is greater than or equal to some instance in `instances`.
+     * Checks if this instance is greater than or equal to some instance in
+     * `instances`.
      * 
      * @param instances The set of instances
-     * @return `true` if this instance is greater than or equal to some instance in `instances`, and
-     *         `false` otherwise.
+     * @return `true` if this instance is greater than or equal to some instance in
+     *         `instances`, and `false` otherwise.
      */
     public boolean geqToSomeIn(Iterable<Instance> instances) {
         Iterator<Instance> iter = instances.iterator();
@@ -379,8 +411,7 @@ public class Instance {
         if (!componentLessThan)
             return false;
         for (int i = 0; i <= m; i++) {
-            if (!(this.waitingTimes[i] == ins.waitingTimes[i]
-                    || this.waitingTimes[i] < ins.waitingTimes[i]))
+            if (!(this.waitingTimes[i] == ins.waitingTimes[i] || this.waitingTimes[i] < ins.waitingTimes[i]))
                 return false;
         }
         return true;

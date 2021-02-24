@@ -7,20 +7,25 @@ import java.util.*;
 
 public class Search {
 
+    /**
+     * @param m
+     * @return
+     * @throws Exception
+     */
     public static HashMap<Instance, Path> searchForCriticalInstances(int m) throws Exception {
         LinkedList<Instance> U = new LinkedList<>();
         HashMap<Instance, Path> C = new HashMap<>();
 
         // INIT
         C.putAll(criticalsWithEmptyIntersection(m)); // M_0
-        C.putAll(criticalsWithShortWaitingTimes(m)); // M_1
-        
+        // C.putAll(criticalsWithShortWaitingTimes(m)); // M_1
+
         // Generate lower bound instances
         HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
         for (Instance lowerBoundInstance : lowerBoundInstances) {
             U.add(lowerBoundInstance);
         }
-        
+
         System.out.println("-------- C --------");
         C.forEach((i, s) -> {
             System.out.println(i.waitingTimesToString() + ": " + s);
@@ -29,39 +34,38 @@ public class Search {
         U.forEach(i -> System.out.println(i.waitingTimesToString()));
         System.out.println("-------------------");
         // SEARCH
-        HashSet<int[]> visitedInstances = new HashSet<>();
-        while (!U.isEmpty())
-        {
+        HashSet<ArrayList<Integer>> visitedInstances = new HashSet<>();
+        while (!U.isEmpty()) {
             System.out.println(U.size() + " visited:" + visitedInstances.size());
             Instance u = U.pop();
-            //System.out.println(u.waitingTimesToString());
+            // System.out.println(u.waitingTimesToString());
             Path solvedU = u.solve();
-            //System.out.print(u.waitingTimesToString() + ": ");
-            //System.out.println(solvedU != null ? "feasible" : "infeasible");
+            // System.out.print(u.waitingTimesToString() + ": ");
+            // System.out.println(solvedU != null ? "feasible" : "infeasible");
             if (solvedU != null && !u.geqToSomeIn(C.keySet())) {
                 C.put(u, solvedU);
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
-                System.out.println("[" + dtf.format(LocalDateTime.now()) + "] found critical: " + u.waitingTimesToString());
-            }
-            else {
+                System.out.println(
+                        "[" + dtf.format(LocalDateTime.now()) + "] found critical: " + u.waitingTimesToString());
+            } else {
                 for (int i = 0; i <= m; i++) {
-                    if (u.getWaitingTimes()[i] == 2*m)
+                    if (u.getWaitingTimes()[i] == 2 * m)
                         continue;
                     int[] newWaitingTimes = u.getWaitingTimes().clone();
                     newWaitingTimes[i]++;
-                    Instance v = new Instance(newWaitingTimes);
-                    int [] cloned = newWaitingTimes.clone();
-                    for(int c = 0; c < cloned.length / 2; c++)
-                    {
-                        int temp = cloned[c];
-                        cloned[c] = cloned[cloned.length - c - 1];
-                        cloned[cloned.length - c - 1] = temp;
+                    ArrayList<Integer> intList = new ArrayList<Integer>(newWaitingTimes.length);
+                    for (int r : newWaitingTimes) {
+                        intList.add(r);
                     }
-                    //Instance vReverse = new Instance(cloned);
-                   System.out.println(""+newWaitingTimes.toString() + cloned);
-                    if (!visitedInstances.contains(newWaitingTimes) && !v.geqToSomeIn(C.keySet()) && !visitedInstances.contains(cloned) ) {
+                    Instance v = new Instance(newWaitingTimes);
+
+                    ArrayList<Integer> intListReversed = (ArrayList<Integer>) intList.clone();
+                    Collections.reverse(intListReversed);
+
+                    if (!visitedInstances.contains(intList) && !v.geqToSomeIn(C.keySet())
+                            && !visitedInstances.contains(intListReversed)) {
                         U.add(v);
-                        visitedInstances.add(newWaitingTimes);
+                        visitedInstances.add(intList);
                     }
                 }
             }
@@ -78,7 +82,7 @@ public class Search {
                 Instance g = Instance.lowerBoundInstance(m, a, b);
                 if (!g.geqToSomeIn(C.keySet())) {
                     allLowerBoundInstances.add(g);
-                    //System.out.println(a + ", " + b + ": " + g.waitingTimesToString());
+                    // System.out.println(a + ", " + b + ": " + g.waitingTimesToString());
                 }
             }
         }
@@ -88,7 +92,7 @@ public class Search {
         for (Instance lowerBoundInstance : allLowerBoundInstances) {
             HashSet<Instance> comparisonSet = (HashSet<Instance>) allLowerBoundInstances.clone();
             comparisonSet.remove(lowerBoundInstance);
-            if (!lowerBoundInstance.geqToSomeIn(comparisonSet)) 
+            if (!lowerBoundInstance.geqToSomeIn(comparisonSet))
                 lowerBoundInstances.add(lowerBoundInstance);
         }
         return lowerBoundInstances;
@@ -120,7 +124,8 @@ public class Search {
 
     private static HashMap<Instance, Path> criticalsWithShortWaitingTimes(int m) throws Exception {
         HashMap<Instance, Path> C = new HashMap<>();
-        if (m < 5) return C;
+        if (m < 5)
+            return C;
 
         // t_k = 1 for 1 <= k <= m-1
         for (int k = 1; k < m; k++) {
@@ -187,7 +192,7 @@ public class Search {
 
         // TODO:
 
-        // TODO: 
+        // TODO:
 
         return C;
     }
