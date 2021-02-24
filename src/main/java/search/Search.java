@@ -38,14 +38,16 @@ public class Search {
         // SEARCH
         HashSet<Instance> visitedInstances = new HashSet<>();
         while (!U.isEmpty()) {
-            //System.out.println(U.size() + " visited:" + visitedInstances.size());
+            System.out.println(U.size() + " visited:" + visitedInstances.size());
             Instance u = new Instance(U.pop().getWaitingTimes());
             Instance uR = u.getReversed();
+            if (u.geqToSomeIn(C.keySet()) || uR.geqToSomeIn(C.keySet()))
+                continue;
             // System.out.println(u.waitingTimesToString());
             Path solvedU = u.solve();
             // System.out.print(u.waitingTimesToString() + ": ");
             // System.out.println(solvedU != null ? "feasible" : "infeasible");
-            if (solvedU != null && !u.geqToSomeIn(C.keySet()) && !uR.geqToSomeIn(C.keySet())) {
+            if (solvedU != null) {
                 C.put(u, solvedU);
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
                 System.out.println(
