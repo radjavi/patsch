@@ -176,7 +176,7 @@ public class Search {
                     if (i <= k - 2)
                         waitingTimes[i] = 2 * Math.max(i, m - i - 1);
                     else if (i == k - 1)
-                        waitingTimes[i] = 2 * Math.max(k - 1, m - k - 1);
+                        waitingTimes[i] = 2 * Math.max(k - 1, m == 5 ? m - k - 1 : m - k - 2);
                     else if (i == k)
                         waitingTimes[i] = 2;
                     else if (i == k + 1)
@@ -190,9 +190,55 @@ public class Search {
             C.put(instance, solution);
         }
 
-        // TODO:
+        // t_k = t_{k+1} = 3 for 2 <= k < k+1 <= m-2
+        for (int k = 2; k <= m - 3; k++) {
+            int[] waitingTimes = new int[m + 1];
+            if (k == 2) {
+                waitingTimes[0] = 2 * (m - 3);
+                waitingTimes[1] = 2 * (m - 4);
+                waitingTimes[2] = 3;
+                waitingTimes[3] = 3;
+                for (int i = 3; i <= m; i++) {
+                    waitingTimes[i] = 2 * Math.max(i - 2, m - i);
+                }
+            } else {
+                for (int i = 0; i <= m; i++) {
+                    if (i <= k - 1)
+                        waitingTimes[i] = 2 * Math.max(i, m - i - 3);
+                    else if (i == k)
+                        waitingTimes[i] = 3;
+                    else if (i == k + 1)
+                        waitingTimes[i] = 3;
+                    else
+                        waitingTimes[i] = 2 * Math.max(i - 3, m - i);
+                }
+            }
+            Instance instance = new Instance(waitingTimes);
+            Path solution = instance.solve();
+            C.put(instance, solution);
+        }
 
-        // TODO:
+        // t_k = 2 && t_{k-1} = t_{k+1} = 4 for 2 <= k <= m-2
+        if (m > 5) {
+            for (int k = 2; k <= m - 2; k++) {
+                int[] waitingTimes = new int[m + 1];
+                for (int i = 0; i <= m; i++) {
+                    if (i <= k - 2)
+                        waitingTimes[i] = 2 * Math.max(i, m - i - 2);
+                    else if (i == k - 1)
+                        waitingTimes[i] = 4;
+                    else if (i == k)
+                        waitingTimes[i] = 2;
+                    else if (i == k + 1)
+                        waitingTimes[i] = 4;
+                    else
+                        waitingTimes[i] = 2 * Math.max(i - 2, m - i);
+                }
+                Instance instance = new Instance(waitingTimes);
+                Path solution = instance.solve();
+                C.put(instance, solution);
+            }
+        }
 
         return C;
     }
