@@ -69,12 +69,21 @@ public class Search {
                         break;
                     }
                 }
+                Instance referenceInstance = u;
+                if (greaterInfeasible != null) {
+                    int[] newWaitingTimes = new int[m + 1];
+                    for (int j = 0; j <= m; j++) {
+                        if (greaterInfeasible.getWaitingTimes()[j] == r)
+                            newWaitingTimes[j] = u.getWaitingTimes()[j];
+                        else
+                            newWaitingTimes[j] = greaterInfeasible.getWaitingTimes()[j];
+                    }
+                    referenceInstance = new Instance(newWaitingTimes);
+                }
                 for (int i = 0; i <= m; i++) {
-                    if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] == r)
+                    if (referenceInstance.getWaitingTimes()[i] == r)
                         continue;
-                    else if (u.getWaitingTimes()[i] == r)
-                        continue;
-                    int[] newWaitingTimes = u.getWaitingTimes().clone();
+                    int[] newWaitingTimes = referenceInstance.getWaitingTimes().clone();
                     newWaitingTimes[i]++;
                     Instance v = new Instance(newWaitingTimes);
                     Instance vR = v.getReversed();
@@ -105,30 +114,34 @@ public class Search {
 
     public static HashSet<Instance> generateStockOfInstances(int m, int r) throws Exception {
         HashSet<Instance> maximalInfeasibleInstances = new HashSet<>();
+        HashSet<Instance> visitedInstances = new HashSet<>();
         LinkedList<Instance> U = new LinkedList<>();
         // Initialize U with [r,...,r].
         int[] allR = new int[m + 1];
         Arrays.fill(allR, r);
-        U.add(new Instance(allR));
+        Instance allRInstance = new Instance(allR);
+        U.add(allRInstance);
+        visitedInstances.add(allRInstance);
 
         while (!U.isEmpty()) {
-            System.out.println(maximalInfeasibleInstances.size());
+            //System.out.println(maximalInfeasibleInstances.size());
             if (maximalInfeasibleInstances.size() > 100) {
-                maximalInfeasibleInstances
-                        .forEach(inf -> System.out.println(inf.waitingTimesToString()));
+                maximalInfeasibleInstances.forEach(inf -> System.out.println(inf.waitingTimesToString()));
                 break;
             }
             Instance u = U.pop();
             Path solution = u.solve();
             if (solution != null) {
                 for (int i = 0; i <= m; i++) {
+                    if (u.getWaitingTimes()[i] != r)
+                        continue;
                     int[] waitingTimes = u.getWaitingTimes().clone();
-                    if (waitingTimes[i] == r)
-                        waitingTimes[i] = 1;
-                    if (!waitingTimes.equals(u.getWaitingTimes())) {
-                        Instance newInstance = new Instance(waitingTimes);
+                    waitingTimes[i] = 1;
+                    Instance newInstance = new Instance(waitingTimes);
+                    if (!visitedInstances.contains(newInstance)) {
                         U.add(newInstance);
-                        System.out.println(newInstance.waitingTimesToString());
+                        visitedInstances.add(newInstance);
+                        //System.out.println(newInstance.waitingTimesToString());
                     }
                 }
             } else {
@@ -143,13 +156,15 @@ public class Search {
                     maximalInfeasibleInstances.remove(smallerInfeasible);
                 maximalInfeasibleInstances.add(u);
                 for (int i = 0; i <= m; i++) {
+                    if (u.getWaitingTimes()[i] == r)
+                        continue;
                     int[] waitingTimes = u.getWaitingTimes().clone();
-                    if (waitingTimes[i] != r)
-                        waitingTimes[i]++;
-                    if (!waitingTimes.equals(u.getWaitingTimes())) {
-                        Instance newInstance = new Instance(waitingTimes);
+                    waitingTimes[i]++;
+                    Instance newInstance = new Instance(waitingTimes);
+                    if (!visitedInstances.contains(newInstance)) {
                         U.add(newInstance);
-                        System.out.println(newInstance.waitingTimesToString());
+                        visitedInstances.add(newInstance);
+                        //System.out.println(newInstance.waitingTimesToString());
                     }
                 }
             }
