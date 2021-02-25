@@ -14,6 +14,7 @@ public class App {
         // set.add(instance);
         // System.out.println(instance2.geqToSomeIn(set));
 
+        //Search.generateStockOfInstances(5);
         HashMap<Instance, Path> criticals = Search.searchForCriticalInstances(4);
         System.out.println("----- " + criticals.size() + " CRITICAL INSTANCES -----");
         criticals.forEach((i, s) -> {

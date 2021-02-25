@@ -171,7 +171,7 @@ public class Instance {
 
     public Path solve() throws Exception {
         if (this.getA() > this.getB()) {
-            System.out.println("a > b: " + this.getA() + " > " + this.getB());
+            // System.out.println("a > b: " + this.getA() + " > " + this.getB());
             // Find correct d to return path from Proposition 1.
             for (int d = 0; d <= m; d++) {
                 Instance critical = Search.criticalWithEmptyIntersection(m, d);
