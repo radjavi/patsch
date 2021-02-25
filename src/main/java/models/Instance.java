@@ -146,123 +146,26 @@ public class Instance {
         return shortestPath(bestF, bestT);
     }
 
-    /**
-     * May be improved.
-     */
-
-    private String getCoordinate(Position from, Position to){
-        String  dir = "";
-        if (to.getY()>from.getY()) 
-            dir += "N";
-        else if (to.getY()<from.getY())
-            dir += "S";
-        if (to.getX()>from.getX()) 
-            dir += "E";
-        else if (to.getX()<from.getX()) 
-            dir  += "W";
-        return dir;
-    }
-
-    private Position moveRobots(Position currentPos, Position target,Path path) throws Exception{
-        String coordinate = getCoordinate(currentPos, target);
-        Position posToCheck ;
-        int ySlope = 0;
-        int xSlope = 0;
-        if (coordinate.indexOf('N') >= 0)
-            ySlope = 1;
-        if (coordinate.indexOf('S') >= 0)
-            ySlope = -1;
-        if (coordinate.indexOf('E') >= 0)
-            xSlope = 1;
-        if (coordinate.indexOf('W') >= 0)
-            xSlope = -1;
-        
-        posToCheck = new Position (currentPos.getX()+xSlope, currentPos.getY()+ySlope);
-            if (validGraph.hasPosition(posToCheck)) {
-                    path.addPositionLast(posToCheck);
-                    return posToCheck;
-                }
-                else {
-                    posToCheck = new Position (currentPos.getX()+xSlope, currentPos.getY());
-                    if (validGraph.hasPosition(posToCheck)) {
-                        path.addPositionLast(posToCheck);
-                        return posToCheck;
-                    }
-                    else {
-                        posToCheck = new Position (currentPos.getX(), currentPos.getY()+ySlope);
-                        if (validGraph.hasPosition(posToCheck)) {
-                            path.addPositionLast(posToCheck);
-                            return posToCheck;
-                        }
-                    }
-                }
-        return null;
-
-    }
-    
-    
     private Path shortestPath(Position from, Position to) throws Exception {
         Path path = new Path(this);
         path.addPositionLast(from);
-        Position currentPos = new Position(from.getX(), from.getY());
+        Position current = from;
         
-        while (!(currentPos.getX() == to.getX() && currentPos.getY() == to.getY()))
-            currentPos = moveRobots(currentPos, to, path);
-        
-        return path;
-    }
-
-        /*___________---------------------
-        HashMap<Position, Integer> gScore = new HashMap<>();
-        this.getValidGraph().getPositions().forEach(p -> gScore.put(p, Integer.MAX_VALUE));
-        gScore.put(from, 0);
-
-        HashMap<Position, Integer> fScore = new HashMap<>();
-        this.getValidGraph().getPositions().forEach(p -> fScore.put(p, Integer.MAX_VALUE));
-        fScore.put(from, from.maxDeltaXY(to));
-
-        PriorityQueue<Position> openSet = new PriorityQueue<>((p1, p2) -> {
-            if (fScore.get(p1) < fScore.get(p2))
-                return -1;
-            if (fScore.get(p1) > fScore.get(p2))
-                return 1;
-            return 0;
-        });
-        openSet.add(from);
-
-        HashMap<Position, Position> cameFrom = new HashMap<>();
-
-        while (!openSet.isEmpty()) {
-            Position current = openSet.remove();
-            if (current.equals(to))
-                return reconstructPath(cameFrom, current);
-
+        while (!current.equals(to)) {
             HashSet<Position> neighbours = this.getValidGraph().getNeighbours(current);
-
+            Position closest = null;
+            int closestHeuristic = Integer.MAX_VALUE;
             for (Position neighbour : neighbours) {
-                int tentativeGScore = gScore.get(current) + 1;
-                if (tentativeGScore < gScore.get(neighbour)) {
-                    cameFrom.put(neighbour, current);
-                    gScore.put(neighbour, tentativeGScore);
-                    fScore.put(neighbour, tentativeGScore + neighbour.maxDeltaXY(to));
-                    if (!openSet.contains(neighbour))
-                        openSet.add(neighbour);
+                int heuristic = neighbour.maxDeltaXY(to);
+                if (heuristic < closestHeuristic) {
+                    closest = neighbour;
+                    closestHeuristic = heuristic;
                 }
             }
+            path.addPositionLast(closest);
+            current = closest;
         }
 
-        return null;
-    }
-*/
-    private Path reconstructPath(HashMap<Position, Position> cameFrom, Position end) throws Exception {
-        Path path = new Path(this);
-        path.addPositionFirst(end);
-        Position current = end;
-        while (cameFrom.get(current) != null) {
-            Position previous = cameFrom.get(current);
-            path.addPositionFirst(previous);
-            current = previous;
-        }
         return path;
     }
 
