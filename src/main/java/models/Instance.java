@@ -127,12 +127,12 @@ public class Instance {
             }
         }
 
-        int shortestHeuristic = Integer.MAX_VALUE;
+        double shortestHeuristic = Double.MAX_VALUE;
         Position bestF = null;
         Position bestT = null;
         for (Position f : fromSet) {
             for (Position t : toSet) {
-                int heuristic = f.maxDeltaXY(t);
+                double heuristic = f.euclideanDistance(t);
                 if (heuristic < shortestHeuristic) {
                     shortestHeuristic = heuristic;
                     bestF = f;
