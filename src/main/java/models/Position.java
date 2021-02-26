@@ -32,7 +32,10 @@ public class Position implements Comparable<Position> {
     int deltaX = Math.abs(x - x1);
     int deltaY = Math.abs(y - y1);
     return Math.max(deltaX, deltaY);
+  }
 
+  public double euclideanDistance(Position p) {
+    return Math.sqrt(Math.pow(p.getX() - this.getX(), 2) + Math.pow(p.getY() - this.getY(), 2));
   }
 
   @Override

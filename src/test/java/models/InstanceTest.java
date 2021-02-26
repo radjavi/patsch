@@ -32,7 +32,7 @@ public class InstanceTest {
       false
     };
     for (int i = 0; i < instances.length; i++) {
-      boolean actual = instances[i].geqToSomeIn(setOfInstances);
+      boolean actual = instances[i].geqToSomeIn(setOfInstances) != null;
       assertEquals(instances[i].waitingTimesToString(), expected[i], actual);
     }
   }

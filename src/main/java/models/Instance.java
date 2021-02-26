@@ -150,13 +150,13 @@ public class Instance {
         Path path = new Path(this);
         path.addPositionLast(from);
         Position current = from;
-        
+
         while (!current.equals(to)) {
             HashSet<Position> neighbours = this.getValidGraph().getNeighbours(current);
             Position closest = null;
-            int closestHeuristic = Integer.MAX_VALUE;
+            double closestHeuristic = Double.MAX_VALUE;
             for (Position neighbour : neighbours) {
-                int heuristic = neighbour.maxDeltaXY(to);
+                double heuristic = neighbour.euclideanDistance(to);
                 if (heuristic < closestHeuristic) {
                     closest = neighbour;
                     closestHeuristic = heuristic;
@@ -170,6 +170,11 @@ public class Instance {
     }
 
     public Path solve() throws Exception {
+        int nrOnes = 0;
+        for (Integer i : this.getWaitingTimes()) {
+            if (i == 1) nrOnes++;
+        }
+        if (nrOnes > 1) return null;
         if (this.getA() > this.getB()) {
             // System.out.println("a > b: " + this.getA() + " > " + this.getB());
             // Find correct d to return path from Proposition 1.
@@ -192,6 +197,7 @@ public class Instance {
         }
 
         while (!paths.isEmpty()) {
+            // System.out.println(paths.size());
             Path p = paths.pop();
             // System.out.println(p);
             for (Position q : this.getValidGraph().getNeighbours(p.getLast())) {
@@ -347,22 +353,50 @@ public class Instance {
         return properties;
     }
 
+    public boolean inSet(Set<Instance> s) {
+        if (s.contains(this) || s.contains(this.getReversed()))
+            return true;
+        return false;
+    }
+
     /**
-     * Checks if this instance is greater than or equal to some instance in
-     * `instances`.
+     * Checks if this instance is greater than or equal to some instance in `instances`.
+     * It also checks the reverse instances in `instances`.
      * 
      * @param instances The set of instances
-     * @return `true` if this instance is greater than or equal to some instance in
-     *         `instances`, and `false` otherwise.
+     * @return The instance in `instances` that is less than or equal to this instance, otherwise null.
      */
-    public boolean geqToSomeIn(Iterable<Instance> instances) {
+    public Instance geqToSomeIn(Iterable<Instance> instances) {
         Iterator<Instance> iter = instances.iterator();
         while (iter.hasNext()) {
             Instance ins = iter.next();
+            Instance insR = ins.getReversed();
             if (ins.lessThanOrEqualTo(this))
-                return true;
+                return ins;
+            else if (insR.lessThanOrEqualTo(this))
+                return ins;
         }
-        return false;
+        return null;
+    }
+
+    /**
+     * Checks if this instance is less than some instance in `instances`.
+     * It also checks the reverse instances in `instances`.
+     * 
+     * @param instances The set of instances
+     * @return The instance in `instances` that is greater than this instance, otherwise null.
+     */
+    public Instance lessThanSomeIn(Iterable<Instance> instances) {
+        Iterator<Instance> iter = instances.iterator();
+        while (iter.hasNext()) {
+            Instance ins = iter.next();
+            Instance insR = ins.getReversed();
+            if (this.lessThan(ins))
+                return ins;
+            else if (this.lessThan(insR))
+                return ins;
+        }
+        return null;
     }
 
     public boolean lessThanOrEqualTo(Instance ins) {
@@ -384,7 +418,8 @@ public class Instance {
         if (!componentLessThan)
             return false;
         for (int i = 0; i <= m; i++) {
-            if (!(this.waitingTimes[i] == ins.waitingTimes[i] || this.waitingTimes[i] < ins.waitingTimes[i]))
+            if (!(this.waitingTimes[i] == ins.waitingTimes[i]
+                    || this.waitingTimes[i] < ins.waitingTimes[i]))
                 return false;
         }
         return true;

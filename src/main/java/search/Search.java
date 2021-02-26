@@ -24,9 +24,7 @@ public class Search {
         // Generate lower bound instances
         HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
         for (Instance lowerBoundInstance : lowerBoundInstances) {
-            Instance lowerBoundInstanceRev = lowerBoundInstance.getReversed();
-            if (!lowerBoundInstance.geqToSomeIn(C.keySet())
-                    && !lowerBoundInstanceRev.geqToSomeIn(C.keySet()))
+            if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null)
                 U.add(lowerBoundInstance);
         }
 
@@ -45,8 +43,7 @@ public class Search {
         while (!U.isEmpty()) {
             System.out.println(U.size() + " visited:" + visitedInstances.size());
             Instance u = new Instance(U.pop().getWaitingTimes());
-            Instance uR = u.getReversed();
-            if (u.geqToSomeIn(C.keySet()) || uR.geqToSomeIn(C.keySet()))
+            if (u.geqToSomeIn(C.keySet()) != null)
                 continue;
             // System.out.println(u.waitingTimesToString());
             Path solvedU = u.solve();
@@ -58,38 +55,24 @@ public class Search {
                 System.out.println("[" + dtf.format(LocalDateTime.now()) + "] found critical: "
                         + u.waitingTimesToString());
             } else {
+                //Instance greaterInfeasible = u.lessThanSomeIn(maximalInfeasibleInstances);
                 Instance greaterInfeasible = null;
-                for (Instance infeasible : maximalInfeasibleInstances) {
-                    Instance infeasibleR = infeasible.getReversed();
-                    if (u.lessThan(infeasible)) {
-                        greaterInfeasible = infeasible;
-                        break;
-                    } else if (u.lessThan(infeasibleR)) {
-                        greaterInfeasible = infeasibleR;
+                for (Instance greater : maximalInfeasibleInstances) {
+                    if (u.lessThan(greater)) {
+                        greaterInfeasible = greater;
                         break;
                     }
-                }
-                Instance referenceInstance = u;
-                if (greaterInfeasible != null) {
-                    int[] newWaitingTimes = new int[m + 1];
-                    for (int j = 0; j <= m; j++) {
-                        if (greaterInfeasible.getWaitingTimes()[j] == r)
-                            newWaitingTimes[j] = u.getWaitingTimes()[j];
-                        else
-                            newWaitingTimes[j] = greaterInfeasible.getWaitingTimes()[j];
-                    }
-                    referenceInstance = new Instance(newWaitingTimes);
                 }
                 for (int i = 0; i <= m; i++) {
-                    if (referenceInstance.getWaitingTimes()[i] == r)
+                    if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] == r)
                         continue;
-                    int[] newWaitingTimes = referenceInstance.getWaitingTimes().clone();
+                    if (u.getWaitingTimes()[i] == r)
+                        continue;
+                    int[] newWaitingTimes = u.getWaitingTimes().clone();
                     newWaitingTimes[i]++;
                     Instance v = new Instance(newWaitingTimes);
-                    Instance vR = v.getReversed();
 
-                    if (!visitedInstances.contains(v) && !visitedInstances.contains(vR)
-                            && !v.geqToSomeIn(C.keySet()) && !vR.geqToSomeIn(C.keySet())) {
+                    if (!v.inSet(visitedInstances) && v.geqToSomeIn(C.keySet()) == null) {
                         U.add(v);
                         visitedInstances.add(v);
                     }
@@ -124,11 +107,10 @@ public class Search {
         visitedInstances.add(allRInstance);
 
         while (!U.isEmpty()) {
-            //System.out.println(maximalInfeasibleInstances.size());
-            if (maximalInfeasibleInstances.size() > 100) {
-                maximalInfeasibleInstances.forEach(inf -> System.out.println(inf.waitingTimesToString()));
-                break;
-            }
+            System.out.println(maximalInfeasibleInstances.size() + ", " + U.size());
+            // if (maximalInfeasibleInstances.size() > 10) {
+            //     break;
+            // }
             Instance u = U.pop();
             Path solution = u.solve();
             if (solution != null) {
@@ -138,22 +120,20 @@ public class Search {
                     int[] waitingTimes = u.getWaitingTimes().clone();
                     waitingTimes[i] = 1;
                     Instance newInstance = new Instance(waitingTimes);
-                    if (!visitedInstances.contains(newInstance)) {
+                    if (!newInstance.inSet(visitedInstances)) {
                         U.add(newInstance);
                         visitedInstances.add(newInstance);
                         //System.out.println(newInstance.waitingTimesToString());
                     }
                 }
             } else {
-                Instance smallerInfeasible = null;
-                for (Instance infeasible : maximalInfeasibleInstances) {
-                    if (infeasible.lessThan(u)) {
-                        smallerInfeasible = infeasible;
-                        break;
-                    }
-                }
-                if (smallerInfeasible != null)
+                if (u.lessThanSomeIn(maximalInfeasibleInstances) != null)
+                    continue;
+                Instance smallerInfeasible = u.geqToSomeIn(maximalInfeasibleInstances);
+                while (smallerInfeasible != null) {
                     maximalInfeasibleInstances.remove(smallerInfeasible);
+                    smallerInfeasible = u.geqToSomeIn(maximalInfeasibleInstances);
+                }
                 maximalInfeasibleInstances.add(u);
                 for (int i = 0; i <= m; i++) {
                     if (u.getWaitingTimes()[i] == r)
@@ -161,7 +141,7 @@ public class Search {
                     int[] waitingTimes = u.getWaitingTimes().clone();
                     waitingTimes[i]++;
                     Instance newInstance = new Instance(waitingTimes);
-                    if (!visitedInstances.contains(newInstance)) {
+                    if (!newInstance.inSet(visitedInstances)) {
                         U.add(newInstance);
                         visitedInstances.add(newInstance);
                         //System.out.println(newInstance.waitingTimesToString());
@@ -169,66 +149,18 @@ public class Search {
                 }
             }
         }
+        maximalInfeasibleInstances.forEach(inf -> System.out.println(inf.waitingTimesToString()));
 
         return maximalInfeasibleInstances;
     }
-
-    // public static HashSet<Instance> generateStockOfInstances(int m, int r) throws Exception {
-    //     HashSet<Instance> maximalInfeasibleInstances = new HashSet<>();
-    //     LinkedList<Instance> U = new LinkedList<>();
-    //     // Initialize U with [r,...,r].
-    //     int[] allR = new int[m + 1];
-    //     Arrays.fill(allR, r);
-    //     U.add(new Instance(allR));
-
-    //     while (!U.isEmpty()) {
-    //         if (maximalInfeasibleInstances.size() > 100) {
-    //             maximalInfeasibleInstances
-    //                     .forEach(inf -> System.out.println(inf.waitingTimesToString()));
-    //             break;
-    //         }
-    //         Instance u = U.pop();
-    //         Path solution = u.solve();
-    //         if (solution != null) {
-    //             for (int i = 0; i <= m; i++) {
-    //                 int[] waitingTimes = u.getWaitingTimes().clone();
-    //                 if (waitingTimes[i] == r)
-    //                     waitingTimes[i] = 1;
-    //                 if (!waitingTimes.equals(u.getWaitingTimes()))
-    //                     U.add(new Instance(waitingTimes));
-    //             }
-    //         } else {
-    //             Instance smallerInfeasible = null;
-    //             for (Instance infeasible : maximalInfeasibleInstances) {
-    //                 if (infeasible.lessThan(u)) {
-    //                     smallerInfeasible = infeasible;
-    //                     break;
-    //                 }
-    //             }
-    //             if (smallerInfeasible != null)
-    //                 maximalInfeasibleInstances.remove(smallerInfeasible);
-    //             maximalInfeasibleInstances.add(u);
-    //             for (int i = 0; i <= m; i++) {
-    //                 int[] waitingTimes = u.getWaitingTimes().clone();
-    //                 if (waitingTimes[i] != r)
-    //                     waitingTimes[i]++;
-    //                 if (!waitingTimes.equals(u.getWaitingTimes()))
-    //                     U.add(new Instance(waitingTimes));
-    //             }
-    //         }
-    //     }
-
-    //     return maximalInfeasibleInstances;
-    // }
 
     private static HashSet<Instance> lowerBoundInstances(HashMap<Instance, Path> C, int m) {
         HashSet<Instance> allLowerBoundInstances = new HashSet<>();
         for (int b = 0; b <= m; b++) {
             for (int a = 0; a <= b; a++) {
                 Instance g = Instance.lowerBoundInstance(m, a, b);
-                if (!g.geqToSomeIn(C.keySet())) {
+                if (g.geqToSomeIn(C.keySet()) == null && !g.inSet(allLowerBoundInstances)) {
                     allLowerBoundInstances.add(g);
-                    // System.out.println(a + ", " + b + ": " + g.waitingTimesToString());
                 }
             }
         }
@@ -238,7 +170,7 @@ public class Search {
         for (Instance lowerBoundInstance : allLowerBoundInstances) {
             HashSet<Instance> comparisonSet = (HashSet<Instance>) allLowerBoundInstances.clone();
             comparisonSet.remove(lowerBoundInstance);
-            if (!lowerBoundInstance.geqToSomeIn(comparisonSet))
+            if (lowerBoundInstance.geqToSomeIn(comparisonSet) == null)
                 lowerBoundInstances.add(lowerBoundInstance);
         }
         return lowerBoundInstances;
@@ -252,8 +184,7 @@ public class Search {
         for (int d = 0; d <= m - 1; d++) {
             Instance instance = criticalWithEmptyIntersection(m, d);
             Path solution = instance.billiardBallPath(d);
-            Instance reversedInstance = instance.getReversed();
-            if (!C.keySet().contains(reversedInstance))
+            if (!instance.inSet(C.keySet()))
                 C.put(instance, solution);
         }
         return C;
