@@ -16,7 +16,7 @@ public class PathTest {
     path.addPositionLast(new Position(4, 0));
     path.addPositionLast(new Position(3, 0));
 
-    int[] expectedS_i = {0, 2, 3, 0, 1, 2, 3, 4};
+    int[] expectedS_i = {0, 1, 2, 0, 1, 2, 3, 4};
     int[] expectedF_i = {8, 6, 5, 8, 7, 6, 5, 4};
     int[] actualS_i = path.getS_i();
     int[] actualF_i = path.getF_i();
