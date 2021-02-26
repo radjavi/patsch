@@ -177,10 +177,11 @@ public class Search {
     }
 
     private static HashMap<Instance, Path> criticalsWithEmptyIntersection(int m) throws Exception {
-        if (m < 4)
-            return null; // may be improved.
-
         HashMap<Instance, Path> C = new HashMap<>();
+
+        if (m < 2)
+            return C; // may be improved.
+
         for (int d = 0; d <= m - 1; d++) {
             Instance instance = criticalWithEmptyIntersection(m, d);
             Path solution = instance.billiardBallPath(d);

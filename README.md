@@ -30,9 +30,9 @@ To only run the tests:
 
 `./gradlew test`
 
-To run our application:
+To run our application that searches for all critical instances for a given integer m, where m > 1 (defaults to m=4 if args not specified):
 
-`./gradlew run`
+`./gradlew run --args="m"`
 
 To list all available gradle tasks:
 
