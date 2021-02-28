@@ -5,7 +5,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+// Import log4j classes.
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 public class Search {
+    private static final Logger logger = LogManager.getLogger(Search.class);
 
     /**
      * @param m
@@ -13,49 +18,57 @@ public class Search {
      * @throws Exception
      */
     public static HashMap<Instance, Path> searchForCriticalInstances(int m) throws Exception {
+        if (m < 2)
+            return null;
         LinkedList<Instance> U = new LinkedList<>();
         HashMap<Instance, Path> C = new HashMap<>();
         int r = 2 * m;
 
         // INIT
-        C.putAll(criticalsWithEmptyIntersection(m)); // M_0
+        logger.info("Generating M_0...");
+        HashMap<Instance, Path> m_0 = criticalsWithEmptyIntersection(m);
+        logger.debug("Generated M_0 - {} instances", m_0.size());
+        C.putAll(m_0); // M_0
+        logger.trace("-------- C --------");
+        C.forEach((i, s) -> {
+            logger.trace(i.waitingTimesToString() + ": " + s);
+        });
+        logger.trace("-------------------");
         // C.putAll(criticalsWithShortWaitingTimes(m)); // M_1
 
         // Generate lower bound instances
+        logger.info("Generating lower bound instances...");
         HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
         for (Instance lowerBoundInstance : lowerBoundInstances) {
             if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null)
                 U.add(lowerBoundInstance);
         }
+        logger.debug("Proceeding with {} lower bound instances", U.size());
+        logger.trace("-------- U --------");
+        U.forEach(i -> logger.trace(i.waitingTimesToString()));
+        logger.trace("-------------------");
 
         // Generate a stock of instances
+        logger.info("Generating maximal infeasible instances...");
         HashSet<Instance> maximalInfeasibleInstances = generateStockOfInstances(m, r);
+        logger.debug("Generated {} maximal infeasible instances",
+                maximalInfeasibleInstances.size());
+        logger.trace("---- Maximal Infeasible Instances ----");
+        maximalInfeasibleInstances.forEach(i -> logger.trace(i.waitingTimesToString()));
+        logger.trace("--------------------------------------");
 
-        System.out.println("-------- C --------");
-        C.forEach((i, s) -> {
-            System.out.println(i.waitingTimesToString() + ": " + s);
-        });
-        System.out.println("-------- U --------");
-        U.forEach(i -> System.out.println(i.waitingTimesToString()));
-        System.out.println("-------------------");
         // SEARCH
+        logger.info("Searching for critical instances...");
         HashSet<Instance> visitedInstances = new HashSet<>();
         while (!U.isEmpty()) {
-            System.out.println(U.size() + " visited:" + visitedInstances.size());
             Instance u = new Instance(U.pop().getWaitingTimes());
             if (u.geqToSomeIn(C.keySet()) != null)
                 continue;
-            // System.out.println(u.waitingTimesToString());
             Path solvedU = u.solve();
-            // System.out.print(u.waitingTimesToString() + ": ");
-            // System.out.println(solvedU != null ? "feasible" : "infeasible");
             if (solvedU != null) {
                 C.put(u, solvedU);
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
-                System.out.println("[" + dtf.format(LocalDateTime.now()) + "] found critical: "
-                        + u.waitingTimesToString());
             } else {
-                //Instance greaterInfeasible = u.lessThanSomeIn(maximalInfeasibleInstances);
+                // Instance greaterInfeasible = u.lessThanSomeIn(maximalInfeasibleInstances);
                 Instance greaterInfeasible = null;
                 for (Instance greater : maximalInfeasibleInstances) {
                     if (u.lessThan(greater)) {
@@ -79,8 +92,10 @@ public class Search {
                 }
             }
         }
+        logger.info("Found critical instances");
 
         // Add reversed critical instances
+        logger.info("Creating reversed critical instances...");
         HashMap<Instance, Path> CReversed = new HashMap<>();
         for (Instance critical : C.keySet()) {
             Instance criticalReversed = critical.getReversed();
@@ -90,6 +105,12 @@ public class Search {
             }
         }
         C.putAll(CReversed);
+
+        logger.info("----- {} CRITICAL INSTANCES -----", C.size());
+        C.forEach((i, s) -> {
+            logger.info("{}: {}", i.waitingTimesToString(), s);
+        });
+        logger.info("---------------------------------");
 
         return C;
 
@@ -107,9 +128,8 @@ public class Search {
         visitedInstances.add(allRInstance);
 
         while (!U.isEmpty()) {
-            System.out.println(maximalInfeasibleInstances.size() + ", " + U.size());
             // if (maximalInfeasibleInstances.size() > 10) {
-            //     break;
+            // break;
             // }
             Instance u = U.pop();
             Path solution = u.solve();
@@ -123,7 +143,6 @@ public class Search {
                     if (!newInstance.inSet(visitedInstances)) {
                         U.add(newInstance);
                         visitedInstances.add(newInstance);
-                        //System.out.println(newInstance.waitingTimesToString());
                     }
                 }
             } else {
@@ -144,12 +163,10 @@ public class Search {
                     if (!newInstance.inSet(visitedInstances)) {
                         U.add(newInstance);
                         visitedInstances.add(newInstance);
-                        //System.out.println(newInstance.waitingTimesToString());
                     }
                 }
             }
         }
-        maximalInfeasibleInstances.forEach(inf -> System.out.println(inf.waitingTimesToString()));
 
         return maximalInfeasibleInstances;
     }

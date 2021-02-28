@@ -176,7 +176,6 @@ public class Instance {
         }
         if (nrOnes > 1) return null;
         if (this.getA() > this.getB()) {
-            // System.out.println("a > b: " + this.getA() + " > " + this.getB());
             // Find correct d to return path from Proposition 1.
             for (int d = 0; d <= m; d++) {
                 Instance critical = Search.criticalWithEmptyIntersection(m, d);
@@ -197,11 +196,8 @@ public class Instance {
         }
 
         while (!paths.isEmpty()) {
-            // System.out.println(paths.size());
             Path p = paths.pop();
-            // System.out.println(p);
             for (Position q : this.getValidGraph().getNeighbours(p.getLast())) {
-                // System.out.println(p + ", " + q);
                 Path pq = new Path(p);
                 pq.addPositionLast(q);
                 if (pq.valid()) {

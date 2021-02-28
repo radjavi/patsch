@@ -104,7 +104,6 @@ public class Path {
     ListIterator<Position> iterator = path.listIterator(s_i[propertyIndex]);
     int iterationCount = f_i[propertyIndex] - s_i[propertyIndex] + 1;
     int time = waitingTime;
-    //System.out.println(property);
     for (int i=0; i < iterationCount; i++) {
       Position current = iterator.next();
       if (property.hasPosition(current))
@@ -114,7 +113,6 @@ public class Path {
         if (time == 0)
           return false;
       }
-      //System.out.println(current + ": " + time);
     }
     return true;
   }
