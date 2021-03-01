@@ -10,6 +10,8 @@
         <OnStartupTriggeringPolicy />
         <TimeBasedTriggeringPolicy />
       </Policies>
+      
+      <DefaultRolloverStrategy max="1000" />
     </RollingFile>
 
     <Console name="Console" target="SYSTEM_OUT">
