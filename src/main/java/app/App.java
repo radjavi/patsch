@@ -24,7 +24,7 @@ public class App {
         // Arrays.fill(waitingTimes, 2*m);
         // Instance i = new Instance(waitingTimes);
         int nrThreads = 4;
-        ExecutorService executor = Executors.newWorkStealingPool();
+        ExecutorService executor = Executors.newFixedThreadPool(nrThreads);
         long startTime = System.nanoTime();
         Search.searchForCriticalInstances(m, executor, nrThreads);
         //logger.info(i.solveParallel(executor, nrThreads));
