@@ -215,7 +215,7 @@ public class Instance {
         return null;
     }
 
-    public Path solveParallel(int nrThreads) throws Exception {
+    public Path solveParallel(ExecutorService executor, int nrThreads) throws Exception {
         if (this.getA() > this.getB()) {
             // Find correct d to return path from Proposition 1.
             for (int d = 0; d <= m; d++) {
@@ -231,7 +231,6 @@ public class Instance {
         // logger.trace("{} - Initial number of paths: {}", this.waitingTimesToString(),
         // paths.size());
 
-        ExecutorService executor = Executors.newWorkStealingPool(nrThreads);
         AtomicInteger nrBlocked = new AtomicInteger(0);
         ArrayList<Callable<Path>> callables = new ArrayList<>();
         for (int i = 0; i < nrThreads; i++) {

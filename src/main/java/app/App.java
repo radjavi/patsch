@@ -3,6 +3,7 @@ package app;
 import search.*;
 import models.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 // Import log4j classes.
 import org.apache.logging.log4j.Logger;
@@ -22,10 +23,28 @@ public class App {
         // int[] waitingTimes = new int[m + 1];
         // Arrays.fill(waitingTimes, 2*m);
         // Instance i = new Instance(waitingTimes);
+        int nrThreads = 4;
+        ExecutorService executor = Executors.newWorkStealingPool();
         long startTime = System.nanoTime();
-        Search.searchForCriticalInstances(m);
-        //logger.info(i.solveParallel(4));
+        Search.searchForCriticalInstances(m, executor, nrThreads);
+        //logger.info(i.solveParallel(executor, nrThreads));
         long stopTime = System.nanoTime();
         logger.info("Search took {} seconds.", (stopTime - startTime) * 1e-9);
+
+        // Shutdown executor
+        try {
+            executor.shutdown();
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        }
+        catch (InterruptedException e) {
+            logger.trace("Executor: Tasks interrupted.");
+        }
+        finally {
+            if (!executor.isTerminated()) {
+                logger.trace("Executor: Cancelling non-finished tasks.");
+            }
+            executor.shutdownNow();
+            logger.trace("Executor: Shutdown finished.");
+        }
     }
 }
