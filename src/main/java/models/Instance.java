@@ -450,11 +450,16 @@ public class Instance {
 
     @Override
     public boolean equals(Object o) {
-        return this.getWaitingTimes().equals(o);
+        if (this == o)
+            return true;
+        if ((o == null) || (o.getClass() != this.getClass()))
+            return false;
+        Instance ins = (Instance) o;
+        return Arrays.equals(this.getWaitingTimes(), ins.getWaitingTimes());
     }
 
     @Override
     public int hashCode() {
-        return this.getWaitingTimes().hashCode();
+        return Arrays.hashCode(this.getWaitingTimes());
     }
 }
