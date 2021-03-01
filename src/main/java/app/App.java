@@ -1,6 +1,8 @@
 package app;
 
 import search.*;
+import models.*;
+import java.util.*;
 
 // Import log4j classes.
 import org.apache.logging.log4j.Logger;
@@ -17,8 +19,12 @@ public class App {
             logger.fatal("m must be greater or equal to 2");
             return;
         }
+        // int[] waitingTimes = new int[m + 1];
+        // Arrays.fill(waitingTimes, 2*m);
+        // Instance i = new Instance(waitingTimes);
         long startTime = System.nanoTime();
         Search.searchForCriticalInstances(m);
+        //logger.info(i.solveParallel(4));
         long stopTime = System.nanoTime();
         logger.info("Search took {} seconds.", (stopTime - startTime) * 1e-9);
     }

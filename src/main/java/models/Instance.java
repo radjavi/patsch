@@ -1,6 +1,8 @@
 package models;
 
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import search.Search;
 
 // Import log4j classes.
@@ -23,7 +25,8 @@ public class Instance {
         m = waitingTimes.length - 1;
         this.waitingTimes = waitingTimes.clone();
         for (int i = 0; i <= m; i++) {
-            assert waitingTimes[i] > 0 : "Waiting time must be greater than 0: " + this.waitingTimesToString();
+            assert waitingTimes[i] > 0
+                    : "Waiting time must be greater than 0: " + this.waitingTimesToString();
         }
     }
 
@@ -179,7 +182,6 @@ public class Instance {
     }
 
     public Path solve() throws Exception {
-
         if (this.getA() > this.getB()) {
             // Find correct d to return path from Proposition 1.
             for (int d = 0; d <= m; d++) {
@@ -192,7 +194,8 @@ public class Instance {
         LinkedList<Path> paths = new LinkedList<>();
 
         initPathsToSolve(paths);
-        //logger.trace("{} - Initial number of paths: {}", this.waitingTimesToString(), paths.size());
+        // logger.trace("{} - Initial number of paths: {}", this.waitingTimesToString(),
+        // paths.size());
 
         while (!paths.isEmpty()) {
             Path p = paths.pop();
@@ -208,6 +211,39 @@ public class Instance {
                 }
             }
         }
+
+        return null;
+    }
+
+    public Path solveParallel(int nrThreads) throws Exception {
+        if (this.getA() > this.getB()) {
+            // Find correct d to return path from Proposition 1.
+            for (int d = 0; d <= m; d++) {
+                Instance critical = Search.criticalWithEmptyIntersection(m, d);
+                if (critical.lessThanOrEqualTo(this))
+                    return billiardBallPath(d);
+            }
+            return null;
+        }
+        LinkedBlockingQueue<Path> paths = new LinkedBlockingQueue<>();
+
+        initPathsToSolve(paths);
+        // logger.trace("{} - Initial number of paths: {}", this.waitingTimesToString(),
+        // paths.size());
+
+        ExecutorService executor = Executors.newWorkStealingPool(nrThreads);
+        AtomicInteger nrBlocked = new AtomicInteger(0);
+        ArrayList<Callable<Path>> callables = new ArrayList<>();
+        for (int i = 0; i < nrThreads; i++) {
+            callables.add(new ParallelInstanceSolver(paths, this, nrBlocked, nrThreads));
+        }
+        executor.invokeAll(callables).stream().map(future -> {
+            try {
+                return future.get();
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        });
 
         return null;
     }
@@ -229,7 +265,7 @@ public class Instance {
         return true;
     }
 
-    private void initPathsToSolve(LinkedList<Path> paths) throws Exception {
+    private void initPathsToSolve(AbstractCollection<Path> paths) throws Exception {
         HashMap<Position, HashSet<Position>> addedPaths = new HashMap<>();
         HashSet<Position> property0 = this.getProperties()[0].getPositions();
         for (Position u : property0) {
@@ -250,8 +286,8 @@ public class Instance {
                 addedPaths.get(v).add(u);
             }
         }
-        //addedPaths.forEach((p1, p2) -> logger.trace("Added: {}->{}", p1, p2));
-        //paths.forEach(p -> logger.trace("Path: {}", p));
+        // addedPaths.forEach((p1, p2) -> logger.trace("Added: {}->{}", p1, p2));
+        // paths.forEach(p -> logger.trace("Path: {}", p));
     }
 
     public Path billiardBallPath(int d) throws Exception {
@@ -395,12 +431,12 @@ public class Instance {
     }
 
     /**
-     * Checks if this instance is greater than or equal to some instance in
-     * `instances`. It also checks the reverse instances in `instances`.
+     * Checks if this instance is greater than or equal to some instance in `instances`. It also
+     * checks the reverse instances in `instances`.
      * 
      * @param instances The set of instances
-     * @return The instance in `instances` that is less than or equal to this
-     *         instance, otherwise null.
+     * @return The instance in `instances` that is less than or equal to this instance, otherwise
+     *         null.
      */
     public Instance geqToSomeIn(Iterable<Instance> instances) {
         Iterator<Instance> iter = instances.iterator();
@@ -416,12 +452,11 @@ public class Instance {
     }
 
     /**
-     * Checks if this instance is less than some instance in `instances`. It also
-     * checks the reverse instances in `instances`.
+     * Checks if this instance is less than some instance in `instances`. It also checks the reverse
+     * instances in `instances`.
      * 
      * @param instances The set of instances
-     * @return The instance in `instances` that is greater than this instance,
-     *         otherwise null.
+     * @return The instance in `instances` that is greater than this instance, otherwise null.
      */
     public Instance lessThanSomeIn(Iterable<Instance> instances) {
         Iterator<Instance> iter = instances.iterator();
@@ -455,7 +490,8 @@ public class Instance {
         if (!componentLessThan)
             return false;
         for (int i = 0; i <= m; i++) {
-            if (!(this.waitingTimes[i] == ins.waitingTimes[i] || this.waitingTimes[i] < ins.waitingTimes[i]))
+            if (!(this.waitingTimes[i] == ins.waitingTimes[i]
+                    || this.waitingTimes[i] < ins.waitingTimes[i]))
                 return false;
         }
         return true;
@@ -474,5 +510,41 @@ public class Instance {
     @Override
     public int hashCode() {
         return Arrays.hashCode(this.getWaitingTimes());
+    }
+
+    private class ParallelInstanceSolver implements Callable<Path> {
+        private final LinkedBlockingQueue<Path> paths;
+        private final Instance instance;
+        private final AtomicInteger nrBlocked;
+        private final int nrThreads;
+
+        public ParallelInstanceSolver(LinkedBlockingQueue<Path> paths, Instance instance, AtomicInteger nrBlocked, int nrThreads) {
+            this.paths = paths;
+            this.instance = instance;
+            this.nrBlocked = nrBlocked;
+            this.nrThreads = nrThreads;
+        }
+
+        @Override
+        public Path call() throws Exception {
+            while (true) {
+                nrBlocked.incrementAndGet();
+                if (paths.peek() != null && nrBlocked.get() == nrThreads)
+                    return null;
+                Path p = paths.take();
+                nrBlocked.decrementAndGet();
+                for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
+                    Path pq = new Path(p);
+                    pq.addPositionLast(q);
+                    if (pq.valid()) {
+                        if (pq.isCycle() && pq.visitsAllProperties()) {
+                            return pq;
+                        } else {
+                            paths.add(pq);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

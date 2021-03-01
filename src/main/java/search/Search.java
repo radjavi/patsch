@@ -65,7 +65,7 @@ public class Search {
             Instance uR = u.getReversed();
             if (u.geqToSomeIn(C.keySet()) != null)
                 continue;
-            Path solvedU = u.solve();
+            Path solvedU = u.solveParallel(4);
             if (solvedU != null) {
                 C.put(u, solvedU);
                 logger.info("Found critical instance {}: {}", u.waitingTimesToString(), solvedU);
@@ -109,7 +109,7 @@ public class Search {
         for (Instance critical : C.keySet()) {
             Instance criticalReversed = critical.getReversed();
             if (!critical.equals(criticalReversed)) {
-                Path solution = criticalReversed.solve();
+                Path solution = criticalReversed.solveParallel(4);
                 CReversed.put(criticalReversed, solution);
             }
         }
@@ -144,7 +144,7 @@ public class Search {
 
         while (!U.isEmpty()) {
             Instance u = U.pop();
-            Path solution = u.solve();
+            Path solution = u.solveParallel(4);
             if (solution != null) {
                 for (int i = 0; i <= m; i++) {
                     if (u.getWaitingTimes()[i] != r)
@@ -256,7 +256,7 @@ public class Search {
                     waitingTimes[i] = 2 * Math.max(i - 1, m - i);
             }
             Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solve();
+            Path solution = instance.solveParallel(4);
             C.put(instance, solution);
         }
 
@@ -274,7 +274,7 @@ public class Search {
                     waitingTimes[i] = 2 * Math.max(i - 2, m - i);
             }
             Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solve();
+            Path solution = instance.solveParallel(4);
             C.put(instance, solution);
         }
 
@@ -303,7 +303,7 @@ public class Search {
                 }
             }
             Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solve();
+            Path solution = instance.solveParallel(4);
             C.put(instance, solution);
         }
 
@@ -331,7 +331,7 @@ public class Search {
                 }
             }
             Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solve();
+            Path solution = instance.solveParallel(4);
             C.put(instance, solution);
         }
 
@@ -352,7 +352,7 @@ public class Search {
                         waitingTimes[i] = 2 * Math.max(i - 2, m - i);
                 }
                 Instance instance = new Instance(waitingTimes);
-                Path solution = instance.solve();
+                Path solution = instance.solveParallel(4);
                 C.put(instance, solution);
             }
         }
