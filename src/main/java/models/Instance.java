@@ -170,11 +170,7 @@ public class Instance {
     }
 
     public Path solve() throws Exception {
-        int nrOnes = 0;
-        for (Integer i : this.getWaitingTimes()) {
-            if (i == 1) nrOnes++;
-        }
-        if (nrOnes > 1) return null;
+
         if (this.getA() > this.getB()) {
             // Find correct d to return path from Proposition 1.
             for (int d = 0; d <= m; d++) {
@@ -356,11 +352,12 @@ public class Instance {
     }
 
     /**
-     * Checks if this instance is greater than or equal to some instance in `instances`.
-     * It also checks the reverse instances in `instances`.
+     * Checks if this instance is greater than or equal to some instance in
+     * `instances`. It also checks the reverse instances in `instances`.
      * 
      * @param instances The set of instances
-     * @return The instance in `instances` that is less than or equal to this instance, otherwise null.
+     * @return The instance in `instances` that is less than or equal to this
+     *         instance, otherwise null.
      */
     public Instance geqToSomeIn(Iterable<Instance> instances) {
         Iterator<Instance> iter = instances.iterator();
@@ -376,11 +373,12 @@ public class Instance {
     }
 
     /**
-     * Checks if this instance is less than some instance in `instances`.
-     * It also checks the reverse instances in `instances`.
+     * Checks if this instance is less than some instance in `instances`. It also
+     * checks the reverse instances in `instances`.
      * 
      * @param instances The set of instances
-     * @return The instance in `instances` that is greater than this instance, otherwise null.
+     * @return The instance in `instances` that is greater than this instance,
+     *         otherwise null.
      */
     public Instance lessThanSomeIn(Iterable<Instance> instances) {
         Iterator<Instance> iter = instances.iterator();
@@ -414,8 +412,7 @@ public class Instance {
         if (!componentLessThan)
             return false;
         for (int i = 0; i <= m; i++) {
-            if (!(this.waitingTimes[i] == ins.waitingTimes[i]
-                    || this.waitingTimes[i] < ins.waitingTimes[i]))
+            if (!(this.waitingTimes[i] == ins.waitingTimes[i] || this.waitingTimes[i] < ins.waitingTimes[i]))
                 return false;
         }
         return true;
