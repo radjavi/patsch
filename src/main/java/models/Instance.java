@@ -377,12 +377,6 @@ public class Instance {
         return properties;
     }
 
-    public boolean inSet(Set<Instance> s) {
-        if (s.contains(this) || s.contains(this.getReversed()))
-            return true;
-        return false;
-    }
-
     public boolean isValidPos(Position pos) {
         return this.getValidGraph().hasPosition(pos);
     }
@@ -456,26 +450,11 @@ public class Instance {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if ((o == null) || (o.getClass() != this.getClass()))
-            return false;
-        Instance ins = (Instance) o;
-        if (this.m != ins.m) // Must have same length
-            return false;
-        for (int i = 0; i <= this.m; i++) {
-            if (this.waitingTimes[i] != ins.waitingTimes[i])
-                return false;
-        }
-        return true;
+        return this.getWaitingTimes().equals(o);
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        for (Integer waitingTime : this.waitingTimes) {
-            hash = 31 * hash + waitingTime;
-        }
-        return hash;
+        return this.getWaitingTimes().hashCode();
     }
 }

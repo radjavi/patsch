@@ -41,3 +41,8 @@ build
 #intelliJ
 .idea/*
 
+# VS Code
+.vscode/*
+
+# Bin
+bin/*
