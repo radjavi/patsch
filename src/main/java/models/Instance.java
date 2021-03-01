@@ -192,6 +192,7 @@ public class Instance {
         LinkedList<Path> paths = new LinkedList<>();
 
         initPathsToSolve(paths);
+        //logger.trace("{} - Initial number of paths: {}", this.waitingTimesToString(), paths.size());
 
         while (!paths.isEmpty()) {
             Path p = paths.pop();
@@ -229,16 +230,28 @@ public class Instance {
     }
 
     private void initPathsToSolve(LinkedList<Path> paths) throws Exception {
-        for (Position u : this.getProperties()[0].getPositions()) {
+        HashMap<Position, HashSet<Position>> addedPaths = new HashMap<>();
+        HashSet<Position> property0 = this.getProperties()[0].getPositions();
+        for (Position u : property0) {
             if (!this.isValidPos(u))
                 continue;
             for (Position v : this.getValidGraph().getNeighbours(u)) {
+                if (addedPaths.get(v) != null && addedPaths.get(v).contains(u))
+                    continue;
                 Path path = new Path(this);
                 path.addPositionLast(u);
                 path.addPositionLast(v);
                 paths.add(path);
+                if (addedPaths.get(u) == null)
+                    addedPaths.put(u, new HashSet<>());
+                addedPaths.get(u).add(v);
+                if (addedPaths.get(v) == null)
+                    addedPaths.put(v, new HashSet<>());
+                addedPaths.get(v).add(u);
             }
         }
+        //addedPaths.forEach((p1, p2) -> logger.trace("Added: {}->{}", p1, p2));
+        //paths.forEach(p -> logger.trace("Path: {}", p));
     }
 
     public Path billiardBallPath(int d) throws Exception {
