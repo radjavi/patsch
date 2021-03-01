@@ -237,15 +237,8 @@ public class Instance {
         for (int i = 0; i < nrThreads; i++) {
             callables.add(new ParallelInstanceSolver(paths, this, nrBlocked, nrThreads));
         }
-        executor.invokeAll(callables).stream().map(future -> {
-            try {
-                return future.get();
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-        });
-
-        return null;
+        
+        return executor.invokeAny(callables);
     }
 
     public boolean isCritical() throws Exception {
@@ -529,7 +522,7 @@ public class Instance {
         public Path call() throws Exception {
             while (true) {
                 nrBlocked.incrementAndGet();
-                if (paths.peek() != null && nrBlocked.get() == nrThreads)
+                if (paths.peek() == null && nrBlocked.get() == nrThreads)
                     return null;
                 Path p = paths.take();
                 nrBlocked.decrementAndGet();
