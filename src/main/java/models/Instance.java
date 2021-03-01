@@ -3,6 +3,10 @@ package models;
 import java.util.*;
 import search.Search;
 
+// Import log4j classes.
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 public class Instance {
     private int m;
     private PositionGraph triangleGraph;
@@ -13,9 +17,14 @@ public class Instance {
     private boolean critical;
     private int[] waitingTimes;
 
+    private static final Logger logger = LogManager.getLogger(Instance.class);
+
     public Instance(int[] waitingTimes) {
         m = waitingTimes.length - 1;
         this.waitingTimes = waitingTimes.clone();
+        for (int i = 0; i <= m; i++) {
+            assert waitingTimes[i] > 0 : "Waiting time must be greater than 0: " + this.waitingTimesToString();
+        }
     }
 
     private void initTriangleGraph() {
@@ -182,14 +191,7 @@ public class Instance {
         }
         LinkedList<Path> paths = new LinkedList<>();
 
-        for (Position u : this.getValidGraph().getPositions()) {
-            for (Position v : this.getValidGraph().getNeighbours(u)) {
-                Path path = new Path(this);
-                path.addPositionLast(u);
-                path.addPositionLast(v);
-                paths.add(path);
-            }
-        }
+        initPathsToSolve(paths);
 
         while (!paths.isEmpty()) {
             Path p = paths.pop();
@@ -207,6 +209,36 @@ public class Instance {
         }
 
         return null;
+    }
+
+    public boolean isCritical() throws Exception {
+
+        for (int i = 0; i <= m; i++) {
+            int[] waitingTimesToTry = this.getWaitingTimes().clone();
+            if (waitingTimesToTry[i] == 1)
+                continue;
+            waitingTimesToTry[i]--;
+            Instance instanceToTry = new Instance(waitingTimesToTry);
+            if (instanceToTry.solve() != null) {
+                logger.trace("{} is critical", instanceToTry.waitingTimesToString());
+                return false;
+            }
+
+        }
+        return true;
+    }
+
+    private void initPathsToSolve(LinkedList<Path> paths) throws Exception {
+        for (Position u : this.getProperties()[0].getPositions()) {
+            if (!this.isValidPos(u))
+                continue;
+            for (Position v : this.getValidGraph().getNeighbours(u)) {
+                Path path = new Path(this);
+                path.addPositionLast(u);
+                path.addPositionLast(v);
+                paths.add(path);
+            }
+        }
     }
 
     public Path billiardBallPath(int d) throws Exception {
@@ -349,6 +381,10 @@ public class Instance {
         if (s.contains(this) || s.contains(this.getReversed()))
             return true;
         return false;
+    }
+
+    public boolean isValidPos(Position pos) {
+        return this.getValidGraph().hasPosition(pos);
     }
 
     /**

@@ -20,7 +20,10 @@ java {
 
 application {
     mainClass = 'app.App' // Set App.java as entry-point
+    applicationDefaultJvmArgs = ['-ea'] // Enable assertions
 }
+
+
 
 repositories {
     // Use jcenter for resolving dependencies.

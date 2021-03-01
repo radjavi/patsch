@@ -51,8 +51,7 @@ public class Search {
         // Generate a stock of instances
         logger.info("Generating maximal infeasible instances...");
         HashSet<Instance> maximalInfeasibleInstances = generateStockOfInstances(m, r);
-        logger.debug("Generated {} maximal infeasible instances",
-                maximalInfeasibleInstances.size());
+        logger.debug("Generated {} maximal infeasible instances", maximalInfeasibleInstances.size());
         logger.trace("---- Maximal Infeasible Instances ----");
         maximalInfeasibleInstances.forEach(i -> logger.trace(i.waitingTimesToString()));
         logger.trace("--------------------------------------");
@@ -105,6 +104,12 @@ public class Search {
             }
         }
         C.putAll(CReversed);
+
+        // Test if critical
+        logger.info("Testing if instances are critical...");
+        for (Instance i : C.keySet()) {
+            assert i.isCritical() : i.waitingTimesToString() + " is NOT critical.";
+        }
 
         logger.info("----- {} CRITICAL INSTANCES -----", C.size());
         C.forEach((i, s) -> {
