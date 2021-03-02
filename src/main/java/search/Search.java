@@ -144,9 +144,9 @@ public class Search {
         visitedInstances.add(allRInstance);
 
         while (!U.isEmpty()) {
-            logger.info("maximal size: {}, visited size: {}", maximalInfeasibleInstances.size(), visitedInstances.size());
+            //logger.info("maximal size: {}, visited size: {}", maximalInfeasibleInstances.size(), visitedInstances.size());
             Instance u = U.pop();
-            logger.info("Solving {}...", u.waitingTimesToString());
+            //logger.info("Solving {}...", u.waitingTimesToString());
             Path solution = u.solveParallel(executor, nrThreads);
             if (solution != null) {
                 for (int i = 0; i <= m; i++) {

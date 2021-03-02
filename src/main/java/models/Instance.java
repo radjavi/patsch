@@ -198,7 +198,7 @@ public class Instance {
         // paths.size());
 
         while (!paths.isEmpty()) {
-            logger.info(paths.size());
+            //logger.info(paths.size());
             Path p = paths.pop();
             for (Position q : this.getValidGraph().getNeighbours(p.getLast())) {
                 Path pq = new Path(p);
@@ -268,8 +268,21 @@ public class Instance {
 
     private void initPathsToSolve(AbstractCollection<Path> paths) throws Exception {
         HashMap<Position, HashSet<Position>> addedPaths = new HashMap<>();
-        HashSet<Position> property0 = this.getProperties()[0].getPositions();
-        for (Position u : property0) {
+        Property[] properties = this.getProperties();
+        int minNrNeighbours = Integer.MAX_VALUE;
+        Property loneliestProperty = null;
+        for (Property property : properties) {
+            int nrNeighbours = 0;
+            for (Position position : property.getPositions()) {
+                if (!this.isValidPos(position))
+                    continue;
+                nrNeighbours += this.getValidGraph().getNeighbours(position).size();
+            }
+            if (nrNeighbours < minNrNeighbours)
+                loneliestProperty = property;
+        }
+
+        for (Position u : loneliestProperty.getPositions()) {
             if (!this.isValidPos(u))
                 continue;
             for (Position v : this.getValidGraph().getNeighbours(u)) {
