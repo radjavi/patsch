@@ -231,10 +231,11 @@ public class Instance {
         // logger.trace("{} - Initial number of paths: {}", this.waitingTimesToString(),
         // paths.size());
 
+        int nrTasks = Math.min(paths.size(), nrThreads);
         AtomicInteger nrBlocked = new AtomicInteger(0);
         ArrayList<Callable<Path>> callables = new ArrayList<>();
-        for (int i = 0; i < nrThreads; i++) {
-            callables.add(new ParallelInstanceSolver(paths, this, nrBlocked, nrThreads));
+        for (int i = 0; i < nrTasks; i++) {
+            callables.add(new ParallelInstanceSolver(paths, this, nrBlocked, nrTasks));
         }
         
         return executor.invokeAny(callables);
