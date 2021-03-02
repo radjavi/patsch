@@ -18,12 +18,14 @@ public class Range {
         HashSet<Position> positions = new HashSet<>();
         for (int x = a; x <= b; x++) {
             for (int y = 0; y <= x; y++) {
+                if (x == y)
+                    continue;
                 positions.add(new Position(x,y));
             }
         }
         for (int y = a; y <= b; y++) {
             for (int x = 0; x <= m; x++) {
-                if (y <= x) //Maybe improve
+                if (y < x) //Maybe improve
                     positions.add(new Position(x,y));
             }
         }

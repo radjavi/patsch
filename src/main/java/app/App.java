@@ -20,14 +20,15 @@ public class App {
             logger.fatal("m must be greater or equal to 2");
             return;
         }
-        // int[] waitingTimes = new int[m + 1];
-        // Arrays.fill(waitingTimes, 2*m);
-        // Instance i = new Instance(waitingTimes);
+        int[] waitingTimes = new int[]{14,2,14,4,14,14,14,14};
+        //Arrays.fill(waitingTimes, 2*m);
+        Instance i = new Instance(waitingTimes);
+        System.out.println(i.getValidGraph().toStringTriangle());
         int nrThreads = 4;
         ExecutorService executor = Executors.newFixedThreadPool(nrThreads);
         long startTime = System.nanoTime();
-        Search.searchForCriticalInstances(m, executor, nrThreads);
-        //logger.info(i.solveParallel(executor, nrThreads));
+        //Search.searchForCriticalInstances(m, executor, nrThreads);
+        logger.info(i.solve());
         long stopTime = System.nanoTime();
         logger.info("Search took {} seconds.", (stopTime - startTime) * 1e-9);
 

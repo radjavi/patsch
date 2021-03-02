@@ -198,6 +198,7 @@ public class Instance {
         // paths.size());
 
         while (!paths.isEmpty()) {
+            logger.info(paths.size());
             Path p = paths.pop();
             for (Position q : this.getValidGraph().getNeighbours(p.getLast())) {
                 Path pq = new Path(p);
@@ -206,6 +207,14 @@ public class Instance {
                     if (pq.isCycle() && pq.visitsAllProperties()) {
                         return pq;
                     } else {
+                        Path pqp = new Path(pq);
+                        Iterator<Position> reverseIterator = p.getPath().descendingIterator();
+                        while (reverseIterator.hasNext()) {
+                            pqp.addPositionLast(reverseIterator.next());
+                        }
+                        if (pqp.valid() && pqp.isCycle() && pqp.visitsAllProperties()) {
+                            return pqp;
+                        }
                         paths.add(pq);
                     }
                 }
@@ -237,12 +246,11 @@ public class Instance {
         for (int i = 0; i < nrTasks; i++) {
             callables.add(new ParallelInstanceSolver(paths, this, nrBlocked, nrTasks));
         }
-        
+
         return executor.invokeAny(callables);
     }
 
     public boolean isCritical() throws Exception {
-
         for (int i = 0; i <= m; i++) {
             int[] waitingTimesToTry = this.getWaitingTimes().clone();
             if (waitingTimesToTry[i] == 1)
@@ -260,8 +268,13 @@ public class Instance {
 
     private void initPathsToSolve(AbstractCollection<Path> paths) throws Exception {
         HashMap<Position, HashSet<Position>> addedPaths = new HashMap<>();
-        HashSet<Position> property0 = this.getProperties()[0].getPositions();
-        for (Position u : property0) {
+        Property[] properties = this.getProperties();
+        Property smallestProperty = properties[0];
+        for (Property property : properties) {
+            if (property.getWaitingTime() < smallestProperty.getWaitingTime())
+                smallestProperty = property;
+        }
+        for (Position u : smallestProperty.getPositions()) {
             if (!this.isValidPos(u))
                 continue;
             for (Position v : this.getValidGraph().getNeighbours(u)) {
@@ -511,7 +524,8 @@ public class Instance {
         private final AtomicInteger nrBlocked;
         private final int nrThreads;
 
-        public ParallelInstanceSolver(LinkedBlockingQueue<Path> paths, Instance instance, AtomicInteger nrBlocked, int nrThreads) {
+        public ParallelInstanceSolver(LinkedBlockingQueue<Path> paths, Instance instance,
+                AtomicInteger nrBlocked, int nrThreads) {
             this.paths = paths;
             this.instance = instance;
             this.nrBlocked = nrBlocked;
@@ -533,6 +547,14 @@ public class Instance {
                         if (pq.isCycle() && pq.visitsAllProperties()) {
                             return pq;
                         } else {
+                            Path pqp = new Path(pq);
+                            Iterator<Position> reverseIterator = p.getPath().descendingIterator();
+                            while (reverseIterator.hasNext()) {
+                                pqp.addPositionLast(reverseIterator.next());
+                            }
+                            if (pqp.valid() && pqp.isCycle() && pqp.visitsAllProperties()) {
+                                return pqp;
+                            }
                             paths.add(pq);
                         }
                     }
