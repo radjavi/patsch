@@ -268,13 +268,8 @@ public class Instance {
 
     private void initPathsToSolve(AbstractCollection<Path> paths) throws Exception {
         HashMap<Position, HashSet<Position>> addedPaths = new HashMap<>();
-        Property[] properties = this.getProperties();
-        Property smallestProperty = properties[0];
-        for (Property property : properties) {
-            if (property.getWaitingTime() < smallestProperty.getWaitingTime())
-                smallestProperty = property;
-        }
-        for (Position u : smallestProperty.getPositions()) {
+        HashSet<Position> property0 = this.getProperties()[0].getPositions();
+        for (Position u : property0) {
             if (!this.isValidPos(u))
                 continue;
             for (Position v : this.getValidGraph().getNeighbours(u)) {
