@@ -204,7 +204,7 @@ public class Instance {
                 Path pq = new Path(p);
                 pq.addPositionLast(q);
                 if (pq.valid()) {
-                    if (pq.isCycle() && pq.visitsAllProperties()) {
+                    if (pq.isValidCycle() && pq.visitsAllProperties()) {
                         return pq;
                     } else {
                         Path pqp = new Path(pq);
@@ -212,7 +212,7 @@ public class Instance {
                         while (reverseIterator.hasNext()) {
                             pqp.addPositionLast(reverseIterator.next());
                         }
-                        if (pqp.valid() && pqp.isCycle() && pqp.visitsAllProperties()) {
+                        if (pqp.valid() && pq.isValidCycle() && pqp.visitsAllProperties()) {
                             return pqp;
                         }
                         paths.add(pq);
@@ -547,12 +547,13 @@ public class Instance {
                 if (paths.peek() == null && nrBlocked.get() == nrThreads)
                     return null;
                 Path p = paths.take();
+                //logger.info(p);
                 nrBlocked.decrementAndGet();
                 for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
                     Path pq = new Path(p);
                     pq.addPositionLast(q);
                     if (pq.valid()) {
-                        if (pq.isCycle() && pq.visitsAllProperties()) {
+                        if (pq.isValidCycle() && pq.visitsAllProperties()) {
                             return pq;
                         } else {
                             Path pqp = new Path(pq);
@@ -560,7 +561,7 @@ public class Instance {
                             while (reverseIterator.hasNext()) {
                                 pqp.addPositionLast(reverseIterator.next());
                             }
-                            if (pqp.valid() && pqp.isCycle() && pqp.visitsAllProperties()) {
+                            if (pqp.valid() && pq.isValidCycle() && pqp.visitsAllProperties()) {
                                 return pqp;
                             }
                             paths.add(pq);

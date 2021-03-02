@@ -20,7 +20,7 @@ public class App {
             logger.fatal("m must be greater or equal to 2");
             return;
         }
-        //int[] waitingTimes = new int[]{14,2,14,4,14,14,14,14};
+        //int[] waitingTimes = new int[]{7,4,4,5,7,5,6,8};
         //Arrays.fill(waitingTimes, 2*m);
         //Instance i = new Instance(waitingTimes);
         //System.out.println(i.getValidGraph().toStringTriangle());
