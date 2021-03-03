@@ -13,6 +13,7 @@ public class Instance {
     private int m;
     private PositionGraph triangleGraph;
     private Property[] properties;
+    private Property[] sortedProperties;
     private PositionGraph validGraph;
     private Integer a;
     private Integer b;
@@ -36,6 +37,15 @@ public class Instance {
 
     private void initProperties() {
         properties = createProperties(waitingTimes);
+        sortedProperties = properties.clone();
+        Arrays.sort(sortedProperties, (p1,p2) -> {
+            if (p1.getWaitingTime()<p2.getWaitingTime())
+                return -1;
+            if (p1.getWaitingTime()>p2.getWaitingTime())
+                return 1;
+            return 0;
+            
+        });
     }
 
     private void initA() {
@@ -258,8 +268,8 @@ public class Instance {
         // paths.size());
 
         SingleExecutor executor = SingleExecutor.getInstance();
-        //int nrTasks = Math.min(paths.size(), executor.getNrThreads());
-        int nrTasks = executor.getNrThreads();
+        int nrTasks = Math.min(paths.size(), executor.getNrThreads());
+        //int nrTasks = executor.getNrThreads();
         AtomicInteger nrBlocked = new AtomicInteger(0);
         ArrayList<Callable<Path>> callables = new ArrayList<>();
         for (int i = 0; i < nrTasks; i++) {
@@ -513,7 +523,10 @@ public class Instance {
         }
         return true;
     }
-
+    public Property[] getSortedProperties(){
+        return sortedProperties;
+    }
+    
     public boolean lessThan(Instance ins) {
         boolean componentLessThan = false;
         for (int i = 0; i <= m; i++) {

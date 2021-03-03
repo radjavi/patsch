@@ -69,12 +69,12 @@ public class Path {
   }
 
   public boolean valid() throws Exception {
-    Property[] properties = instance.getProperties();
+    Property[] properties = instance.getSortedProperties();
 
     Position s = this.getFirst();
     Position f = this.getLast();
-    for (int p = 0; p < properties.length; p++) {
-      Property property = properties[p];
+    for (Property property : properties) {
+      int p = property.getIndex();
       int waitingTime = property.getWaitingTime();
       if (s_i[p] < 0 && f_i[p] < 0) {
         int propToS = instance.distance(property, s);
