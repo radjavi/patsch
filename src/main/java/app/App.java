@@ -2,8 +2,8 @@ package app;
 
 import search.*;
 import models.*;
+import singletons.*;
 import java.util.*;
-import java.util.concurrent.*;
 
 // Import log4j classes.
 import org.apache.logging.log4j.Logger;
@@ -20,32 +20,22 @@ public class App {
             logger.fatal("m must be greater or equal to 2");
             return;
         }
+        int nrThreads = args.length > 1 ? Integer.parseInt(args[1]) : 1;
+        if (nrThreads < 1) {
+            logger.fatal("Number of threads must be greater than 0");
+            return;
+        }
+        SingleExecutor executor = SingleExecutor.init(nrThreads);
         //int[] waitingTimes = new int[]{7,4,4,5,7,5,6,8};
         //Arrays.fill(waitingTimes, 2*m);
         //Instance i = new Instance(waitingTimes);
         //System.out.println(i.getValidGraph().toStringTriangle());
-        int nrThreads = 4;
-        ExecutorService executor = Executors.newFixedThreadPool(nrThreads);
         long startTime = System.nanoTime();
-        Search.searchForCriticalInstances(m, executor, nrThreads);
+        Search.searchForCriticalInstances(m);
         //logger.info(i.solve());
         long stopTime = System.nanoTime();
         logger.info("Search took {} seconds.", (stopTime - startTime) * 1e-9);
-
-        // Shutdown executor
-        try {
+        if (executor != null)
             executor.shutdown();
-            executor.awaitTermination(5, TimeUnit.SECONDS);
-        }
-        catch (InterruptedException e) {
-            logger.trace("Executor: Tasks interrupted.");
-        }
-        finally {
-            if (!executor.isTerminated()) {
-                logger.trace("Executor: Cancelling non-finished tasks.");
-            }
-            executor.shutdownNow();
-            logger.trace("Executor: Shutdown finished.");
-        }
     }
 }

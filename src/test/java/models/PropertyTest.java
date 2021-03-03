@@ -9,10 +9,10 @@ public class PropertyTest {
     int[] waitingTimes = { 2, 2, 2, 2 };
 
     Position[][] expectedPositionSets = {
-        { new Position(3, 0), new Position(2, 0), new Position(1, 0), new Position(0, 0) },
-        { new Position(3, 1), new Position(2, 1), new Position(1, 0), new Position(1, 1) },
-        { new Position(2, 0), new Position(3, 2), new Position(2, 1), new Position(2, 2) },
-        { new Position(3, 0), new Position(3, 1), new Position(3, 2), new Position(3, 3) }, };
+        { new Position(3, 0), new Position(2, 0), new Position(1, 0) },
+        { new Position(3, 1), new Position(2, 1), new Position(1, 0) },
+        { new Position(2, 0), new Position(3, 2), new Position(2, 1) },
+        { new Position(3, 0), new Position(3, 1), new Position(3, 2) }, };
 
     for (int i = 0; i < waitingTimes.length; i++) {
       Property prop = new Property(waitingTimes.length - 1, waitingTimes[i], i);

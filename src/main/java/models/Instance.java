@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import search.Search;
-
+import singletons.SingleExecutor;
 // Import log4j classes.
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -182,6 +182,14 @@ public class Instance {
     }
 
     public Path solve() throws Exception {
+        SingleExecutor executor = SingleExecutor.getInstance();
+        if (executor == null) {
+            return solveSequential();
+        }
+        return solveParallel();
+    }
+
+    public Path solveSequential() throws Exception {
         if (this.getA() > this.getB()) {
             // Find correct d to return path from Proposition 1.
             for (int d = 0; d <= m; d++) {
@@ -224,7 +232,7 @@ public class Instance {
         return null;
     }
 
-    public Path solveParallel(ExecutorService executor, int nrThreads) throws Exception {
+    public Path solveParallel() throws Exception {
         if (this.getA() > this.getB()) {
             // Find correct d to return path from Proposition 1.
             for (int d = 0; d <= m; d++) {
@@ -240,14 +248,15 @@ public class Instance {
         // logger.trace("{} - Initial number of paths: {}", this.waitingTimesToString(),
         // paths.size());
 
-        int nrTasks = Math.min(paths.size(), nrThreads);
+        SingleExecutor executor = SingleExecutor.getInstance();
+        int nrTasks = Math.min(paths.size(), executor.getNrThreads());
         AtomicInteger nrBlocked = new AtomicInteger(0);
         ArrayList<Callable<Path>> callables = new ArrayList<>();
         for (int i = 0; i < nrTasks; i++) {
             callables.add(new ParallelInstanceSolver(paths, this, nrBlocked, nrTasks));
         }
 
-        return executor.invokeAny(callables);
+        return executor.getExecutor().invokeAny(callables);
     }
 
     public boolean isCritical() throws Exception {

@@ -1,10 +1,7 @@
 package search;
 
 import models.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.*;
 
 // Import log4j classes.
 import org.apache.logging.log4j.Logger;
@@ -18,7 +15,7 @@ public class Search {
      * @return
      * @throws Exception
      */
-    public static HashMap<Instance, Path> searchForCriticalInstances(int m, ExecutorService executor, int nrThreads) throws Exception {
+    public static HashMap<Instance, Path> searchForCriticalInstances(int m) throws Exception {
         if (m < 2)
             return null;
         LinkedList<Instance> U = new LinkedList<>();
@@ -51,7 +48,7 @@ public class Search {
 
         // Generate a stock of instances
         logger.info("Generating maximal infeasible instances...");
-        HashSet<Instance> maximalInfeasibleInstances = generateStockOfInstances(m, r, executor, nrThreads);
+        HashSet<Instance> maximalInfeasibleInstances = generateStockOfInstances(m, r);
         logger.debug("Generated {} maximal infeasible instances",
                 maximalInfeasibleInstances.size());
         logger.trace("---- Maximal Infeasible Instances ----");
@@ -66,7 +63,7 @@ public class Search {
             Instance uR = u.getReversed();
             if (u.geqToSomeIn(C.keySet()) != null)
                 continue;
-            Path solvedU = u.solveParallel(executor, nrThreads);
+            Path solvedU = u.solve();
             if (solvedU != null) {
                 C.put(u, solvedU);
                 logger.info("Found critical instance {}: {}", u.waitingTimesToString(), solvedU);
@@ -110,7 +107,7 @@ public class Search {
         for (Instance critical : C.keySet()) {
             Instance criticalReversed = critical.getReversed();
             if (!critical.equals(criticalReversed)) {
-                Path solution = criticalReversed.solveParallel(executor, nrThreads);
+                Path solution = criticalReversed.solve();
                 CReversed.put(criticalReversed, solution);
             }
         }
@@ -132,7 +129,7 @@ public class Search {
 
     }
 
-    public static HashSet<Instance> generateStockOfInstances(int m, int r, ExecutorService executor, int nrThreads) throws Exception {
+    public static HashSet<Instance> generateStockOfInstances(int m, int r) throws Exception {
         HashSet<Instance> maximalInfeasibleInstances = new HashSet<>();
         HashSet<Instance> visitedInstances = new HashSet<>();
         LinkedList<Instance> U = new LinkedList<>();
@@ -147,7 +144,7 @@ public class Search {
             //logger.info("maximal size: {}, visited size: {}", maximalInfeasibleInstances.size(), visitedInstances.size());
             Instance u = U.pop();
             //logger.info("Solving {}...", u.waitingTimesToString());
-            Path solution = u.solveParallel(executor, nrThreads);
+            Path solution = u.solve();
             if (solution != null) {
                 for (int i = 0; i <= m; i++) {
                     if (u.getWaitingTimes()[i] != r)
@@ -242,7 +239,7 @@ public class Search {
         return new Instance(waitingTimes);
     }
 
-    private static HashMap<Instance, Path> criticalsWithShortWaitingTimes(int m, ExecutorService executor, int nrThreads) throws Exception {
+    private static HashMap<Instance, Path> criticalsWithShortWaitingTimes(int m) throws Exception {
         HashMap<Instance, Path> C = new HashMap<>();
         if (m < 5)
             return C;
@@ -259,7 +256,7 @@ public class Search {
                     waitingTimes[i] = 2 * Math.max(i - 1, m - i);
             }
             Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solveParallel(executor, nrThreads);
+            Path solution = instance.solve();
             C.put(instance, solution);
         }
 
@@ -277,7 +274,7 @@ public class Search {
                     waitingTimes[i] = 2 * Math.max(i - 2, m - i);
             }
             Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solveParallel(executor, nrThreads);
+            Path solution = instance.solve();
             C.put(instance, solution);
         }
 
@@ -306,7 +303,7 @@ public class Search {
                 }
             }
             Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solveParallel(executor, nrThreads);
+            Path solution = instance.solve();
             C.put(instance, solution);
         }
 
@@ -334,7 +331,7 @@ public class Search {
                 }
             }
             Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solveParallel(executor, nrThreads);
+            Path solution = instance.solve();
             C.put(instance, solution);
         }
 
@@ -355,7 +352,7 @@ public class Search {
                         waitingTimes[i] = 2 * Math.max(i - 2, m - i);
                 }
                 Instance instance = new Instance(waitingTimes);
-                Path solution = instance.solveParallel(executor, nrThreads);
+                Path solution = instance.solve();
                 C.put(instance, solution);
             }
         }
