@@ -13,7 +13,6 @@ public class Instance {
     private int m;
     private PositionGraph triangleGraph;
     private Property[] properties;
-    private Property[] sortedProperties;
     private PositionGraph validGraph;
     private Integer a;
     private Integer b;
@@ -37,14 +36,8 @@ public class Instance {
 
     private void initProperties() {
         properties = createProperties(waitingTimes);
-        sortedProperties = properties.clone();
-        Arrays.sort(sortedProperties, (p1,p2) -> {
-            if (p1.getWaitingTime()<p2.getWaitingTime())
-                return -1;
-            if (p1.getWaitingTime()>p2.getWaitingTime())
-                return 1;
-            return 0;
-            
+        Arrays.sort(properties, (Property p1, Property p2) -> {
+            return Integer.compare(p1.getWaitingTime(), p2.getWaitingTime());
         });
     }
 
@@ -81,8 +74,8 @@ public class Instance {
 
     private static int computeA(Property[] properties) {
         int a = 0;
-        for (int i = 0; i < properties.length; i++) {
-            int temp = properties[i].getRange().getA();
+        for (Property property : properties) {
+            int temp = property.getRange().getA();
             if (temp > a)
                 a = temp;
         }
@@ -91,8 +84,8 @@ public class Instance {
 
     private static int computeB(Property[] properties) {
         int b = Integer.MAX_VALUE;
-        for (int i = 0; i < properties.length; i++) {
-            int temp = properties[i].getRange().getB();
+        for (Property property : properties) {
+            int temp = property.getRange().getB();
             if (temp < b)
                 b = temp;
         }
@@ -519,9 +512,6 @@ public class Instance {
                 return false;
         }
         return true;
-    }
-    public Property[] getSortedProperties(){
-        return sortedProperties;
     }
     
     public boolean lessThan(Instance ins) {

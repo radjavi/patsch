@@ -69,7 +69,7 @@ public class Path {
   }
 
   public boolean valid() throws Exception {
-    Property[] properties = instance.getSortedProperties();
+    Property[] properties = instance.getProperties();
 
     Position s = this.getFirst();
     Position f = this.getLast();
@@ -88,14 +88,15 @@ public class Path {
         int fiToProp = ((path.size() - 1) - f_i[p]) + instance.distance(f, property);
         if (fiToProp > waitingTime)
           return false;
-        if (!consecutivePathsValid(property, p, waitingTime))
+        if (!consecutivePathsValid(property, waitingTime))
           return false;
       }
     }
     return true;
   }
 
-  private boolean consecutivePathsValid(Property property, int propertyIndex, int waitingTime) {
+  private boolean consecutivePathsValid(Property property, int waitingTime) {
+    int propertyIndex = property.getIndex();
     ListIterator<Position> iterator = path.listIterator(s_i[propertyIndex]);
     int iterationCount = f_i[propertyIndex] - s_i[propertyIndex] + 1;
     int time = waitingTime;
@@ -124,11 +125,12 @@ public class Path {
    */
   private void computeIndices() {
     Property[] properties = instance.getProperties();
-    for (int p = 0; p <= instance.getM(); p++) {
+    for (Property property : properties) {
+      int p = property.getIndex();
       ListIterator<Position> iterator = path.listIterator();
       int i = 0;
       while (iterator.hasNext()) {
-        if (properties[p].hasPosition(iterator.next())) {
+        if (property.hasPosition(iterator.next())) {
           s_i[p] = i;
           break;
         }
@@ -137,7 +139,7 @@ public class Path {
       Iterator<Position> iteratorReverse = path.descendingIterator();
       i = path.size() - 1;
       while (iteratorReverse.hasNext()) {
-        if (properties[p].hasPosition(iterator.next())) {
+        if (property.hasPosition(iterator.next())) {
           f_i[p] = i;
           break;
         }
@@ -152,8 +154,8 @@ public class Path {
   private void updateIndices(Position newPosition, int positionIndex) {
     ArrayList<Integer> propertyIndices = new ArrayList<>();
     Property[] properties = instance.getProperties();
-    for (int p = 0; p <= instance.getM(); p++) {
-      Property property = properties[p];
+    for (Property property : properties) {
+      int p = property.getIndex();
       if (property.hasPosition(newPosition)) {
         propertyIndices.add(p);
       }
@@ -207,8 +209,8 @@ public class Path {
       return false;
 
     Property[] properties = instance.getProperties();
-    for (int p = 0; p < properties.length; p++) {
-      Property property = properties[p];
+    for (Property property : properties) {
+      int p = property.getIndex();
       int waitingTime = property.getWaitingTime();
       int fiToF = ((path.size() - 1) - f_i[p]);
       int sToSi = s_i[p];
