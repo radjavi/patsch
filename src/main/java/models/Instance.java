@@ -36,9 +36,9 @@ public class Instance {
 
     private void initProperties() {
         properties = createProperties(waitingTimes);
-        Arrays.sort(properties, (Property p1, Property p2) -> {
-            return Integer.compare(p1.getWaitingTime(), p2.getWaitingTime());
-        });
+        // Arrays.sort(properties, (Property p1, Property p2) -> {
+        // return Integer.compare(p1.getWaitingTime(), p2.getWaitingTime());
+        // });
     }
 
     private void initA() {
@@ -262,11 +262,12 @@ public class Instance {
 
         SingleExecutor executor = SingleExecutor.getInstance();
         int nrTasks = Math.min(paths.size(), executor.getNrThreads());
-        //int nrTasks = executor.getNrThreads();
+        // int nrTasks = executor.getNrThreads();
+        Semaphore available = new Semaphore(1, true);
         AtomicInteger nrBlocked = new AtomicInteger(0);
         ArrayList<Callable<Path>> callables = new ArrayList<>();
         for (int i = 0; i < nrTasks; i++) {
-            callables.add(new ParallelInstanceSolver(paths, this, nrBlocked, nrTasks));
+            callables.add(new ParallelInstanceSolver(paths, this, nrBlocked, nrTasks, available));
         }
 
         return executor.getExecutor().invokeAny(callables);
@@ -279,7 +280,7 @@ public class Instance {
                 continue;
             waitingTimesToTry[i]--;
             Instance instanceToTry = new Instance(waitingTimesToTry);
-            if (instanceToTry.solve() != null) 
+            if (instanceToTry.solve() != null)
                 return false;
         }
         return true;
@@ -513,7 +514,7 @@ public class Instance {
         }
         return true;
     }
-    
+
     public boolean lessThan(Instance ins) {
         boolean componentLessThan = false;
         for (int i = 0; i <= m; i++) {
@@ -555,13 +556,15 @@ public class Instance {
         private final Instance instance;
         private final AtomicInteger nrBlocked;
         private final int nrThreads;
+        private final Semaphore semaphore;
 
         public ParallelInstanceSolver(LinkedBlockingQueue<Path> paths, Instance instance, AtomicInteger nrBlocked,
-                int nrThreads) {
+                int nrThreads, Semaphore semaphore) {
             this.paths = paths;
             this.instance = instance;
             this.nrBlocked = nrBlocked;
             this.nrThreads = nrThreads;
+            this.semaphore = semaphore;
         }
 
         @Override
@@ -570,9 +573,10 @@ public class Instance {
                 nrBlocked.incrementAndGet();
                 if (paths.peek() == null && nrBlocked.get() == nrThreads)
                     return null;
+                semaphore.acquire();
                 Path p = paths.take();
-                // logger.info(p);
                 nrBlocked.decrementAndGet();
+                semaphore.release();
                 for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
                     Path pq = new Path(p);
                     pq.addPositionLast(q);
