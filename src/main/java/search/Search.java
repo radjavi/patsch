@@ -116,7 +116,9 @@ public class Search {
         // Test if critical
         logger.info("Testing if instances are critical...");
         for (Instance i : C.keySet()) {
-            assert i.isCritical() : i.waitingTimesToString() + " is NOT critical.";
+            boolean critical = i.isCritical();
+            logger.trace("{} is NOT critical", i.waitingTimesToString());
+            assert critical : i.waitingTimesToString() + " is NOT critical.";
         }
 
         logger.info("----- {} CRITICAL INSTANCES -----", C.size());

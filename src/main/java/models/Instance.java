@@ -286,11 +286,8 @@ public class Instance {
                 continue;
             waitingTimesToTry[i]--;
             Instance instanceToTry = new Instance(waitingTimesToTry);
-            if (instanceToTry.solve() != null) {
-                logger.trace("{} is critical", instanceToTry.waitingTimesToString());
+            if (instanceToTry.solve() != null) 
                 return false;
-            }
-
         }
         return true;
     }
