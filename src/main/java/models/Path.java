@@ -125,17 +125,23 @@ public class Path {
   private void computeIndices() {
     Property[] properties = instance.getProperties();
     for (int p = 0; p <= instance.getM(); p++) {
-      for (int i = 0; i < path.size(); i++) {
-        if (properties[p].hasPosition(path.get(i))) {
+      ListIterator<Position> iterator = path.listIterator();
+      int i = 0;
+      while (iterator.hasNext()) {
+        if (properties[p].hasPosition(iterator.next())) {
           s_i[p] = i;
           break;
         }
+        i++;
       }
-      for (int i = path.size() - 1; i >= 0; i--) {
-        if (properties[p].hasPosition(path.get(i))) {
+      Iterator<Position> iteratorReverse = path.descendingIterator();
+      i = path.size() - 1;
+      while (iteratorReverse.hasNext()) {
+        if (properties[p].hasPosition(iterator.next())) {
           f_i[p] = i;
           break;
         }
+        i--;
       }
     }
   }
