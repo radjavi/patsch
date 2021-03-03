@@ -16,17 +16,17 @@ public class Instance {
     private PositionGraph validGraph;
     private Integer a;
     private Integer b;
-    private boolean critical;
+    private PropertyPositionDistances shortestDistances;
     private int[] waitingTimes;
 
     private static final Logger logger = LogManager.getLogger(Instance.class);
 
     public Instance(int[] waitingTimes) {
+        shortestDistances = new PropertyPositionDistances();
         m = waitingTimes.length - 1;
         this.waitingTimes = waitingTimes.clone();
         for (int i = 0; i <= m; i++) {
-            assert waitingTimes[i] > 0
-                    : "Waiting time must be greater than 0: " + this.waitingTimesToString();
+            assert waitingTimes[i] > 0 : "Waiting time must be greater than 0: " + this.waitingTimesToString();
         }
     }
 
@@ -109,13 +109,20 @@ public class Instance {
      * @return the shortest distance to p
      */
     public <F, T> int distance(F from, T to) throws Exception {
-        return shortestPath(from, to).getLength();
+        Integer cachedDistance = shortestDistances.getDistance(from, to);
+        if (cachedDistance != null)
+            return cachedDistance;
+
+        int distance = shortestPath(from, to).getLength();
+        shortestDistances.setDistance(from, to, distance);
+        return distance;
     }
 
     /**
      * May be improved.
      */
     public <F, T> Path shortestPath(F from, T to) throws Exception {
+
         if (from instanceof Position && to instanceof Position)
             return shortestPath((Position) from, (Position) to);
         HashSet<Position> fromSet = new HashSet<>();
@@ -129,6 +136,7 @@ public class Instance {
                     fromSet.add(p);
             }
         }
+
         if (to instanceof Position)
             toSet.add((Position) to);
         else if (to instanceof Property) {
@@ -155,6 +163,7 @@ public class Instance {
 
         if (bestF == null || bestT == null)
             return null;
+
         return shortestPath(bestF, bestT);
     }
 
@@ -206,7 +215,7 @@ public class Instance {
         // paths.size());
 
         while (!paths.isEmpty()) {
-            //logger.info(paths.size());
+            // logger.info(paths.size());
             Path p = paths.pop();
             for (Position q : this.getValidGraph().getNeighbours(p.getLast())) {
                 Path pq = new Path(p);
@@ -447,6 +456,7 @@ public class Instance {
         for (int i = 0; i <= m; i++) {
             properties[i] = new Property(m, waitingTimes[i], i);
         }
+
         return properties;
     }
 
@@ -455,12 +465,12 @@ public class Instance {
     }
 
     /**
-     * Checks if this instance is greater than or equal to some instance in `instances`. It also
-     * checks the reverse instances in `instances`.
+     * Checks if this instance is greater than or equal to some instance in
+     * `instances`. It also checks the reverse instances in `instances`.
      * 
      * @param instances The set of instances
-     * @return The instance in `instances` that is less than or equal to this instance, otherwise
-     *         null.
+     * @return The instance in `instances` that is less than or equal to this
+     *         instance, otherwise null.
      */
     public Instance geqToSomeIn(Iterable<Instance> instances) {
         Iterator<Instance> iter = instances.iterator();
@@ -476,11 +486,12 @@ public class Instance {
     }
 
     /**
-     * Checks if this instance is less than some instance in `instances`. It also checks the reverse
-     * instances in `instances`.
+     * Checks if this instance is less than some instance in `instances`. It also
+     * checks the reverse instances in `instances`.
      * 
      * @param instances The set of instances
-     * @return The instance in `instances` that is greater than this instance, otherwise null.
+     * @return The instance in `instances` that is greater than this instance,
+     *         otherwise null.
      */
     public Instance lessThanSomeIn(Iterable<Instance> instances) {
         Iterator<Instance> iter = instances.iterator();
@@ -514,11 +525,14 @@ public class Instance {
         if (!componentLessThan)
             return false;
         for (int i = 0; i <= m; i++) {
-            if (!(this.waitingTimes[i] == ins.waitingTimes[i]
-                    || this.waitingTimes[i] < ins.waitingTimes[i]))
+            if (!(this.waitingTimes[i] == ins.waitingTimes[i] || this.waitingTimes[i] < ins.waitingTimes[i]))
                 return false;
         }
         return true;
+    }
+
+    public PropertyPositionDistances getshortestDistances() {
+        return shortestDistances;
     }
 
     @Override
@@ -542,8 +556,8 @@ public class Instance {
         private final AtomicInteger nrBlocked;
         private final int nrThreads;
 
-        public ParallelInstanceSolver(LinkedBlockingQueue<Path> paths, Instance instance,
-                AtomicInteger nrBlocked, int nrThreads) {
+        public ParallelInstanceSolver(LinkedBlockingQueue<Path> paths, Instance instance, AtomicInteger nrBlocked,
+                int nrThreads) {
             this.paths = paths;
             this.instance = instance;
             this.nrBlocked = nrBlocked;
@@ -557,7 +571,7 @@ public class Instance {
                 if (paths.peek() == null && nrBlocked.get() == nrThreads)
                     return null;
                 Path p = paths.take();
-                //logger.info(p);
+                // logger.info(p);
                 nrBlocked.decrementAndGet();
                 for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
                     Path pq = new Path(p);

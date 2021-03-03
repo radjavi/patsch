@@ -38,7 +38,7 @@ public class Property {
         return range;
     }
 
-    public int getIndex(){
+    public int getIndex() {
         return index;
     }
 
@@ -48,12 +48,30 @@ public class Property {
 
     @Override
     public String toString() {
-        String s = "Index:" + index + ", " +  "WatingTime:" + waitingTime + ", Positions: ";
+        String s = "Index:" + index + ", " + "WatingTime:" + waitingTime + ", Positions: ";
         for (Position position : pos) {
-            s +=  position ;
-            
+            s += position;
+
         }
-        s +=" \n\n";
+        s += " \n\n";
         return s;
+    }
+
+    // May be improved (same instance?).
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if ((obj == null) || (obj.getClass() != this.getClass()))
+            return false;
+        Property prop = (Property) obj;
+        return this.getIndex() == prop.getIndex();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + this.getIndex();
+        return hash;
     }
 }

@@ -26,13 +26,13 @@ public class App {
             return;
         }
         SingleExecutor executor = SingleExecutor.init(nrThreads);
-        //int[] waitingTimes = new int[]{7,4,4,5,7,5,6,8};
-        //Arrays.fill(waitingTimes, 2*m);
-        //Instance i = new Instance(waitingTimes);
-        //System.out.println(i.getValidGraph().toStringTriangle());
+        // int[] waitingTimes = new int[]{7,4,4,5,7,5,6,8};
+        // Arrays.fill(waitingTimes, 2*m);
+        // Instance i = new Instance(waitingTimes);
+        // System.out.println(i.getValidGraph().toStringTriangle());
         long startTime = System.nanoTime();
         Search.searchForCriticalInstances(m);
-        //logger.info(i.solve());
+        // logger.info(i.solve());
         long stopTime = System.nanoTime();
         logger.info("Search took {} seconds.", (stopTime - startTime) * 1e-9);
         if (executor != null)

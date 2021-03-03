@@ -49,8 +49,7 @@ public class Search {
         // Generate a stock of instances
         logger.info("Generating maximal infeasible instances...");
         HashSet<Instance> maximalInfeasibleInstances = generateStockOfInstances(m, r);
-        logger.debug("Generated {} maximal infeasible instances",
-                maximalInfeasibleInstances.size());
+        logger.debug("Generated {} maximal infeasible instances", maximalInfeasibleInstances.size());
         logger.trace("---- Maximal Infeasible Instances ----");
         maximalInfeasibleInstances.forEach(i -> logger.trace(i.waitingTimesToString()));
         logger.trace("--------------------------------------");
@@ -59,6 +58,7 @@ public class Search {
         logger.info("Searching for critical instances...");
         HashSet<Instance> visitedInstances = new HashSet<>();
         while (!U.isEmpty()) {
+
             Instance u = new Instance(U.pop().getWaitingTimes());
             Instance uR = u.getReversed();
             if (u.geqToSomeIn(C.keySet()) != null)
@@ -141,9 +141,10 @@ public class Search {
         visitedInstances.add(allRInstance);
 
         while (!U.isEmpty()) {
-            //logger.info("maximal size: {}, visited size: {}", maximalInfeasibleInstances.size(), visitedInstances.size());
+            // logger.info("maximal size: {}, visited size: {}",
+            // maximalInfeasibleInstances.size(), visitedInstances.size());
             Instance u = U.pop();
-            //logger.info("Solving {}...", u.waitingTimesToString());
+            // logger.info("Solving {}...", u.waitingTimesToString());
             Path solution = u.solve();
             if (solution != null) {
                 for (int i = 0; i <= m; i++) {
@@ -153,8 +154,7 @@ public class Search {
                     waitingTimes[i] = 1;
                     Instance newInstance = new Instance(waitingTimes);
                     Instance newInstanceR = newInstance.getReversed();
-                    if (!visitedInstances.contains(newInstance)
-                            && !visitedInstances.contains(newInstanceR)) {
+                    if (!visitedInstances.contains(newInstance) && !visitedInstances.contains(newInstanceR)) {
                         U.add(newInstance);
                         visitedInstances.add(newInstance);
                     }
@@ -175,8 +175,7 @@ public class Search {
                     waitingTimes[i]++;
                     Instance newInstance = new Instance(waitingTimes);
                     Instance newInstanceR = newInstance.getReversed();
-                    if (!visitedInstances.contains(newInstance)
-                            && !visitedInstances.contains(newInstanceR)) {
+                    if (!visitedInstances.contains(newInstance) && !visitedInstances.contains(newInstanceR)) {
                         U.add(newInstance);
                         visitedInstances.add(newInstance);
                     }

@@ -70,6 +70,7 @@ public class Path {
 
   public boolean valid() throws Exception {
     Property[] properties = instance.getProperties();
+
     Position s = this.getFirst();
     Position f = this.getLast();
     for (int p = 0; p < properties.length; p++) {
@@ -98,7 +99,7 @@ public class Path {
     ListIterator<Position> iterator = path.listIterator(s_i[propertyIndex]);
     int iterationCount = f_i[propertyIndex] - s_i[propertyIndex] + 1;
     int time = waitingTime;
-    for (int i=0; i < iterationCount; i++) {
+    for (int i = 0; i < iterationCount; i++) {
       Position current = iterator.next();
       if (property.hasPosition(current))
         time = waitingTime;
@@ -198,7 +199,7 @@ public class Path {
   public boolean isValidCycle() {
     if (!this.isCycle())
       return false;
-    
+
     Property[] properties = instance.getProperties();
     for (int p = 0; p < properties.length; p++) {
       Property property = properties[p];
