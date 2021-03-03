@@ -249,7 +249,8 @@ public class Instance {
         // paths.size());
 
         SingleExecutor executor = SingleExecutor.getInstance();
-        int nrTasks = Math.min(paths.size(), executor.getNrThreads());
+        //int nrTasks = Math.min(paths.size(), executor.getNrThreads());
+        int nrTasks = executor.getNrThreads();
         AtomicInteger nrBlocked = new AtomicInteger(0);
         ArrayList<Callable<Path>> callables = new ArrayList<>();
         for (int i = 0; i < nrTasks; i++) {
