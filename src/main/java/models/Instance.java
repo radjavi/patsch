@@ -574,7 +574,7 @@ public class Instance {
                 if (paths.peek() == null && nrBlocked.get() == nrThreads)
                     return null;
                 Path p = null;
-                while (p != null) {
+                while (p == null) {
                     semaphore.acquire();
                     Path temp = paths.peek();
                     if (temp != null) {
