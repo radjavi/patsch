@@ -2,7 +2,7 @@ package app;
 
 import search.*;
 import models.*;
-import singletons.*;
+import wrappers.*;
 import java.util.*;
 
 // Import log4j classes.
@@ -26,13 +26,17 @@ public class App {
             return;
         }
         SingleExecutor executor = SingleExecutor.init(nrThreads);
-        // int[] waitingTimes = new int[]{7,4,4,5,7,5,6,8};
+        //int[] waitingTimes = new int[]{8,6,2,2,4,6,8};
         // Arrays.fill(waitingTimes, 2*m);
-        // Instance i = new Instance(waitingTimes);
+        //Instance i = new Instance(waitingTimes);
         // System.out.println(i.getValidGraph().toStringTriangle());
         long startTime = System.nanoTime();
         Search.searchForCriticalInstances(m);
-        // logger.info(i.solve());
+        // Path solution = i.solve();
+        // while (solution != null) {
+        //     solution = i.solve();
+        // }
+        // System.out.println(solution);
         long stopTime = System.nanoTime();
         logger.info("Search took {} seconds.", (stopTime - startTime) * 1e-9);
         if (executor != null)

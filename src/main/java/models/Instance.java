@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import search.Search;
-import singletons.SingleExecutor;
+import wrappers.*;
 // Import log4j classes.
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -254,15 +254,15 @@ public class Instance {
             }
             return null;
         }
-        LinkedBlockingQueue<Path> paths = new LinkedBlockingQueue<>();
+        ConcurrentLinkedQueue<Path> paths = new ConcurrentLinkedQueue<>();
 
         initPathsToSolve(paths);
         // logger.trace("{} - Initial number of paths: {}", this.waitingTimesToString(),
         // paths.size());
 
         SingleExecutor executor = SingleExecutor.getInstance();
-        int nrTasks = Math.min(paths.size(), executor.getNrThreads());
-        // int nrTasks = executor.getNrThreads();
+        //int nrTasks = Math.min(paths.size(), executor.getNrThreads());
+        int nrTasks = executor.getNrThreads();
         Semaphore available = new Semaphore(1, true);
         AtomicInteger nrBlocked = new AtomicInteger(0);
         ArrayList<Callable<Path>> callables = new ArrayList<>();
@@ -552,13 +552,13 @@ public class Instance {
     }
 
     private class ParallelInstanceSolver implements Callable<Path> {
-        private final LinkedBlockingQueue<Path> paths;
+        private final ConcurrentLinkedQueue<Path> paths;
         private final Instance instance;
         private final AtomicInteger nrBlocked;
         private final int nrThreads;
         private final Semaphore semaphore;
 
-        public ParallelInstanceSolver(LinkedBlockingQueue<Path> paths, Instance instance, AtomicInteger nrBlocked,
+        public ParallelInstanceSolver(ConcurrentLinkedQueue<Path> paths, Instance instance, AtomicInteger nrBlocked,
                 int nrThreads, Semaphore semaphore) {
             this.paths = paths;
             this.instance = instance;
@@ -573,10 +573,17 @@ public class Instance {
                 nrBlocked.incrementAndGet();
                 if (paths.peek() == null && nrBlocked.get() == nrThreads)
                     return null;
-                semaphore.acquire();
-                Path p = paths.take();
-                nrBlocked.decrementAndGet();
-                semaphore.release();
+                Path p = null;
+                while (p != null) {
+                    semaphore.acquire();
+                    Path temp = paths.peek();
+                    if (temp != null) {
+                        nrBlocked.decrementAndGet();
+                        p = paths.poll();
+                    }
+                    semaphore.release();
+                }
+
                 for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
                     Path pq = new Path(p);
                     pq.addPositionLast(q);

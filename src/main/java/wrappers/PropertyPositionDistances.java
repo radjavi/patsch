@@ -1,5 +1,6 @@
-package models;
+package wrappers;
 
+import models.*;
 import com.google.common.collect.Table;
 import com.google.common.collect.HashBasedTable;
 
