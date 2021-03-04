@@ -274,6 +274,8 @@ public class Instance {
     }
 
     public boolean isCritical() throws Exception {
+        if (this.solve() == null)
+            return false;
         for (int i = 0; i <= m; i++) {
             int[] waitingTimesToTry = this.getWaitingTimes().clone();
             if (waitingTimesToTry[i] == 1)

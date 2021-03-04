@@ -58,7 +58,6 @@ public class Search {
         logger.info("Searching for critical instances...");
         HashSet<Instance> visitedInstances = new HashSet<>();
         while (!U.isEmpty()) {
-
             Instance u = new Instance(U.pop().getWaitingTimes());
             Instance uR = u.getReversed();
             if (u.geqToSomeIn(C.keySet()) != null)
