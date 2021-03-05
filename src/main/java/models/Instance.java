@@ -484,12 +484,13 @@ public class Instance {
      *         instance, otherwise null.
      */
     public Instance geqToSomeIn(Iterable<Instance> instances) {
+        Instance thisReversed = this.getReversed();
         Iterator<Instance> iter = instances.iterator();
         while (iter.hasNext()) {
             Instance ins = iter.next();
             if (ins.lessThanOrEqualTo(this))
                 return ins;
-            else if (ins.lessThanOrEqualTo(this.getReversed()))
+            else if (ins.lessThanOrEqualTo(thisReversed))
                 return ins;
         }
         return null;
@@ -504,12 +505,13 @@ public class Instance {
      *         otherwise null.
      */
     public Instance lessThanSomeIn(Iterable<Instance> instances) {
+        Instance thisReversed = this.getReversed();
         Iterator<Instance> iter = instances.iterator();
         while (iter.hasNext()) {
             Instance ins = iter.next();
             if (this.lessThan(ins))
                 return ins;
-            else if (this.getReversed().lessThan(ins))
+            else if (thisReversed.lessThan(ins))
                 return ins;
         }
         return null;
