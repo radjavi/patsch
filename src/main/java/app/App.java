@@ -26,7 +26,7 @@ public class App {
             return;
         }
         SingleExecutor executor = SingleExecutor.init(nrThreads);
-        //int[] waitingTimes = new int[m + 1];
+        //int[] waitingTimes = new int[]{14,14,5,14,2,14,14,14};
         //Arrays.fill(waitingTimes, 2*m);
         //Instance i = new Instance(waitingTimes);
         // System.out.println(i.getValidGraph().toStringTriangle());

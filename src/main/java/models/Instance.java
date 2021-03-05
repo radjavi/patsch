@@ -164,13 +164,13 @@ public class Instance {
             }
         }
 
-        if (bestF == null || bestT == null)
-            return null;
-
         return shortestPath(bestF, bestT);
     }
 
     private Path shortestPath(Position from, Position to) throws Exception {
+        if (from == null || to == null)
+            return null;
+
         Path path = new Path(this);
         path.addPositionLast(from);
         Position current = from;
@@ -225,9 +225,12 @@ public class Instance {
             for (Position q : this.getValidGraph().getNeighbours(p.getLast())) {
                 Path pq = new Path(p);
                 pq.addPositionLast(q);
+                Position penultimate = p.getPath().get(p.getPath().size() - 2);
+                if (Math.abs(penultimate.getX() - q.getX()) == 1 && Math.abs(penultimate.getY() - q.getY()) == 1)
+                    continue;
                 if (pq.valid()) {
                     if (pq.isValidCycle() && pq.visitsAllProperties()) {
-                        //logger.trace("{} visited {} paths.", this.waitingTimesToString(), nrPaths);
+                        //logger.info("{} ({}) visited {} paths.", this.waitingTimesToString(), "feasible", nrPaths);
                         return pq;
                     } else {
                         Path pqp = new Path(pq);
@@ -237,7 +240,7 @@ public class Instance {
                         }
                         //logger.trace("pqp: {}", pqp);
                         if (pqp.valid() && pqp.isValidCycle() && pqp.visitsAllProperties()) {
-                            //logger.trace("{} visited {} paths.", this.waitingTimesToString(), nrPaths);
+                            //logger.info("{} ({}) visited {} paths.", this.waitingTimesToString(), "feasible", nrPaths);
                             return pqp;
                         }
                         paths.add(pq);
@@ -245,7 +248,7 @@ public class Instance {
                 }
             }
         }
-        //logger.trace("{} visited {} paths.", this.waitingTimesToString(), nrPaths);
+        //logger.info("{} ({}) visited {} paths.", this.waitingTimesToString(), "infeasible", nrPaths);
         return null;
     }
 
@@ -484,10 +487,9 @@ public class Instance {
         Iterator<Instance> iter = instances.iterator();
         while (iter.hasNext()) {
             Instance ins = iter.next();
-            Instance insR = ins.getReversed();
             if (ins.lessThanOrEqualTo(this))
                 return ins;
-            else if (insR.lessThanOrEqualTo(this))
+            else if (ins.lessThanOrEqualTo(this.getReversed()))
                 return ins;
         }
         return null;
@@ -505,10 +507,9 @@ public class Instance {
         Iterator<Instance> iter = instances.iterator();
         while (iter.hasNext()) {
             Instance ins = iter.next();
-            Instance insR = ins.getReversed();
             if (this.lessThan(ins))
                 return ins;
-            else if (this.lessThan(insR))
+            else if (this.getReversed().lessThan(ins))
                 return ins;
         }
         return null;
@@ -594,6 +595,9 @@ public class Instance {
                 for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
                     Path pq = new Path(p);
                     pq.addPositionLast(q);
+                    Position penultimate = p.getPath().get(p.getPath().size() - 2);
+                    if (Math.abs(penultimate.getX() - q.getX()) == 1 && Math.abs(penultimate.getY() - q.getY()) == 1)
+                        continue;
                     if (pq.valid()) {
                         if (pq.isValidCycle() && pq.visitsAllProperties()) {
                             return pq;

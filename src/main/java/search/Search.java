@@ -63,6 +63,7 @@ public class Search {
             if (u.geqToSomeIn(C.keySet()) != null)
                 continue;
             Path solvedU = u.solve();
+            //logger.info("{}: {}", u.waitingTimesToString(), solvedU != null ? "feasible" : "infeasible");
             if (solvedU != null) {
                 C.put(u, solvedU);
                 logger.info("Found critical instance {}: {}", u.waitingTimesToString(), solvedU);
