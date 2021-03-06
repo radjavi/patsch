@@ -35,7 +35,7 @@ public class PropertyPositionDistances {
         if (from instanceof Property && to instanceof Position)
             return shortestDistancesPropertytoPosition.get((Property) from, (Position) to);
 
-        if (from instanceof Position & to instanceof Property)
+        if (from instanceof Position && to instanceof Property)
             return shortestDistancesPositiontoProperty.get((Position) from, (Property) to);
 
         return null;
