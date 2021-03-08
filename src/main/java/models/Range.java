@@ -4,9 +4,9 @@ import java.util.HashSet;
 
 
 public class Range {
-    private int a;
-    private int b;
-    private HashSet<Position> positions;
+    private final int a;
+    private final int b;
+    private final HashSet<Position> positions;
 
     public Range(int m, int waitingTime, int index){
         a = Math.max(0,index - (waitingTime/2));

@@ -3,16 +3,16 @@ package models;
 import java.util.HashSet;
 
 public class Property {
-    private HashSet<Position> pos;
-    private int waitingTime;
-    private int index;
-    private Range range;
+    private final int index;
+    private final int waitingTime;
+    private final HashSet<Position> positions;
+    private final Range range;
 
     public Property(int m, int waitingTime, int index) {
-        pos = positions(m, index);
+        this.positions = this.positions(m, index);
         this.index = index;
         this.waitingTime = waitingTime;
-        range = new Range(m, waitingTime, index);
+        this.range = new Range(m, waitingTime, index);
     }
 
     private HashSet<Position> positions(int m, int index) {
@@ -27,29 +27,29 @@ public class Property {
     }
 
     public HashSet<Position> getPositions() {
-        return pos;
+        return this.positions;
     }
 
     public boolean hasPosition(Position p) {
-        return pos.contains(p);
+        return this.positions.contains(p);
     }
 
     public Range getRange() {
-        return range;
+        return this.range;
     }
 
     public int getIndex() {
-        return index;
+        return this.index;
     }
 
     public int getWaitingTime() {
-        return waitingTime;
+        return this.waitingTime;
     }
 
     @Override
     public String toString() {
-        String s = "Index:" + index + ", " + "WatingTime:" + waitingTime + ", Positions: ";
-        for (Position position : pos) {
+        String s = "Index:" + this.getIndex() + ", " + "WatingTime:" + this.getWaitingTime() + ", Positions: ";
+        for (Position position : this.getPositions()) {
             s += position;
 
         }
