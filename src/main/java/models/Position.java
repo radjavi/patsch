@@ -1,8 +1,8 @@
 package models;
 
 public class Position implements Comparable<Position> {
-  private int x;
-  private int y;
+  private final int x;
+  private final int y;
 
   /**
    * 
@@ -23,14 +23,14 @@ public class Position implements Comparable<Position> {
    * 
    */
   public int getY() {
-    return this.y; // (3,2) -> (0,0) = 3 => 2,1 1,0 0,0
+    return this.y;
   }
 
   public int maxDeltaXY(Position p) {
     int x1 = p.getX();
     int y1 = p.getY();
-    int deltaX = Math.abs(x - x1);
-    int deltaY = Math.abs(y - y1);
+    int deltaX = Math.abs(this.getX() - x1);
+    int deltaY = Math.abs(this.getY() - y1);
     return Math.max(deltaX, deltaY);
   }
 
@@ -40,12 +40,12 @@ public class Position implements Comparable<Position> {
 
   @Override
   public int compareTo(Position pos) {
-    if (this.x == pos.x && this.y == pos.y)
+    if (this.getX() == pos.getX() && this.getY() == pos.getY())
       return 0;
-    if (this.x > pos.x)
+    if (this.getX() > pos.getX())
       return 1;
-    if (this.x == pos.x) {
-      if (this.y > pos.y)
+    if (this.getX() == pos.getX()) {
+      if (this.getY() > pos.getY())
         return 1;
       else
         return -1;
@@ -61,19 +61,19 @@ public class Position implements Comparable<Position> {
     if ((o == null) || (o.getClass() != this.getClass()))
       return false;
     Position pos = (Position) o;
-    return x == pos.x && y == pos.y;
+    return x == pos.getX() && y == pos.getY();
   }
 
   @Override
   public int hashCode() {
     int hash = 7;
-    hash = 31 * hash + x;
-    hash = 31 * hash + y;
+    hash = 31 * hash + this.getX();
+    hash = 31 * hash + this.getY();
     return hash;
   }
 
   @Override
   public String toString() {
-    return "(" + x + "," + y + ")";
+    return "(" + this.getX() + "," + this.getY() + ")";
   }
 }
