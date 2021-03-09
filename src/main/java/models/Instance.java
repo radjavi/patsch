@@ -1,9 +1,6 @@
 package models;
 
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import search.Search;
 import wrappers.*;
 // Import log4j classes.
 import org.apache.logging.log4j.Logger;
@@ -11,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 
 public class Instance {
     private int m;
-    private PositionGraph triangleGraph;
     private Property[] properties;
     private PositionGraph validGraph;
     private Integer a;
@@ -28,10 +24,6 @@ public class Instance {
         for (int i = 0; i <= m; i++) {
             assert waitingTimes[i] > 0 : "Waiting time must be greater than 0: " + this.waitingTimesToString();
         }
-    }
-
-    private void initTriangleGraph() {
-        triangleGraph = new PositionGraph(trianglePositions(m));
     }
 
     private void initProperties() {
@@ -202,9 +194,9 @@ public class Instance {
         int slopeXConstant = -1;
         int slopeYConstant = -1;
         if (d == 0)
-          slopeYConstant = 0;
+            slopeYConstant = 0;
         if (d == m - 1)
-          slopeXConstant = 0;
+            slopeXConstant = 0;
         int slopeX = -1 * slopeXConstant;
         int slopeY = -1 * slopeYConstant;
         int x = d + 1;
@@ -214,33 +206,33 @@ public class Instance {
         path.addPositionFirst(p1);
         boolean flagX = false;
         boolean flagY = false;
-    
+
         while (!(flagX && flagY)) {
-          x += slopeX;
-          y += slopeY;
-    
-          Position current = new Position(x, y);
-          path.addPositionLast(current);
-    
-          if (!flagX && x == m)
-            flagX = true;
-          if (!flagY && y == d)
-            flagY = true;
-          if (x == d + 1 || x == m)
-            slopeX *= slopeXConstant;
-          if (y == d || y == 0)
-            slopeY *= slopeYConstant;
-    
+            x += slopeX;
+            y += slopeY;
+
+            Position current = new Position(x, y);
+            path.addPositionLast(current);
+
+            if (!flagX && x == m)
+                flagX = true;
+            if (!flagY && y == d)
+                flagY = true;
+            if (x == d + 1 || x == m)
+                slopeX *= slopeXConstant;
+            if (y == d || y == 0)
+                slopeY *= slopeYConstant;
+
         }
         Path copyPath = new Path(path);
         Iterator<Position> reversePathIterator = copyPath.getPath().descendingIterator();
         reversePathIterator.next(); // skip first
         while (reversePathIterator.hasNext()) {
-          Position pos = reversePathIterator.next();
-          path.addPositionLast(pos);
+            Position pos = reversePathIterator.next();
+            path.addPositionLast(pos);
         }
         return path;
-      }
+    }
 
     public boolean isCritical() throws Exception {
         if (this.solve() == null)
@@ -293,12 +285,6 @@ public class Instance {
 
     public int[] getWaitingTimes() {
         return waitingTimes;
-    }
-
-    public PositionGraph getTriangleGraph() {
-        if (triangleGraph == null)
-            initTriangleGraph();
-        return triangleGraph;
     }
 
     public PositionGraph getValidGraph() {
