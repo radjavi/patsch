@@ -186,52 +186,8 @@ public class Instance {
     }
 
     public Path solve() throws Exception {
-        InstanceSolver solver = new InstanceSolver(this);
-        return solver.solve();
-    }
 
-    public Path billiardBallPath(int d) throws Exception {
-        int slopeXConstant = -1;
-        int slopeYConstant = -1;
-        if (d == 0)
-            slopeYConstant = 0;
-        if (d == m - 1)
-            slopeXConstant = 0;
-        int slopeX = -1 * slopeXConstant;
-        int slopeY = -1 * slopeYConstant;
-        int x = d + 1;
-        int y = 0;
-        Position p1 = new Position(x, y);
-        Path path = new Path(this);
-        path.addPositionFirst(p1);
-        boolean flagX = false;
-        boolean flagY = false;
-
-        while (!(flagX && flagY)) {
-            x += slopeX;
-            y += slopeY;
-
-            Position current = new Position(x, y);
-            path.addPositionLast(current);
-
-            if (!flagX && x == m)
-                flagX = true;
-            if (!flagY && y == d)
-                flagY = true;
-            if (x == d + 1 || x == m)
-                slopeX *= slopeXConstant;
-            if (y == d || y == 0)
-                slopeY *= slopeYConstant;
-
-        }
-        Path copyPath = new Path(path);
-        Iterator<Position> reversePathIterator = copyPath.getPath().descendingIterator();
-        reversePathIterator.next(); // skip first
-        while (reversePathIterator.hasNext()) {
-            Position pos = reversePathIterator.next();
-            path.addPositionLast(pos);
-        }
-        return path;
+        return InstanceSolver.solve(this);
     }
 
     public boolean isCritical() throws Exception {

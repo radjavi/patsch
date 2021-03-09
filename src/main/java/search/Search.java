@@ -1,6 +1,8 @@
 package search;
 
 import models.*;
+import wrappers.InstanceSolver;
+
 import java.util.*;
 
 // Import log4j classes.
@@ -63,7 +65,8 @@ public class Search {
             if (u.geqToSomeIn(C.keySet()) != null)
                 continue;
             Path solvedU = u.solve();
-            //logger.info("{}: {}", u.waitingTimesToString(), solvedU != null ? "feasible" : "infeasible");
+            // logger.info("{}: {}", u.waitingTimesToString(), solvedU != null ? "feasible"
+            // : "infeasible");
             if (solvedU != null) {
                 C.put(u, solvedU);
                 logger.info("Found critical instance {}: {}", u.waitingTimesToString(), solvedU);
@@ -222,7 +225,7 @@ public class Search {
         for (int d = 0; d <= m - 1; d++) {
             Instance instance = criticalWithEmptyIntersection(m, d);
             Instance instanceR = instance.getReversed();
-            Path solution = instance.billiardBallPath(d);
+            Path solution = InstanceSolver.billiardBallPath(instance, d);
             Set<Instance> criticals = C.keySet();
             if (!criticals.contains(instance) && !criticals.contains(instanceR))
                 C.put(instance, solution);

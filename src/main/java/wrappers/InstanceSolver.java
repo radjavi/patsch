@@ -11,36 +11,33 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 public class InstanceSolver {
-  private final Instance instance;
+
   private static final Logger logger = LogManager.getLogger(InstanceSolver.class);
 
-  public InstanceSolver(Instance instance) {
-    this.instance = instance;
-  }
-
-  public Path solve() throws Exception {
+  public static Path solve(Instance instance) throws Exception {
     SingleExecutor executor = SingleExecutor.getInstance();
     if (executor == null) {
-      return solveSequential();
+      return solveSequential(instance);
     }
-    return solveParallel();
+    return solveParallel(instance);
   }
 
-  private Path solveSequential() throws Exception {
+  private static Path solveSequential(Instance instance) throws Exception {
     int m = instance.getM();
     if (instance.getA() > instance.getB()) {
       // Find correct d to return path from Proposition 1.
       for (int d = 0; d <= m; d++) {
         Instance critical = Search.criticalWithEmptyIntersection(m, d);
         if (critical.lessThanOrEqualTo(instance))
-          return instance.billiardBallPath(d);
+          return billiardBallPath(instance, d);
       }
       return null;
     }
     LinkedList<Path> paths = new LinkedList<>();
 
-    initPathsToSolve(paths);
-    // logger.trace("{} - Initial number of paths: {}", instance.waitingTimesToString(),
+    initPathsToSolve(instance, paths);
+    // logger.trace("{} - Initial number of paths: {}",
+    // instance.waitingTimesToString(),
     // paths.size());
 
     int nrPaths = 0;
@@ -52,13 +49,12 @@ public class InstanceSolver {
         Path pq = new Path(p);
         pq.addPositionLast(q);
         Position penultimate = p.getPath().get(p.getPath().size() - 2);
-        if (Math.abs(penultimate.getX() - q.getX()) == 1
-            && Math.abs(penultimate.getY() - q.getY()) == 1)
+        if (Math.abs(penultimate.getX() - q.getX()) == 1 && Math.abs(penultimate.getY() - q.getY()) == 1)
           continue;
         if (pq.valid()) {
           if (pq.isValidCycle() && pq.visitsAllProperties()) {
-            logger.info("{} ({}) visited {} paths.", instance.waitingTimesToString(), "feasible",
-                nrPaths);
+            // logger.info("{} ({}) visited {} paths.", instance.waitingTimesToString(),
+            // "feasible", nrPaths);
             return pq;
           } else {
             Path pqp = new Path(pq);
@@ -68,8 +64,8 @@ public class InstanceSolver {
             }
             // logger.trace("pqp: {}", pqp);
             if (pqp.valid() && pqp.isValidCycle() && pqp.visitsAllProperties()) {
-              logger.info("{} ({}) visited {} paths.", instance.waitingTimesToString(), "feasible",
-                  nrPaths);
+              // logger.info("{} ({}) visited {} paths.", instance.waitingTimesToString(),
+              // "feasible", nrPaths);
               return pqp;
             }
             paths.add(pq);
@@ -77,26 +73,27 @@ public class InstanceSolver {
         }
       }
     }
-    logger.info("{} ({}) visited {} paths.", instance.waitingTimesToString(), "infeasible",
-        nrPaths);
+    // logger.info("{} ({}) visited {} paths.", instance.waitingTimesToString(),
+    // "infeasible", nrPaths);
     return null;
   }
 
-  private Path solveParallel() throws Exception {
+  private static Path solveParallel(Instance instance) throws Exception {
     int m = instance.getM();
     if (instance.getA() > instance.getB()) {
       // Find correct d to return path from Proposition 1.
       for (int d = 0; d <= m; d++) {
         Instance critical = Search.criticalWithEmptyIntersection(m, d);
         if (critical.lessThanOrEqualTo(instance))
-          return instance.billiardBallPath(d);
+          return billiardBallPath(instance, d);
       }
       return null;
     }
     ConcurrentLinkedQueue<Path> paths = new ConcurrentLinkedQueue<>();
 
-    initPathsToSolve(paths);
-    // logger.trace("{} - Initial number of paths: {}", instance.waitingTimesToString(),
+    initPathsToSolve(instance, paths);
+    // logger.trace("{} - Initial number of paths: {}",
+    // instance.waitingTimesToString(),
     // paths.size());
 
     SingleExecutor executor = SingleExecutor.getInstance();
@@ -112,7 +109,52 @@ public class InstanceSolver {
     return executor.getExecutor().invokeAny(callables);
   }
 
-  private void initPathsToSolve(AbstractCollection<Path> paths) throws Exception {
+  public static Path billiardBallPath(Instance instance, int d) throws Exception {
+    int m = instance.getM();
+    int slopeXConstant = -1;
+    int slopeYConstant = -1;
+    if (d == 0)
+      slopeYConstant = 0;
+    if (d == m - 1)
+      slopeXConstant = 0;
+    int slopeX = -1 * slopeXConstant;
+    int slopeY = -1 * slopeYConstant;
+    int x = d + 1;
+    int y = 0;
+    Position p1 = new Position(x, y);
+    Path path = new Path(instance);
+    path.addPositionFirst(p1);
+    boolean flagX = false;
+    boolean flagY = false;
+
+    while (!(flagX && flagY)) {
+      x += slopeX;
+      y += slopeY;
+
+      Position current = new Position(x, y);
+      path.addPositionLast(current);
+
+      if (!flagX && x == m)
+        flagX = true;
+      if (!flagY && y == d)
+        flagY = true;
+      if (x == d + 1 || x == m)
+        slopeX *= slopeXConstant;
+      if (y == d || y == 0)
+        slopeY *= slopeYConstant;
+
+    }
+    Path copyPath = new Path(path);
+    Iterator<Position> reversePathIterator = copyPath.getPath().descendingIterator();
+    reversePathIterator.next(); // skip first
+    while (reversePathIterator.hasNext()) {
+      Position pos = reversePathIterator.next();
+      path.addPositionLast(pos);
+    }
+    return path;
+  }
+
+  private static void initPathsToSolve(Instance instance, AbstractCollection<Path> paths) throws Exception {
     HashMap<Position, HashSet<Position>> addedPaths = new HashMap<>();
     Property[] properties = instance.getProperties();
     int minNrNeighbours = Integer.MAX_VALUE;
@@ -150,15 +192,15 @@ public class InstanceSolver {
     // paths.forEach(p -> logger.trace("Path: {}", p));
   }
 
-  private class ParallelInstanceSolver implements Callable<Path> {
+  private static class ParallelInstanceSolver implements Callable<Path> {
     private final ConcurrentLinkedQueue<Path> paths;
     private final Instance instance;
     private final AtomicInteger nrBlocked;
     private final int nrThreads;
     private final Semaphore semaphore;
 
-    public ParallelInstanceSolver(ConcurrentLinkedQueue<Path> paths, Instance instance,
-        AtomicInteger nrBlocked, int nrThreads, Semaphore semaphore) {
+    public ParallelInstanceSolver(ConcurrentLinkedQueue<Path> paths, Instance instance, AtomicInteger nrBlocked,
+        int nrThreads, Semaphore semaphore) {
       this.paths = paths;
       this.instance = instance;
       this.nrBlocked = nrBlocked;
@@ -187,8 +229,7 @@ public class InstanceSolver {
           Path pq = new Path(p);
           pq.addPositionLast(q);
           Position penultimate = p.getPath().get(p.getPath().size() - 2);
-          if (Math.abs(penultimate.getX() - q.getX()) == 1
-              && Math.abs(penultimate.getY() - q.getY()) == 1)
+          if (Math.abs(penultimate.getX() - q.getX()) == 1 && Math.abs(penultimate.getY() - q.getY()) == 1)
             continue;
           if (pq.valid()) {
             if (pq.isValidCycle() && pq.visitsAllProperties()) {
