@@ -4,13 +4,13 @@ import models.*;
 import com.google.common.collect.Table;
 import com.google.common.collect.HashBasedTable;
 
-public class PropertyPositionDistances {
+public class DistanceCache {
 
     private Table<Position, Position, Integer> shortestDistancesPosition;
     private Table<Property, Position, Integer> shortestDistancesPropertytoPosition;
     private Table<Position, Property, Integer> shortestDistancesPositiontoProperty;
 
-    public PropertyPositionDistances() {
+    public DistanceCache() {
         shortestDistancesPosition = HashBasedTable.create();
         shortestDistancesPropertytoPosition = HashBasedTable.create();
         shortestDistancesPositiontoProperty = HashBasedTable.create();
