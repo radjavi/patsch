@@ -6,37 +6,29 @@ import com.google.common.collect.HashBasedTable;
 
 public class DistanceCache {
 
-    private Table<Position, Position, Integer> shortestDistancesPosition;
-    private Table<Property, Position, Integer> shortestDistancesPropertytoPosition;
-    private Table<Position, Property, Integer> shortestDistancesPositiontoProperty;
+    private Table<Property, Position, Integer> cache;
 
     public DistanceCache() {
-        shortestDistancesPosition = HashBasedTable.create();
-        shortestDistancesPropertytoPosition = HashBasedTable.create();
-        shortestDistancesPositiontoProperty = HashBasedTable.create();
+        cache = HashBasedTable.create();
     }
 
     public <F, T> void setDistance(F from, T to, int distance) {
-        if (from instanceof Position && to instanceof Position)
-            shortestDistancesPosition.put((Position) from, (Position) to, distance);
 
         if (from instanceof Property && to instanceof Position)
-            shortestDistancesPropertytoPosition.put((Property) from, (Position) to, distance);
+            cache.put((Property) from, (Position) to, distance);
 
         if (from instanceof Position && to instanceof Property)
-            shortestDistancesPositiontoProperty.put((Position) from, (Property) to, distance);
+            cache.put((Property) to, (Position) from, distance);
 
     }
 
     public <F, T> Integer getDistance(F from, T to) {
-        if (from instanceof Position && to instanceof Position)
-            return shortestDistancesPosition.get((Position) from, (Position) to);
 
         if (from instanceof Property && to instanceof Position)
-            return shortestDistancesPropertytoPosition.get((Property) from, (Position) to);
+            return cache.get((Property) from, (Position) to);
 
         if (from instanceof Position && to instanceof Property)
-            return shortestDistancesPositiontoProperty.get((Position) from, (Property) to);
+            return cache.get((Property) to, (Position) from);
 
         return null;
     }
