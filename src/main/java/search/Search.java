@@ -91,18 +91,20 @@ public class Search {
                 Instance v = new Instance(newWaitingTimes);
                 Instance vR = v.getReversed();
 
-                if (!visitedInstances.contains(v) && !visitedInstances.contains(vR)) {
+                if (!visitedInstances.contains(v) && !visitedInstances.contains(vR)
+                        && v.geqToSomeIn(C.keySet()) == null) {
                     vs.add(v);
                     visitedInstances.add(v);
                 }
             }
             for (Instance v : vs) {
                 Path solution = v.solve();
-                if (solution != null && v.geqToSomeIn(C.keySet()) == null) {
+                if (solution != null) {
                     C.put(v, solution);
-                } else if (solution == null) {
+                    logger.info("Found critical instance {}: {}", v.waitingTimesToString(),
+                            solution);
+                } else
                     U.add(v);
-                }
             }
         }
         logger.info("Found critical instances");
