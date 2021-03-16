@@ -40,8 +40,12 @@ public class Search {
         logger.info("Generating lower bound instances...");
         HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
         for (Instance lowerBoundInstance : lowerBoundInstances) {
-            if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null)
+            Path solution = lowerBoundInstance.solve();
+            if (solution != null)
+                C.put(lowerBoundInstance, solution);
+            else if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null) {
                 U.add(lowerBoundInstance);
+            }
         }
         logger.debug("Proceeding with {} lower bound instances", U.size());
         logger.trace("-------- U --------");
@@ -51,7 +55,8 @@ public class Search {
         // Generate a stock of instances
         logger.info("Generating maximal infeasible instances...");
         HashSet<Instance> maximalInfeasibleInstances = generateStockOfInstances(m, r);
-        logger.debug("Generated {} maximal infeasible instances", maximalInfeasibleInstances.size());
+        logger.debug("Generated {} maximal infeasible instances",
+                maximalInfeasibleInstances.size());
         logger.trace("---- Maximal Infeasible Instances ----");
         maximalInfeasibleInstances.forEach(i -> logger.trace(i.waitingTimesToString()));
         logger.trace("--------------------------------------");
@@ -62,43 +67,41 @@ public class Search {
         while (!U.isEmpty()) {
             Instance u = new Instance(U.pop().getWaitingTimes());
             Instance uR = u.getReversed();
-            if (u.geqToSomeIn(C.keySet()) != null)
-                continue;
-            Path solvedU = u.solve();
-            // logger.info("{}: {}", u.waitingTimesToString(), solvedU != null ? "feasible"
-            // : "infeasible");
-            if (solvedU != null) {
-                C.put(u, solvedU);
-                logger.info("Found critical instance {}: {}", u.waitingTimesToString(), solvedU);
-            } else {
-                // Instance greaterInfeasible = u.lessThanSomeIn(maximalInfeasibleInstances);
-                Instance greaterInfeasible = null;
-                Instance referenceInstance = u;
-                for (Instance greater : maximalInfeasibleInstances) {
-                    if (u.lessThan(greater)) {
-                        greaterInfeasible = greater;
-                        break;
-                    } else if (uR.lessThan(greater)) {
-                        greaterInfeasible = greater;
-                        referenceInstance = uR;
-                        break;
-                    }
+            // Instance greaterInfeasible = u.lessThanSomeIn(maximalInfeasibleInstances);
+            Instance greaterInfeasible = null;
+            Instance referenceInstance = u;
+            for (Instance greater : maximalInfeasibleInstances) {
+                if (u.lessThan(greater)) {
+                    greaterInfeasible = greater;
+                    break;
+                } else if (uR.lessThan(greater)) {
+                    greaterInfeasible = greater;
+                    referenceInstance = uR;
+                    break;
                 }
-                for (int i = 0; i <= m; i++) {
-                    if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] == r)
-                        continue;
-                    if (referenceInstance.getWaitingTimes()[i] == r)
-                        continue;
-                    int[] newWaitingTimes = referenceInstance.getWaitingTimes().clone();
-                    newWaitingTimes[i]++;
-                    Instance v = new Instance(newWaitingTimes);
-                    Instance vR = v.getReversed();
+            }
+            ArrayList<Instance> vs = new ArrayList<>();
+            for (int i = 0; i <= m; i++) {
+                if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] == r)
+                    continue;
+                if (referenceInstance.getWaitingTimes()[i] == r)
+                    continue;
+                int[] newWaitingTimes = referenceInstance.getWaitingTimes().clone();
+                newWaitingTimes[i]++;
+                Instance v = new Instance(newWaitingTimes);
+                Instance vR = v.getReversed();
 
-                    if (!visitedInstances.contains(v) && !visitedInstances.contains(vR)
-                            && v.geqToSomeIn(C.keySet()) == null) {
-                        U.add(v);
-                        visitedInstances.add(v);
-                    }
+                if (!visitedInstances.contains(v) && !visitedInstances.contains(vR)) {
+                    vs.add(v);
+                    visitedInstances.add(v);
+                }
+            }
+            for (Instance v : vs) {
+                Path solution = v.solve();
+                if (solution != null && v.geqToSomeIn(C.keySet()) == null) {
+                    C.put(v, solution);
+                } else if (solution == null) {
+                    U.add(v);
                 }
             }
         }
@@ -160,7 +163,8 @@ public class Search {
                     waitingTimes[i] = 1;
                     Instance newInstance = new Instance(waitingTimes);
                     Instance newInstanceR = newInstance.getReversed();
-                    if (!visitedInstances.contains(newInstance) && !visitedInstances.contains(newInstanceR)) {
+                    if (!visitedInstances.contains(newInstance)
+                            && !visitedInstances.contains(newInstanceR)) {
                         U.add(newInstance);
                         visitedInstances.add(newInstance);
                     }
@@ -181,7 +185,8 @@ public class Search {
                     waitingTimes[i]++;
                     Instance newInstance = new Instance(waitingTimes);
                     Instance newInstanceR = newInstance.getReversed();
-                    if (!visitedInstances.contains(newInstance) && !visitedInstances.contains(newInstanceR)) {
+                    if (!visitedInstances.contains(newInstance)
+                            && !visitedInstances.contains(newInstanceR)) {
                         U.add(newInstance);
                         visitedInstances.add(newInstance);
                     }
