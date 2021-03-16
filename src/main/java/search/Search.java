@@ -80,7 +80,7 @@ public class Search {
                     break;
                 }
             }
-            ArrayList<Instance> vs = new ArrayList<>();
+            ArrayList<Instance> vs = new ArrayList<>(m+1);
             for (int i = 0; i <= m; i++) {
                 if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] == r)
                     continue;
