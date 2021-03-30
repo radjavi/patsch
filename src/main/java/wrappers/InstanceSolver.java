@@ -217,11 +217,9 @@ public class InstanceSolver {
         Path p = null;
         while (p == null) {
           semaphore.acquire();
-          Path temp = paths.peek();
-          if (temp != null) {
+          p = paths.poll();
+          if (p != null)
             nrBlocked.decrementAndGet();
-            p = paths.poll();
-          }
           semaphore.release();
         }
 
