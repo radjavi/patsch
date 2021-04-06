@@ -40,17 +40,17 @@ public class InstanceSolver {
     // instance.waitingTimesToString(),
     // paths.size());
 
-    int nrPaths = 0;
+    // int nrPaths = 0;
     while (!paths.isEmpty()) {
       Path p = paths.pop();
-      nrPaths++;
+      // nrPaths++;
       Path solution = extendPath(instance, paths, p);
       if (solution != null) {
-        logger.trace("{} visited {} paths (feasible)", instance.waitingTimesToString(), nrPaths);
+        // logger.trace("{} visited {} paths (feasible)", instance.waitingTimesToString(), nrPaths);
         return solution;
       }
     }
-    logger.trace("{} visited {} paths (infeasible)", instance.waitingTimesToString(), nrPaths);
+    // logger.trace("{} visited {} paths (infeasible)", instance.waitingTimesToString(), nrPaths);
     return null;
   }
 
@@ -117,7 +117,7 @@ public class InstanceSolver {
       }
     }
 
-    // Parallelogram
+    // // Parallelogram
     // if (antepenultimate.getX() < penultimate.getX() && antepenultimate.getY() == penultimate.getY()) {
     //   if (instance.getProperties()[penultimate.getY()].getWaitingTime() > 2) {
     //     if (penultimate.getX() < q.getX() && penultimate.getY() < q.getY()) {
@@ -344,9 +344,11 @@ public class InstanceSolver {
         Path p = null;
         while (p == null) {
           semaphore.acquire();
-          p = paths.poll();
-          if (p != null)
+          Path temp = paths.peek();
+          if (temp != null) {
             nrBlocked.decrementAndGet();
+            p = paths.poll();
+          }
           semaphore.release();
         }
 
