@@ -45,20 +45,21 @@ public class InstanceSolver {
       Path p = paths.pop();
       nrPaths++;
       Path solution = extendPath(instance, paths, p);
-        if (solution != null) {
-          logger.trace("{} visited {} paths (feasible)", instance.waitingTimesToString(), nrPaths);
-          return solution;
-        }
+      if (solution != null) {
+        logger.trace("{} visited {} paths (feasible)", instance.waitingTimesToString(), nrPaths);
+        return solution;
+      }
     }
     logger.trace("{} visited {} paths (infeasible)", instance.waitingTimesToString(), nrPaths);
     return null;
   }
 
-  private static Path extendPath(Instance instance, AbstractCollection<Path> paths, Path p) throws Exception {
+  private static Path extendPath(Instance instance, AbstractCollection<Path> paths, Path p)
+      throws Exception {
     for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
       Path pq = new Path(p);
       pq.addPositionLast(q);
-      if (redundantPath(pq))
+      if (redundantPath(instance, pq))
         continue;
       if (pq.valid()) {
         if (pq.isValidCycle() && pq.visitsAllProperties()) {
@@ -79,19 +80,41 @@ public class InstanceSolver {
     return null;
   }
 
-  private static boolean redundantPath(Path pq) throws Exception {
-    return redundantPathOfLength3(pq);
+  private static boolean redundantPath(Instance instance, Path pq) throws Exception {
+    return redundantPathOfLength3(instance, pq);
   }
 
-  private static boolean redundantPathOfLength3(Path pq) {
+  private static boolean redundantPathOfLength3(Instance instance, Path pq) {
     Position antepenultimate = pq.getPath().get(pq.getPath().size() - 3);
+    Position penultimate = pq.getPath().get(pq.getPath().size() - 2);
     Position q = pq.getLast();
+    
     // Diagonal
-    if (Math.abs(antepenultimate.getX() - q.getX()) == 1 && Math.abs(antepenultimate.getY() - q.getY()) == 1)
+    if (Math.abs(antepenultimate.getX() - q.getX()) == 1
+        && Math.abs(antepenultimate.getY() - q.getY()) == 1)
       return true;
 
-    // Parallelogram
-
+    // Square Diamond
+    if (antepenultimate.getX() == penultimate.getX() && penultimate.getX() == q.getX()) {
+      Position right = new Position(penultimate.getX() + 1, penultimate.getY());
+      Position left = new Position(penultimate.getX() - 1, penultimate.getY());
+      if ((antepenultimate.getY() < penultimate.getY() && penultimate.getY() < q.getY())
+          || (antepenultimate.getY() > penultimate.getY() && penultimate.getY() > q.getY())) {
+        if (instance.getValidGraph().hasPosition(right)
+            || instance.getValidGraph().hasPosition(left))
+          return true;
+      }
+    }
+    if (antepenultimate.getY() == penultimate.getY() && penultimate.getY() == q.getY()) {
+      Position above = new Position(penultimate.getX(), penultimate.getY() + 1);
+      Position under = new Position(penultimate.getX(), penultimate.getY() - 1);
+      if ((antepenultimate.getX() < penultimate.getX() && penultimate.getX() < q.getX())
+          || (antepenultimate.getX() > penultimate.getX() && penultimate.getX() > q.getX())) {
+        if (instance.getValidGraph().hasPosition(above)
+            || instance.getValidGraph().hasPosition(under))
+          return true;
+      }
+    }
 
     return false;
   }
@@ -172,7 +195,8 @@ public class InstanceSolver {
     return path;
   }
 
-  private static void initPathsToSolve(Instance instance, AbstractCollection<Path> paths) throws Exception {
+  private static void initPathsToSolve(Instance instance, AbstractCollection<Path> paths)
+      throws Exception {
     HashMap<Position, HashSet<Position>> addedPaths = new HashMap<>();
     Property[] properties = instance.getProperties();
     int minNrNeighbours = Integer.MAX_VALUE;
@@ -217,8 +241,8 @@ public class InstanceSolver {
     private final int nrThreads;
     private final Semaphore semaphore;
 
-    public ParallelInstanceSolver(ConcurrentLinkedQueue<Path> paths, Instance instance, AtomicInteger nrBlocked,
-        int nrThreads, Semaphore semaphore) {
+    public ParallelInstanceSolver(ConcurrentLinkedQueue<Path> paths, Instance instance,
+        AtomicInteger nrBlocked, int nrThreads, Semaphore semaphore) {
       this.paths = paths;
       this.instance = instance;
       this.nrBlocked = nrBlocked;
