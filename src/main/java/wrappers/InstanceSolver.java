@@ -40,41 +40,38 @@ public class InstanceSolver {
     // instance.waitingTimesToString(),
     // paths.size());
 
-    int nrPaths = 0;
     while (!paths.isEmpty()) {
       Path p = paths.pop();
-      // logger.trace(p);
-      nrPaths++;
-      for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
-        Path pq = new Path(p);
-        pq.addPositionLast(q);
-        Position penultimate = p.getPath().get(p.getPath().size() - 2);
-        if (Math.abs(penultimate.getX() - q.getX()) == 1 && Math.abs(penultimate.getY() - q.getY()) == 1)
-          continue;
-        if (pq.valid()) {
-          if (pq.isValidCycle() && pq.visitsAllProperties()) {
-            // logger.info("{} ({}) visited {} paths.", instance.waitingTimesToString(),
-            // "feasible", nrPaths);
-            return pq;
-          } else {
-            Path pqp = new Path(pq);
-            Iterator<Position> reverseIterator = p.getPath().descendingIterator();
-            while (reverseIterator.hasNext()) {
-              pqp.addPositionLast(reverseIterator.next());
-            }
-            // logger.trace("pqp: {}", pqp);
-            if (pqp.valid() && pqp.isValidCycle() && pqp.visitsAllProperties()) {
-              // logger.info("{} ({}) visited {} paths.", instance.waitingTimesToString(),
-              // "feasible", nrPaths);
-              return pqp;
-            }
-            paths.add(pq);
+      Path solution = extendPath(instance, paths, p);
+        if (solution != null)
+          return solution;
+    }
+    return null;
+  }
+
+  private static Path extendPath(Instance instance, AbstractCollection<Path> paths, Path p) throws Exception {
+    for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
+      Path pq = new Path(p);
+      pq.addPositionLast(q);
+      Position penultimate = p.getPath().get(p.getPath().size() - 2);
+      if (Math.abs(penultimate.getX() - q.getX()) == 1 && Math.abs(penultimate.getY() - q.getY()) == 1)
+        continue;
+      if (pq.valid()) {
+        if (pq.isValidCycle() && pq.visitsAllProperties()) {
+          return pq;
+        } else {
+          Path pqp = new Path(pq);
+          Iterator<Position> reverseIterator = p.getPath().descendingIterator();
+          while (reverseIterator.hasNext()) {
+            pqp.addPositionLast(reverseIterator.next());
           }
+          if (pqp.valid() && pqp.isValidCycle() && pqp.visitsAllProperties()) {
+            return pqp;
+          }
+          paths.add(pq);
         }
       }
     }
-    // logger.info("{} ({}) visited {} paths.", instance.waitingTimesToString(),
-    // "infeasible", nrPaths);
     return null;
   }
 
@@ -223,28 +220,9 @@ public class InstanceSolver {
           semaphore.release();
         }
 
-        for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
-          Path pq = new Path(p);
-          pq.addPositionLast(q);
-          Position penultimate = p.getPath().get(p.getPath().size() - 2);
-          if (Math.abs(penultimate.getX() - q.getX()) == 1 && Math.abs(penultimate.getY() - q.getY()) == 1)
-            continue;
-          if (pq.valid()) {
-            if (pq.isValidCycle() && pq.visitsAllProperties()) {
-              return pq;
-            } else {
-              Path pqp = new Path(pq);
-              Iterator<Position> reverseIterator = p.getPath().descendingIterator();
-              while (reverseIterator.hasNext()) {
-                pqp.addPositionLast(reverseIterator.next());
-              }
-              if (pqp.valid() && pqp.isValidCycle() && pqp.visitsAllProperties()) {
-                return pqp;
-              }
-              paths.add(pq);
-            }
-          }
-        }
+        Path solution = extendPath(instance, paths, p);
+        if (solution != null)
+          return solution;
       }
     }
   }
