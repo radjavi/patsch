@@ -40,12 +40,17 @@ public class InstanceSolver {
     // instance.waitingTimesToString(),
     // paths.size());
 
+    int nrPaths = 0;
     while (!paths.isEmpty()) {
       Path p = paths.pop();
+      nrPaths++;
       Path solution = extendPath(instance, paths, p);
-        if (solution != null)
+        if (solution != null) {
+          logger.trace("{} visited {} paths (feasible)", instance.waitingTimesToString(), nrPaths);
           return solution;
+        }
     }
+    logger.trace("{} visited {} paths (infeasible)", instance.waitingTimesToString(), nrPaths);
     return null;
   }
 
@@ -79,11 +84,14 @@ public class InstanceSolver {
   }
 
   private static boolean redundantPathOfLength3(Path pq) {
-    // Diagonal
-    Position penultimate = pq.getPath().get(pq.getPath().size() - 3);
+    Position antepenultimate = pq.getPath().get(pq.getPath().size() - 3);
     Position q = pq.getLast();
-    if (Math.abs(penultimate.getX() - q.getX()) == 1 && Math.abs(penultimate.getY() - q.getY()) == 1)
+    // Diagonal
+    if (Math.abs(antepenultimate.getX() - q.getX()) == 1 && Math.abs(antepenultimate.getY() - q.getY()) == 1)
       return true;
+
+    // Parallelogram
+
 
     return false;
   }
