@@ -53,8 +53,7 @@ public class InstanceSolver {
     for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
       Path pq = new Path(p);
       pq.addPositionLast(q);
-      Position penultimate = p.getPath().get(p.getPath().size() - 2);
-      if (Math.abs(penultimate.getX() - q.getX()) == 1 && Math.abs(penultimate.getY() - q.getY()) == 1)
+      if (redundantPath(pq))
         continue;
       if (pq.valid()) {
         if (pq.isValidCycle() && pq.visitsAllProperties()) {
@@ -73,6 +72,20 @@ public class InstanceSolver {
       }
     }
     return null;
+  }
+
+  private static boolean redundantPath(Path pq) throws Exception {
+    return redundantPathOfLength3(pq);
+  }
+
+  private static boolean redundantPathOfLength3(Path pq) {
+    // Diagonal
+    Position penultimate = pq.getPath().get(pq.getPath().size() - 3);
+    Position q = pq.getLast();
+    if (Math.abs(penultimate.getX() - q.getX()) == 1 && Math.abs(penultimate.getY() - q.getY()) == 1)
+      return true;
+
+    return false;
   }
 
   private static Path solveParallel(Instance instance) throws Exception {
