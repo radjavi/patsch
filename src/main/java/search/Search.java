@@ -22,6 +22,7 @@ public class Search {
             return null;
         LinkedList<Instance> U = new LinkedList<>();
         HashMap<Instance, Path> C = new HashMap<>();
+        HashSet<Instance> visitedInstances = new HashSet<>();
         int r = 2 * m;
 
         // INIT
@@ -40,7 +41,7 @@ public class Search {
         logger.info("Generating lower bound instances...");
         HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
         for (Instance lowerBoundInstance : lowerBoundInstances) {
-            Path solution = lowerBoundInstance.solve();
+            Path solution = new Instance(lowerBoundInstance.getWaitingTimes()).solve();
             if (solution != null)
                 C.put(lowerBoundInstance, solution);
             else if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null) {
@@ -63,11 +64,9 @@ public class Search {
 
         // SEARCH
         logger.info("Searching for critical instances...");
-        HashSet<Instance> visitedInstances = new HashSet<>();
         while (!U.isEmpty()) {
-            Instance u = new Instance(U.pop().getWaitingTimes());
+            Instance u = U.pop();
             Instance uR = u.getReversed();
-            // Instance greaterInfeasible = u.lessThanSomeIn(maximalInfeasibleInstances);
             Instance greaterInfeasible = null;
             Instance referenceInstance = u;
             for (Instance greater : maximalInfeasibleInstances) {
@@ -98,7 +97,7 @@ public class Search {
                 }
             }
             for (Instance v : vs) {
-                Path solution = v.solve();
+                Path solution = new Instance(v.getWaitingTimes()).solve();
                 if (solution != null) {
                     C.put(v, solution);
                     logger.info("Found critical instance {}: {}", v.waitingTimesToString(),
