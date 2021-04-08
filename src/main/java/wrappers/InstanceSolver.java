@@ -63,14 +63,14 @@ public class InstanceSolver {
         if (pq.isValidCycle() && pq.visitsAllProperties()) {
           return pq;
         } else {
-          Path pqp = new Path(pq);
-          Iterator<Position> reverseIterator = p.getPath().descendingIterator();
-          while (reverseIterator.hasNext()) {
-            pqp.addPositionLast(reverseIterator.next());
-          }
-          if (pqp.valid() && pqp.isValidCycle() && pqp.visitsAllProperties()) {
-            return pqp;
-          }
+          // Path pqp = new Path(pq);
+          // Iterator<Position> reverseIterator = p.getPath().descendingIterator();
+          // while (reverseIterator.hasNext()) {
+          //   pqp.addPositionLast(reverseIterator.next());
+          // }
+          // if (pqp.valid() && pqp.isValidCycle() && pqp.visitsAllProperties()) {
+          //   return pqp;
+          // }
           paths.add(pq);
         }
       }

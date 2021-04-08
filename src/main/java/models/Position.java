@@ -1,6 +1,6 @@
 package models;
 
-public class Position {
+public class Position implements Comparable<Position> {
   private final int x;
   private final int y;
 
@@ -46,6 +46,21 @@ public class Position {
     hash = 31 * hash + this.getX();
     hash = 31 * hash + this.getY();
     return hash;
+  }
+
+  @Override
+  public int compareTo(Position pos) {
+    if (this.getX() == pos.getX() && this.getY() == pos.getY())
+      return 0;
+    if (this.getX() > pos.getX())
+      return 1;
+    if (this.getX() == pos.getX()) {
+      if (this.getY() > pos.getY())
+        return 1;
+      else
+        return -1;
+    }
+    return -1;
   }
 
   @Override
