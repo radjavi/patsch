@@ -1,6 +1,7 @@
 package models;
 
 import java.util.*;
+import wrappers.RedundantPaths;
 
 public class Path {
 
@@ -204,6 +205,10 @@ public class Path {
     return f_i;
   }
 
+  public Instance getInstance() {
+    return instance;
+  }
+
   public boolean isValidCycle() {
     if (!this.isCycle())
       return false;
@@ -232,6 +237,10 @@ public class Path {
         return false;
     }
     return true;
+  }
+
+  public boolean redundant() throws Exception {
+    return RedundantPaths.length2(this);
   }
 
   @Override

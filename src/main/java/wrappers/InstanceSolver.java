@@ -59,9 +59,7 @@ public class InstanceSolver {
     for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
       Path pq = new Path(p);
       pq.addPositionLast(q);
-      if (redundantPath(instance, pq))
-        continue;
-      if (pq.valid()) {
+      if (!pq.redundant() && pq.valid()) {
         if (pq.isValidCycle() && pq.visitsAllProperties()) {
           return pq;
         } else {
@@ -78,102 +76,6 @@ public class InstanceSolver {
       }
     }
     return null;
-  }
-
-  private static boolean redundantPath(Instance instance, Path pq) throws Exception {
-    return redundantPathOfLength2(instance, pq);
-  }
-
-  private static boolean redundantPathOfLength2(Instance instance, Path pq) {
-    Position antepenultimate = pq.getPath().get(pq.getPath().size() - 3);
-    Position penultimate = pq.getPath().get(pq.getPath().size() - 2);
-    Position q = pq.getLast();
-    PositionGraph validGraph = instance.getValidGraph();
-
-    int direction1 = antepenultimate.directionTo(penultimate);
-    int direction2 = penultimate.directionTo(q);
-    int[] directionPath = new int[] {direction1, direction2};
-
-    // Diagonal
-    if (Math.abs(antepenultimate.getX() - q.getX()) == 1
-        && Math.abs(antepenultimate.getY() - q.getY()) == 1)
-      return true;
-
-    // Square Diamond
-    if (Arrays.equals(directionPath, new int[] {Position.NORTH, Position.NORTH})
-        || Arrays.equals(directionPath, new int[] {Position.SOUTH, Position.SOUTH})) {
-      Position right = new Position(penultimate.getX() + 1, penultimate.getY());
-      Position left = new Position(penultimate.getX() - 1, penultimate.getY());
-      if (validGraph.hasPosition(right) || validGraph.hasPosition(left))
-        return true;
-    }
-    if (Arrays.equals(directionPath, new int[] {Position.EAST, Position.EAST})
-        || Arrays.equals(directionPath, new int[] {Position.WEST, Position.WEST})) {
-      Position above = new Position(penultimate.getX(), penultimate.getY() + 1);
-      Position under = new Position(penultimate.getX(), penultimate.getY() - 1);
-      if (validGraph.hasPosition(above) || validGraph.hasPosition(under))
-        return true;
-    }
-
-    // Parallelogram
-    if (Arrays.equals(directionPath, new int[] {Position.NORTH, Position.NORTHEAST})) {
-      if (instance.getProperties()[penultimate.getX()].getWaitingTime() > 2) {
-        Position intermediate = new Position(penultimate.getX() + 1, penultimate.getY());
-        if (validGraph.hasPosition(intermediate))
-          return true;
-      }
-    }
-    if (Arrays.equals(directionPath, new int[] {Position.NORTH, Position.NORTHWEST})) {
-      if (instance.getProperties()[penultimate.getX()].getWaitingTime() > 2) {
-        Position intermediate = new Position(penultimate.getX() - 1, penultimate.getY());
-        if (validGraph.hasPosition(intermediate))
-          return true;
-      }
-    }
-    if (Arrays.equals(directionPath, new int[] {Position.EAST, Position.NORTHEAST})) {
-      if (instance.getProperties()[penultimate.getY()].getWaitingTime() > 2) {
-        Position intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
-        if (validGraph.hasPosition(intermediate))
-          return true;
-      }
-    }
-    if (Arrays.equals(directionPath, new int[] {Position.EAST, Position.SOUTHEAST})) {
-      if (instance.getProperties()[penultimate.getY()].getWaitingTime() > 2) {
-        Position intermediate = new Position(penultimate.getX(), penultimate.getY() - 1);
-        if (validGraph.hasPosition(intermediate))
-          return true;
-      }
-    }
-    if (Arrays.equals(directionPath, new int[] {Position.SOUTH, Position.SOUTHEAST})) {
-      if (instance.getProperties()[penultimate.getX()].getWaitingTime() > 2) {
-        Position intermediate = new Position(penultimate.getX() + 1, penultimate.getY());
-        if (validGraph.hasPosition(intermediate))
-          return true;
-      }
-    }
-    if (Arrays.equals(directionPath, new int[] {Position.SOUTH, Position.SOUTHWEST})) {
-      if (instance.getProperties()[penultimate.getX()].getWaitingTime() > 2) {
-        Position intermediate = new Position(penultimate.getX() - 1, penultimate.getY());
-        if (validGraph.hasPosition(intermediate))
-          return true;
-      }
-    }
-    if (Arrays.equals(directionPath, new int[] {Position.WEST, Position.SOUTHWEST})) {
-      if (instance.getProperties()[penultimate.getY()].getWaitingTime() > 2) {
-        Position intermediate = new Position(penultimate.getX(), penultimate.getY() - 1);
-        if (validGraph.hasPosition(intermediate))
-          return true;
-      }
-    }
-    if (Arrays.equals(directionPath, new int[] {Position.WEST, Position.NORTHWEST})) {
-      if (instance.getProperties()[penultimate.getY()].getWaitingTime() > 2) {
-        Position intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
-        if (validGraph.hasPosition(intermediate))
-          return true;
-      }
-    }
-
-    return false;
   }
 
   private static Path solveParallel(Instance instance) throws Exception {
