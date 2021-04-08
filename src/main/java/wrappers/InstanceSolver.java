@@ -40,17 +40,17 @@ public class InstanceSolver {
     // instance.waitingTimesToString(),
     // paths.size());
 
-    // int nrPaths = 0;
+    int nrPaths = 0;
     while (!paths.isEmpty()) {
       Path p = paths.pop();
-      // nrPaths++;
+      nrPaths++;
       Path solution = extendPath(instance, paths, p);
       if (solution != null) {
-        // logger.trace("{} visited {} paths (feasible)", instance.waitingTimesToString(), nrPaths);
+        logger.trace("{} visited {} paths (feasible)", instance.waitingTimesToString(), nrPaths);
         return solution;
       }
     }
-    // logger.trace("{} visited {} paths (infeasible)", instance.waitingTimesToString(), nrPaths);
+    logger.trace("{} visited {} paths (infeasible)", instance.waitingTimesToString(), nrPaths);
     return null;
   }
 

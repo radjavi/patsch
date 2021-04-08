@@ -19,6 +19,11 @@ public class RedundantPaths {
     return (int) Math.toDegrees(Math.atan2(deltaY, deltaX));
   }
 
+  /**
+   * May be improved.
+   * @param pq
+   * @return
+   */
   public static boolean length2(Path pq) {
     Instance instance = pq.getInstance();
     Position antepenultimate = pq.getPath().get(pq.getPath().size() - 3);
@@ -104,6 +109,64 @@ public class RedundantPaths {
     if (Arrays.equals(directionPath, new int[] {WEST, NORTHWEST})) {
       if (instance.getPropertyWaitingTime(penultimate.getY()) > 2) {
         Position intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
+        if (validGraph.hasPosition(intermediate))
+          return true;
+      }
+    }
+
+    // Hourglass
+    if (Arrays.equals(directionPath, new int[] {EAST, NORTHWEST})) {
+      if (instance.getPropertyWaitingTime(penultimate.getY()) > 2) {
+        Position intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
+        if (validGraph.hasPosition(intermediate))
+          return true;
+      }
+    }
+    if (Arrays.equals(directionPath, new int[] {EAST, SOUTHWEST})) {
+      if (instance.getPropertyWaitingTime(penultimate.getY()) > 2) {
+        Position intermediate = new Position(penultimate.getX(), penultimate.getY() - 1);
+        if (validGraph.hasPosition(intermediate))
+          return true;
+      }
+    }
+    if (Arrays.equals(directionPath, new int[] {WEST, NORTHEAST})) {
+      if (instance.getPropertyWaitingTime(penultimate.getY()) > 2) {
+        Position intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
+        if (validGraph.hasPosition(intermediate))
+          return true;
+      }
+    }
+    if (Arrays.equals(directionPath, new int[] {WEST, SOUTHEAST})) {
+      if (instance.getPropertyWaitingTime(penultimate.getY()) > 2) {
+        Position intermediate = new Position(penultimate.getX(), penultimate.getY() - 1);
+        if (validGraph.hasPosition(intermediate))
+          return true;
+      }
+    }
+    if (Arrays.equals(directionPath, new int[] {NORTH, SOUTHEAST})) {
+      if (instance.getPropertyWaitingTime(penultimate.getX()) > 2) {
+        Position intermediate = new Position(penultimate.getX() + 1, penultimate.getY());
+        if (validGraph.hasPosition(intermediate))
+          return true;
+      }
+    }
+    if (Arrays.equals(directionPath, new int[] {NORTH, SOUTHWEST})) {
+      if (instance.getPropertyWaitingTime(penultimate.getX()) > 2) {
+        Position intermediate = new Position(penultimate.getX() - 1, penultimate.getY());
+        if (validGraph.hasPosition(intermediate))
+          return true;
+      }
+    }
+    if (Arrays.equals(directionPath, new int[] {SOUTH, NORTHEAST})) {
+      if (instance.getPropertyWaitingTime(penultimate.getX()) > 2) {
+        Position intermediate = new Position(penultimate.getX() + 1, penultimate.getY());
+        if (validGraph.hasPosition(intermediate))
+          return true;
+      }
+    }
+    if (Arrays.equals(directionPath, new int[] {SOUTH, NORTHWEST})) {
+      if (instance.getPropertyWaitingTime(penultimate.getX()) > 2) {
+        Position intermediate = new Position(penultimate.getX() - 1, penultimate.getY());
         if (validGraph.hasPosition(intermediate))
           return true;
       }
