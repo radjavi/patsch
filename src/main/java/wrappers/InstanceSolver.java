@@ -225,7 +225,7 @@ public class InstanceSolver {
           }
           semaphore.release();
         }
-
+        
         Path solution = extendPath(instance, paths, p);
         if (solution != null)
           return solution;

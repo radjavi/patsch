@@ -1,9 +1,17 @@
 package wrappers;
 
-import java.util.Arrays;
+
+import java.util.*;
 import models.*;
 
+// Import log4j classes.
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 public class RedundantPaths {
+  // Define a static logger variable so that it references the
+  // Logger instance named "App".
+  private static final Logger logger = LogManager.getLogger(RedundantPaths.class);
 
   private static String direction(Position from, Position to) {
     String dir = "";
@@ -24,7 +32,10 @@ public class RedundantPaths {
    * @param pq
    * @return
    */
-  public static boolean length2(Path pq) {
+  public static boolean length2(Path pq) throws Exception {
+    if (pq.getLength() < 2)
+      return false;
+
     Instance instance = pq.getInstance();
     Position antepenultimate = pq.getPath().get(pq.getPath().size() - 3);
     Position penultimate = pq.getPath().get(pq.getPath().size() - 2);
@@ -56,120 +67,71 @@ public class RedundantPaths {
         if (validGraph.hasPosition(above) || validGraph.hasPosition(under))
           return true;
         break;
+    };
+
+    LinkedList<Position> newPathPositions = (LinkedList<Position>) pq.getPath().clone();
+    Position intermediate = null;
+    switch (directionPath) {
       // Parallelogram
-      case "N,NE":
-        if (instance.getPropertyWaitingTime(penultimate.getX()) > 2) {
-          Position intermediate = new Position(penultimate.getX() + 1, penultimate.getY());
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
+      case "NE,N": // Parallelogram
+      case "SE,S": // Parallelogram
+      case "N,SE": // Hourglass
+      case "S,NE": // Hourglass
+        intermediate = new Position(penultimate.getX() - 1, penultimate.getY());
         break;
-      case "N,NW":
-        if (instance.getPropertyWaitingTime(penultimate.getX()) > 2) {
-          Position intermediate = new Position(penultimate.getX() - 1, penultimate.getY());
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
+      case "NW,N": // Parallelogram
+      case "SW,S": // Parallelogram
+      case "N,SW": // Hourglass
+      case "S,NW": // Hourglass
+        intermediate = new Position(penultimate.getX() + 1, penultimate.getY());
         break;
-      case "E,NE":
-        if (instance.getPropertyWaitingTime(penultimate.getY()) > 2) {
-          Position intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
+      case "NE,E": // Parallelogram
+      case "NW,W": // Parallelogram
+      case "E,NW": // Hourglass
+      case "W,NE": // Hourglass
+        intermediate = new Position(penultimate.getX(), penultimate.getY() - 1);
         break;
-      case "E,SE":
-        if (instance.getPropertyWaitingTime(penultimate.getY()) > 2) {
-          Position intermediate = new Position(penultimate.getX(), penultimate.getY() - 1);
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
+      case "SE,E": // Parallelogram
+      case "SW,W": // Parallelogram
+      case "E,SW": // Hourglass
+      case "W,SE": // Hourglass
+        intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
         break;
-      case "S,SE":
-        if (instance.getPropertyWaitingTime(penultimate.getX()) > 2) {
-          Position intermediate = new Position(penultimate.getX() + 1, penultimate.getY());
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
+    }
+    if (intermediate != null && validGraph.hasPosition(intermediate)) {
+      newPathPositions.set(newPathPositions.size() - 2, intermediate);
+      Path newPath = new Path(instance, newPathPositions);
+      if (newPath.valid())
+        return true;
+    }
+
+    return false;
+  }
+
+  public static boolean length3(Path pq) throws Exception {
+    if (pq.getLength() < 3)
+      return false;
+
+    Instance instance = pq.getInstance();
+    Position preantepenultimate = pq.getPath().get(pq.getPath().size() - 4);
+    Position antepenultimate = pq.getPath().get(pq.getPath().size() - 3);
+    Position penultimate = pq.getPath().get(pq.getPath().size() - 2);
+    Position q = pq.getLast();
+    PositionGraph validGraph = instance.getValidGraph();
+
+    String direction1 = direction(preantepenultimate, antepenultimate);
+    String direction2 = direction(antepenultimate, penultimate);
+    String direction3 = direction(penultimate, q);
+    String directionPath = direction1 + "," + direction2 + "," + direction3;
+
+    switch (directionPath) {
+      case "E,NE,E":
+        Position intermediate1 = new Position(antepenultimate.getX(), antepenultimate.getY() + 1);
+        Position intermediate2 = new Position(penultimate.getX(), penultimate.getY() - 1);
+        if (validGraph.hasPosition(intermediate1) && validGraph.hasPosition(intermediate2))
+          return true;
         break;
-      case "S,SW":
-        if (instance.getPropertyWaitingTime(penultimate.getX()) > 2) {
-          Position intermediate = new Position(penultimate.getX() - 1, penultimate.getY());
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
-        break;
-      case "W,SW":
-        if (instance.getPropertyWaitingTime(penultimate.getY()) > 2) {
-          Position intermediate = new Position(penultimate.getX(), penultimate.getY() - 1);
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
-        break;
-      case "W,NW":
-        if (instance.getPropertyWaitingTime(penultimate.getY()) > 2) {
-          Position intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
-        break;
-      // Hourglass
-      case "E,NW":
-        if (instance.getPropertyWaitingTime(penultimate.getY()) > 2) {
-          Position intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
-        break;
-      case "E,SW":
-        if (instance.getPropertyWaitingTime(penultimate.getY()) > 2) {
-          Position intermediate = new Position(penultimate.getX(), penultimate.getY() - 1);
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
-        break;
-      case "W,NE":
-        if (instance.getPropertyWaitingTime(penultimate.getY()) > 2) {
-          Position intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
-        break;
-      case "W,SE":
-        if (instance.getPropertyWaitingTime(penultimate.getY()) > 2) {
-          Position intermediate = new Position(penultimate.getX(), penultimate.getY() - 1);
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
-        break;
-      case "N,SE":
-        if (instance.getPropertyWaitingTime(penultimate.getX()) > 2) {
-          Position intermediate = new Position(penultimate.getX() + 1, penultimate.getY());
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
-        break;
-      case "N,SW":
-        if (instance.getPropertyWaitingTime(penultimate.getX()) > 2) {
-          Position intermediate = new Position(penultimate.getX() - 1, penultimate.getY());
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
-        break;
-      case "S,NE":
-        if (instance.getPropertyWaitingTime(penultimate.getX()) > 2) {
-          Position intermediate = new Position(penultimate.getX() + 1, penultimate.getY());
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
-        break;
-      case "S,NW":
-        if (instance.getPropertyWaitingTime(penultimate.getX()) > 2) {
-          Position intermediate = new Position(penultimate.getX() - 1, penultimate.getY());
-          if (validGraph.hasPosition(intermediate))
-            return true;
-        }
-        break;
+      // TODO: Add more cases
     }
 
     return false;
