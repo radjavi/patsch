@@ -1,6 +1,5 @@
 package wrappers;
 
-
 import java.util.*;
 import models.*;
 
@@ -37,8 +36,9 @@ public class RedundantPaths {
       return false;
 
     Instance instance = pq.getInstance();
-    Position antepenultimate = pq.getPath().get(pq.getPath().size() - 3);
-    Position penultimate = pq.getPath().get(pq.getPath().size() - 2);
+    LinkedList<Position> path = pq.getPath();
+    Position antepenultimate = path.get(path.size() - 3);
+    Position penultimate = path.get(path.size() - 2);
     Position q = pq.getLast();
     PositionGraph validGraph = instance.getValidGraph();
 
@@ -47,58 +47,58 @@ public class RedundantPaths {
     String directionPath = direction1 + "," + direction2;
 
     // Diagonal
-    if (Math.abs(antepenultimate.getX() - q.getX()) == 1
-        && Math.abs(antepenultimate.getY() - q.getY()) == 1)
+    if (Math.abs(antepenultimate.getX() - q.getX()) == 1 && Math.abs(antepenultimate.getY() - q.getY()) == 1)
       return true;
 
     switch (directionPath) {
-      // Square Diamond
-      case "N,N":
-      case "S,S":
-        Position right = new Position(penultimate.getX() + 1, penultimate.getY());
-        Position left = new Position(penultimate.getX() - 1, penultimate.getY());
-        if (validGraph.hasPosition(right) || validGraph.hasPosition(left))
-          return true;
-        break;
-      case "E,E":
-      case "W,W":
-        Position above = new Position(penultimate.getX(), penultimate.getY() + 1);
-        Position under = new Position(penultimate.getX(), penultimate.getY() - 1);
-        if (validGraph.hasPosition(above) || validGraph.hasPosition(under))
-          return true;
-        break;
-    };
+    // Square Diamond
+    case "N,N":
+    case "S,S":
+      Position right = new Position(penultimate.getX() + 1, penultimate.getY());
+      Position left = new Position(penultimate.getX() - 1, penultimate.getY());
+      if (validGraph.hasPosition(right) || validGraph.hasPosition(left))
+        return true;
+      break;
+    case "E,E":
+    case "W,W":
+      Position above = new Position(penultimate.getX(), penultimate.getY() + 1);
+      Position under = new Position(penultimate.getX(), penultimate.getY() - 1);
+      if (validGraph.hasPosition(above) || validGraph.hasPosition(under))
+        return true;
+      break;
+    }
 
-    LinkedList<Position> newPathPositions = (LinkedList<Position>) pq.getPath().clone();
+    
     Position intermediate = null;
     switch (directionPath) {
-      // Parallelogram
-      case "NE,N": // Parallelogram
-      case "SE,S": // Parallelogram
-      case "N,SE": // Hourglass
-      case "S,NE": // Hourglass
-        intermediate = new Position(penultimate.getX() - 1, penultimate.getY());
-        break;
-      case "NW,N": // Parallelogram
-      case "SW,S": // Parallelogram
-      case "N,SW": // Hourglass
-      case "S,NW": // Hourglass
-        intermediate = new Position(penultimate.getX() + 1, penultimate.getY());
-        break;
-      case "NE,E": // Parallelogram
-      case "NW,W": // Parallelogram
-      case "E,NW": // Hourglass
-      case "W,NE": // Hourglass
-        intermediate = new Position(penultimate.getX(), penultimate.getY() - 1);
-        break;
-      case "SE,E": // Parallelogram
-      case "SW,W": // Parallelogram
-      case "E,SW": // Hourglass
-      case "W,SE": // Hourglass
-        intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
-        break;
+    // Parallelogram
+    case "NE,N": // Parallelogram
+    case "SE,S": // Parallelogram
+    case "N,SE": // Hourglass
+    case "S,NE": // Hourglass
+      intermediate = new Position(penultimate.getX() - 1, penultimate.getY());
+      break;
+    case "NW,N": // Parallelogram
+    case "SW,S": // Parallelogram
+    case "N,SW": // Hourglass
+    case "S,NW": // Hourglass
+      intermediate = new Position(penultimate.getX() + 1, penultimate.getY());
+      break;
+    case "NE,E": // Parallelogram
+    case "NW,W": // Parallelogram
+    case "E,NW": // Hourglass
+    case "W,NE": // Hourglass
+      intermediate = new Position(penultimate.getX(), penultimate.getY() - 1);
+      break;
+    case "SE,E": // Parallelogram
+    case "SW,W": // Parallelogram
+    case "E,SW": // Hourglass
+    case "W,SE": // Hourglass
+      intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
+      break;
     }
     if (intermediate != null && validGraph.hasPosition(intermediate)) {
+      LinkedList<Position> newPathPositions = (LinkedList<Position>) pq.getPath().clone();
       newPathPositions.set(newPathPositions.size() - 2, intermediate);
       Path newPath = new Path(instance, newPathPositions);
       if (newPath.valid())
@@ -112,27 +112,55 @@ public class RedundantPaths {
     if (pq.getLength() < 3)
       return false;
 
-    Instance instance = pq.getInstance();
-    Position preantepenultimate = pq.getPath().get(pq.getPath().size() - 4);
-    Position antepenultimate = pq.getPath().get(pq.getPath().size() - 3);
-    Position penultimate = pq.getPath().get(pq.getPath().size() - 2);
+    LinkedList<Position> path = pq.getPath();
+    Position preantepenultimate = path.get(path.size() - 4);
+    Position antepenultimate = path.get(path.size() - 3);
+    Position penultimate = path.get(path.size() - 2);
     Position q = pq.getLast();
-    PositionGraph validGraph = instance.getValidGraph();
+    
 
     String direction1 = direction(preantepenultimate, antepenultimate);
     String direction2 = direction(antepenultimate, penultimate);
     String direction3 = direction(penultimate, q);
     String directionPath = direction1 + "," + direction2 + "," + direction3;
-
+    Position intermediate1 = null;
+    Position intermediate2 = null;
+    
     switch (directionPath) {
-      case "E,NE,E":
-        Position intermediate1 = new Position(antepenultimate.getX(), antepenultimate.getY() + 1);
-        Position intermediate2 = new Position(penultimate.getX(), penultimate.getY() - 1);
-        if (validGraph.hasPosition(intermediate1) && validGraph.hasPosition(intermediate2))
-          return true;
-        break;
-      // TODO: Add more cases
+    case "E,NE,E": 
+    case "W,NW,W": 
+      intermediate1 = new Position(antepenultimate.getX(), antepenultimate.getY() + 1);
+      intermediate2 = new Position(penultimate.getX(), penultimate.getY() - 1);
+      break;
+    
+    case "E,SE,E": 
+    case "W,SW,W": 
+      intermediate1 = new Position(antepenultimate.getX(), antepenultimate.getY() - 1);
+      intermediate2 = new Position(penultimate.getX(), penultimate.getY() + 1);
+      break;
+    
+    case "N,NW,N": 
+    case "S,SW,S": 
+      intermediate1 = new Position(antepenultimate.getX()-1, antepenultimate.getY());
+      intermediate2 = new Position(penultimate.getX()+1, penultimate.getY());
+
+      break;
+    
+    case "N,NE,N": 
+    case "S,SE,S": 
+      intermediate1 = new Position(antepenultimate.getX()+1, antepenultimate.getY());
+      intermediate2 = new Position(penultimate.getX()-1, penultimate.getY());
+      break;
+    
+    // TODO: Add more cases
     }
+    if (intermediate1 != null && intermediate2 != null){
+      Instance instance = pq.getInstance();
+      PositionGraph validGraph = instance.getValidGraph();
+      if (validGraph.hasPosition(intermediate1) && validGraph.hasPosition(intermediate2))
+        return true;
+    }
+   
 
     return false;
   }
