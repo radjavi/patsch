@@ -5,6 +5,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import search.Search;
 import models.*;
+import com.google.common.collect.Table;
+import com.google.common.collect.HashBasedTable;
 
 // Import log4j classes.
 import org.apache.logging.log4j.Logger;
@@ -39,18 +41,43 @@ public class InstanceSolver {
     // logger.trace("{} - Initial number of paths: {}",
     // instance.waitingTimesToString(),
     // paths.size());
+    // Table<Position, Position, Path> bestValidPaths = HashBasedTable.create();
+    // for (Path p : paths) {
+    //   bestValidPaths.put(p.getFirst(), p.getLast(), p);
+    // }
 
-    int nrPaths = 0;
-    while (!paths.isEmpty()) {
-      Path p = paths.pop();
-      nrPaths++;
-      Path solution = extendPath(instance, paths, p);
-      if (solution != null) {
-        logger.trace("{} visited {} paths (feasible)", instance.waitingTimesToString(), nrPaths);
-        return solution;
+    //System.out.println(instance.waitingTimesToString());
+    while (true) {
+      Table<Position, Position, Path> newBestValidPaths = HashBasedTable.create();
+      while (!paths.isEmpty()) {
+        Path p = paths.pop();
+        for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
+          Path pq = new Path(p);
+          pq.addPositionLast(q);
+          if (pq.valid()) {
+            if (pq.isValidCycle() && pq.visitsAllProperties()) {
+              return pq;
+            } else {
+              //logger.info(pq);
+              // Path pqp = lookAhead(pq);
+              // if (pqp != null)
+              //   return pqp; 
+              Path bestValidPq = newBestValidPaths.get(pq.getFirst(), q);
+              if (bestValidPq == null || !bestValidPq.betterThan(pq)) {
+                //bestValidPaths.put(pq.getFirst(), q, pq);
+                newBestValidPaths.put(pq.getFirst(), q, pq);
+              }
+            }
+          }
+        }
       }
+      //logger.info(newBestValidPaths);
+      if (newBestValidPaths.isEmpty())
+        break;
+      paths.addAll(newBestValidPaths.values());
     }
-    logger.trace("{} visited {} paths (infeasible)", instance.waitingTimesToString(), nrPaths);
+    //logger.info(bestValidPaths);
+
     return null;
   }
 

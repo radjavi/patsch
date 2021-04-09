@@ -26,7 +26,26 @@ public class App {
             return;
         }
         SingleExecutor executor = SingleExecutor.init(nrThreads);
-        //int[] waitingTimes = new int[]{16,16,7,16,2,16,16,16,16};
+        // Path path1 = new Path(new Instance(new int[]{10,5,2,3,4,8,10}));
+        // Path path2 = new Path(new Instance(new int[]{10,5,2,3,4,8,10}));
+
+        // path1.addPositionLast(new Position(6,3)); // (6,3)(5,2)(4,1)(3,2)(4,2)
+        // path1.addPositionLast(new Position(5,2));
+        // path1.addPositionLast(new Position(4,1));
+        // path1.addPositionLast(new Position(3,2));
+        // path1.addPositionLast(new Position(4,2));
+
+        // path2.addPositionLast(new Position(6,3)); // (6,3)(5,2)(4,2)(3,1)(4,2)
+        // path2.addPositionLast(new Position(5,2));
+        // path2.addPositionLast(new Position(4,2));
+        // path2.addPositionLast(new Position(3,1));
+        // path2.addPositionLast(new Position(4,2));
+
+        // System.out.println( "f:" + Arrays.toString( path1.getF_i()) + " s: "+Arrays.toString( path1.getS_i()));
+        // System.out.println( "f:" + Arrays.toString(path2.getF_i()) +  " s: "+Arrays.toString( path2.getS_i()));
+        // System.out.println(path1.betterThan(path2));
+
+        //int[] waitingTimes = new int[]{10,5,2,3,4,8,10};
         //Arrays.fill(waitingTimes, 2*m);
         //Instance i = new Instance(waitingTimes);
         //System.out.println(i.getValidGraph().toStringTriangle());

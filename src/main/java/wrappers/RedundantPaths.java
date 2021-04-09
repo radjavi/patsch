@@ -99,7 +99,7 @@ public class RedundantPaths {
         break;
     }
     if (intermediate != null && validGraph.hasPosition(intermediate)) {
-      LinkedList<Position> newPathPositions = (LinkedList<Position>) pq.getPath().clone();
+      ArrayList<Position> newPathPositions = (ArrayList<Position>) pq.getPath().clone();
       newPathPositions.set(newPathPositions.size() - 2, intermediate);
       Path newPath = new Path(instance, newPathPositions);
       if (newPath.valid())

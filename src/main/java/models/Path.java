@@ -23,8 +23,16 @@ public class Path {
     f_i = initIntArray(instance.getM() + 1, -1);
   }
 
-  public Path(Instance instance, LinkedList<Position> path) {
+  public Path(Instance instance, ArrayList<Position> path) throws Exception {
     this.instance = instance;
+    PositionGraph validGraph = instance.getValidGraph();
+    if (!path.isEmpty()) {
+      for (int i = 0; i < path.size() - 1; i++) {
+        if (!validGraph.getNeighbours(path.get(i)).contains(path.get(i + 1))) {
+          throw new Exception("Position " + path.get(i + 1) + " is not neighbour to " + path.get(i) + ".");
+        }
+      }
+    }
     this.path = (LinkedList<Position>) path.clone();
     s_i = initIntArray(instance.getM() + 1, -1);
     f_i = initIntArray(instance.getM() + 1, -1);
@@ -242,6 +250,29 @@ public class Path {
 
   public boolean redundant() throws Exception {
     return RedundantPaths.length2(this) || RedundantPaths.length3(this);
+  }
+
+  public boolean betterThan(Path path) {
+    if (!this.getFirst().equals(path.getFirst()) || !this.getLast().equals(path.getLast()))
+      return false;
+    // if (this.getLength() < path.getLength() - 1)
+    //   return false;
+    // TODO 
+    // Check if the paths visits the properties equal amount of times
+    for (int i = 0; i < getF_i().length; i++) {
+      if (this.getF_i()[i] == -1 && path.getF_i()[i] >= 0)
+        return false;
+    }
+
+    int sum1 = 0;
+    int sum2 = 0;
+    for (int i = 0; i < getF_i().length; i++) {
+      sum1 += this.getLength() - getF_i()[i];
+    }
+    for (int i = 0; i < path.getF_i().length; i++) {
+      sum2 += path.getLength() - path.getF_i()[i];
+    }
+    return sum1 < sum2;
   }
 
   @Override
