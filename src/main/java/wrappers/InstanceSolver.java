@@ -63,17 +63,25 @@ public class InstanceSolver {
         if (pq.isValidCycle() && pq.visitsAllProperties()) {
           return pq;
         } else {
-          // Path pqp = new Path(pq);
-          // Iterator<Position> reverseIterator = p.getPath().descendingIterator();
-          // while (reverseIterator.hasNext()) {
-          //   pqp.addPositionLast(reverseIterator.next());
-          // }
-          // if (pqp.valid() && pqp.isValidCycle() && pqp.visitsAllProperties()) {
+          // Path pqp = lookAhead(pq);
+          // if (pqp != null)
           //   return pqp;
-          // }
           paths.add(pq);
         }
       }
+    }
+    return null;
+  }
+
+  private static Path lookAhead(Path pq) throws Exception {
+    Path pqp = new Path(pq);
+    Iterator<Position> reverseIterator = pq.getPath().descendingIterator();
+    reverseIterator.next();
+    while (reverseIterator.hasNext()) {
+      pqp.addPositionLast(reverseIterator.next());
+    }
+    if (pqp.valid() && pqp.isValidCycle() && pqp.visitsAllProperties()) {
+      return pqp;
     }
     return null;
   }
@@ -225,7 +233,7 @@ public class InstanceSolver {
           }
           semaphore.release();
         }
-        
+
         Path solution = extendPath(instance, paths, p);
         if (solution != null)
           return solution;
