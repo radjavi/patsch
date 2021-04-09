@@ -5,8 +5,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import search.Search;
 import models.*;
-import com.google.common.collect.Table;
-import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Sets;
 
 // Import log4j classes.
 import org.apache.logging.log4j.Logger;
@@ -43,46 +42,25 @@ public class InstanceSolver {
     // paths.size());
     // Table<Position, Position, Path> bestValidPaths = HashBasedTable.create();
     // for (Path p : paths) {
-    //   bestValidPaths.put(p.getFirst(), p.getLast(), p);
+    // bestValidPaths.put(p.getFirst(), p.getLast(), p);
     // }
 
-    //System.out.println(instance.waitingTimesToString());
-    while (true) {
-      Table<Position, Position, Path> newBestValidPaths = HashBasedTable.create();
-      while (!paths.isEmpty()) {
-        Path p = paths.pop();
-        for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
-          Path pq = new Path(p);
-          pq.addPositionLast(q);
-          if (pq.valid()) {
-            if (pq.isValidCycle() && pq.visitsAllProperties()) {
-              return pq;
-            } else {
-              //logger.info(pq);
-              // Path pqp = lookAhead(pq);
-              // if (pqp != null)
-              //   return pqp; 
-              Path bestValidPq = newBestValidPaths.get(pq.getFirst(), q);
-              if (bestValidPq == null || !bestValidPq.betterThan(pq)) {
-                //bestValidPaths.put(pq.getFirst(), q, pq);
-                newBestValidPaths.put(pq.getFirst(), q, pq);
-              }
-            }
-          }
-        }
-      }
-      //logger.info(newBestValidPaths);
-      if (newBestValidPaths.isEmpty())
-        break;
-      paths.addAll(newBestValidPaths.values());
+    HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
+    // System.out.println(instance.waitingTimesToString());
+    // int nrPaths = 0;
+    while (!paths.isEmpty()) {
+      Path p = paths.pop();
+      // nrPaths++;
+      Path solution = extendPath(instance, fingerprints, paths, p);
+      if (solution != null)
+        return solution;
     }
-    //logger.info(bestValidPaths);
-
+    // logger.info("nrPaths: {}", nrPaths);
     return null;
   }
 
-  private static Path extendPath(Instance instance, AbstractCollection<Path> paths, Path p)
-      throws Exception {
+  private static Path extendPath(Instance instance, Set<ArrayList<Integer>> fingerprints,
+      AbstractCollection<Path> paths, Path p) throws Exception {
     for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
       Path pq = new Path(p);
       pq.addPositionLast(q);
@@ -92,8 +70,12 @@ public class InstanceSolver {
         } else {
           // Path pqp = lookAhead(pq);
           // if (pqp != null)
-          //   return pqp;
-          paths.add(pq);
+          // return pqp;
+          ArrayList<Integer> fingerprint = pq.fingerprint();
+          if (!fingerprints.contains(fingerprint)) {
+            fingerprints.add(fingerprint);
+            paths.add(pq);
+          }
         }
       }
     }
@@ -137,8 +119,10 @@ public class InstanceSolver {
     Semaphore available = new Semaphore(1, true);
     AtomicInteger nrBlocked = new AtomicInteger(0);
     ArrayList<Callable<Path>> callables = new ArrayList<>();
+    Set<ArrayList<Integer>> fingerprints = Sets.newConcurrentHashSet();
     for (int i = 0; i < nrTasks; i++) {
-      callables.add(new ParallelInstanceSolver(paths, instance, nrBlocked, nrTasks, available));
+      callables.add(
+          new ParallelInstanceSolver(paths, fingerprints, instance, nrBlocked, nrTasks, available));
     }
 
     return executor.getExecutor().invokeAny(callables);
@@ -230,14 +214,17 @@ public class InstanceSolver {
 
   private static class ParallelInstanceSolver implements Callable<Path> {
     private final ConcurrentLinkedQueue<Path> paths;
+    private final Set<ArrayList<Integer>> fingerprints;
     private final Instance instance;
     private final AtomicInteger nrBlocked;
     private final int nrThreads;
     private final Semaphore semaphore;
 
-    public ParallelInstanceSolver(ConcurrentLinkedQueue<Path> paths, Instance instance,
-        AtomicInteger nrBlocked, int nrThreads, Semaphore semaphore) {
+    public ParallelInstanceSolver(ConcurrentLinkedQueue<Path> paths,
+        Set<ArrayList<Integer>> fingerprints, Instance instance, AtomicInteger nrBlocked,
+        int nrThreads, Semaphore semaphore) {
       this.paths = paths;
+      this.fingerprints = fingerprints;
       this.instance = instance;
       this.nrBlocked = nrBlocked;
       this.nrThreads = nrThreads;
@@ -261,7 +248,7 @@ public class InstanceSolver {
           semaphore.release();
         }
 
-        Path solution = extendPath(instance, paths, p);
+        Path solution = extendPath(instance, fingerprints, paths, p);
         if (solution != null)
           return solution;
       }

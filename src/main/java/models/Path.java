@@ -33,14 +33,14 @@ public class Path {
         }
       }
     }
-    this.path = (LinkedList<Position>) path.clone();
+    this.path = new LinkedList<Position>(path);
     s_i = initIntArray(instance.getM() + 1, -1);
     f_i = initIntArray(instance.getM() + 1, -1);
     computeIndices();
   }
 
   public Path(Path path) {
-    this.path = (LinkedList<Position>) path.getPath().clone();
+    this.path = new LinkedList<Position>(path.getPath());
     this.instance = path.instance;
     this.s_i = path.s_i.clone();
     this.f_i = path.f_i.clone();
@@ -252,27 +252,23 @@ public class Path {
     return RedundantPaths.length2(this) || RedundantPaths.length3(this);
   }
 
-  public boolean betterThan(Path path) {
-    if (!this.getFirst().equals(path.getFirst()) || !this.getLast().equals(path.getLast()))
-      return false;
-    // if (this.getLength() < path.getLength() - 1)
-    //   return false;
-    // TODO 
-    // Check if the paths visits the properties equal amount of times
-    for (int i = 0; i < getF_i().length; i++) {
-      if (this.getF_i()[i] == -1 && path.getF_i()[i] >= 0)
-        return false;
+  /**
+   * The fingerprint of a path from position s to position f is an array that contains:
+   * [s_x, s_y, t_x, t_y, s-s_0, ..., s-s_m, f-f_0, ..., f-f_m]
+   * 
+   * @return
+   */
+  public ArrayList<Integer> fingerprint() {
+    ArrayList<Integer> fingerprint = new ArrayList<>();
+    fingerprint.add(this.getFirst().getX());
+    fingerprint.add(this.getFirst().getY());
+    fingerprint.add(this.getLast().getX());
+    fingerprint.add(this.getLast().getY());
+    for (int p = 0; p < this.getS_i().length; p++) {
+      fingerprint.add(this.getS_i()[p] < 0 ? this.getLength() : this.getS_i()[p]);
+      fingerprint.add(this.getF_i()[p] < 0 ? this.getLength() : this.getLength() - this.getF_i()[p]);
     }
-
-    int sum1 = 0;
-    int sum2 = 0;
-    for (int i = 0; i < getF_i().length; i++) {
-      sum1 += this.getLength() - getF_i()[i];
-    }
-    for (int i = 0; i < path.getF_i().length; i++) {
-      sum2 += path.getLength() - path.getF_i()[i];
-    }
-    return sum1 < sum2;
+    return fingerprint;
   }
 
   @Override

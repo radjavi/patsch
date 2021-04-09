@@ -45,7 +45,7 @@ public class App {
         // System.out.println( "f:" + Arrays.toString(path2.getF_i()) +  " s: "+Arrays.toString( path2.getS_i()));
         // System.out.println(path1.betterThan(path2));
 
-        //int[] waitingTimes = new int[]{10,5,2,3,4,8,10};
+        //int[] waitingTimes = new int[]{16,16,7,16,2,16,16,16,16};
         //Arrays.fill(waitingTimes, 2*m);
         //Instance i = new Instance(waitingTimes);
         //System.out.println(i.getValidGraph().toStringTriangle());
