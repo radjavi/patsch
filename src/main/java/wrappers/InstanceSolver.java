@@ -45,33 +45,27 @@ public class InstanceSolver {
       Path p = paths.pop();
       nrPaths++;
       Path solution = extendPath(instance, paths, p);
-        if (solution != null) {
-          logger.trace("{} visited {} paths (feasible)", instance.waitingTimesToString(), nrPaths);
-          return solution;
-        }
+      if (solution != null) {
+        logger.trace("{} visited {} paths (feasible)", instance.waitingTimesToString(), nrPaths);
+        return solution;
+      }
     }
     logger.trace("{} visited {} paths (infeasible)", instance.waitingTimesToString(), nrPaths);
     return null;
   }
 
-  private static Path extendPath(Instance instance, AbstractCollection<Path> paths, Path p) throws Exception {
+  private static Path extendPath(Instance instance, AbstractCollection<Path> paths, Path p)
+      throws Exception {
     for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
       Path pq = new Path(p);
       pq.addPositionLast(q);
-      if (redundantPath(pq))
-        continue;
-      if (pq.valid()) {
+      if (!pq.redundant() && pq.valid()) {
         if (pq.isValidCycle() && pq.visitsAllProperties()) {
           return pq;
         } else {
-          Path pqp = new Path(pq);
-          Iterator<Position> reverseIterator = p.getPath().descendingIterator();
-          while (reverseIterator.hasNext()) {
-            pqp.addPositionLast(reverseIterator.next());
-          }
-          if (pqp.valid() && pqp.isValidCycle() && pqp.visitsAllProperties()) {
-            return pqp;
-          }
+          // Path pqp = lookAhead(pq);
+          // if (pqp != null)
+          //   return pqp;
           paths.add(pq);
         }
       }
@@ -79,21 +73,17 @@ public class InstanceSolver {
     return null;
   }
 
-  private static boolean redundantPath(Path pq) throws Exception {
-    return redundantPathOfLength3(pq);
-  }
-
-  private static boolean redundantPathOfLength3(Path pq) {
-    Position antepenultimate = pq.getPath().get(pq.getPath().size() - 3);
-    Position q = pq.getLast();
-    // Diagonal
-    if (Math.abs(antepenultimate.getX() - q.getX()) == 1 && Math.abs(antepenultimate.getY() - q.getY()) == 1)
-      return true;
-
-    // Parallelogram
-
-
-    return false;
+  private static Path lookAhead(Path pq) throws Exception {
+    Path pqp = new Path(pq);
+    Iterator<Position> reverseIterator = pq.getPath().descendingIterator();
+    reverseIterator.next();
+    while (reverseIterator.hasNext()) {
+      pqp.addPositionLast(reverseIterator.next());
+    }
+    if (pqp.valid() && pqp.isValidCycle() && pqp.visitsAllProperties()) {
+      return pqp;
+    }
+    return null;
   }
 
   private static Path solveParallel(Instance instance) throws Exception {
@@ -172,7 +162,8 @@ public class InstanceSolver {
     return path;
   }
 
-  private static void initPathsToSolve(Instance instance, AbstractCollection<Path> paths) throws Exception {
+  private static void initPathsToSolve(Instance instance, AbstractCollection<Path> paths)
+      throws Exception {
     HashMap<Position, HashSet<Position>> addedPaths = new HashMap<>();
     Property[] properties = instance.getProperties();
     int minNrNeighbours = Integer.MAX_VALUE;
@@ -217,8 +208,8 @@ public class InstanceSolver {
     private final int nrThreads;
     private final Semaphore semaphore;
 
-    public ParallelInstanceSolver(ConcurrentLinkedQueue<Path> paths, Instance instance, AtomicInteger nrBlocked,
-        int nrThreads, Semaphore semaphore) {
+    public ParallelInstanceSolver(ConcurrentLinkedQueue<Path> paths, Instance instance,
+        AtomicInteger nrBlocked, int nrThreads, Semaphore semaphore) {
       this.paths = paths;
       this.instance = instance;
       this.nrBlocked = nrBlocked;

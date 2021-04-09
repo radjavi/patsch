@@ -1,6 +1,7 @@
 package models;
 
 import java.util.*;
+import wrappers.RedundantPaths;
 
 public class Path {
 
@@ -24,8 +25,7 @@ public class Path {
 
   public Path(Instance instance, LinkedList<Position> path) {
     this.instance = instance;
-    this.path = new LinkedList<Position>();
-    this.path.addAll(path);
+    this.path = (LinkedList<Position>) path.clone();
     s_i = initIntArray(instance.getM() + 1, -1);
     f_i = initIntArray(instance.getM() + 1, -1);
     computeIndices();
@@ -128,7 +128,7 @@ public class Path {
     for (Property property : properties) {
       int p = property.getIndex();
       ListIterator<Position> iterator = path.listIterator();
-      int i = 0;
+      int i = 0;    
       while (iterator.hasNext()) {
         if (property.hasPosition(iterator.next())) {
           s_i[p] = i;
@@ -136,10 +136,12 @@ public class Path {
         }
         i++;
       }
+      if (i == path.size())
+        return;
       Iterator<Position> iteratorReverse = path.descendingIterator();
       i = path.size() - 1;
       while (iteratorReverse.hasNext()) {
-        if (property.hasPosition(iterator.next())) {
+        if (property.hasPosition(iteratorReverse.next())) {
           f_i[p] = i;
           break;
         }
@@ -204,6 +206,10 @@ public class Path {
     return f_i;
   }
 
+  public Instance getInstance() {
+    return instance;
+  }
+
   public boolean isValidCycle() {
     if (!this.isCycle())
       return false;
@@ -232,6 +238,10 @@ public class Path {
         return false;
     }
     return true;
+  }
+
+  public boolean redundant() throws Exception {
+    return RedundantPaths.length2(this) || RedundantPaths.length3(this);
   }
 
   @Override

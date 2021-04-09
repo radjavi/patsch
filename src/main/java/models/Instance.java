@@ -255,6 +255,16 @@ public class Instance {
         return properties;
     }
 
+    public Property getProperty(int index) {
+        if (index < 0 || index >= properties.length)
+            return null;
+        return properties[index];
+    }
+
+    public int getPropertyWaitingTime(int index) {
+        return getProperty(index).getWaitingTime();
+    }
+
     public Instance getReversed() {
         int[] waitingTimes = this.getWaitingTimes();
         int m = this.m;

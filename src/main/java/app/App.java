@@ -26,10 +26,10 @@ public class App {
             return;
         }
         SingleExecutor executor = SingleExecutor.init(nrThreads);
-        //int[] waitingTimes = new int[]{14,14,5,14,2,14,14,14};
+        //int[] waitingTimes = new int[]{16,16,7,16,2,16,16,16,16};
         //Arrays.fill(waitingTimes, 2*m);
         //Instance i = new Instance(waitingTimes);
-        // System.out.println(i.getValidGraph().toStringTriangle());
+        //System.out.println(i.getValidGraph().toStringTriangle());
         long startTime = System.nanoTime();
         Search.searchForCriticalInstances(m);
         //logger.info(i.solve());
