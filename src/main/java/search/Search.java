@@ -33,7 +33,7 @@ public class Search {
         LinkedList<Instance> U = new LinkedList<>();
         HashMap<Instance, Path> C = new HashMap<>();
         HashSet<Instance> visitedInstances = new HashSet<>();
-        int r = 2 * m;
+        int r = 3 * m;
 
         // INIT
         logger.info("Generating M_0...");
@@ -157,7 +157,7 @@ public class Search {
         ConcurrentLinkedQueue<Instance> U = new ConcurrentLinkedQueue<>();
         ConcurrentHashMap<Instance, Path> C = new ConcurrentHashMap<>();
         Set<Instance> visitedInstances = ConcurrentHashMap.newKeySet();
-        int r = 2 * m;
+        int r = 3 * m;
 
         // INIT
         logger.info("Generating M_0...");
