@@ -12,13 +12,13 @@ public class Instance {
     private PositionGraph validGraph;
     private Integer a;
     private Integer b;
-    private DistanceCache shortestDistances;
+    private PropertyPositionDistances shortestDistances;
     private int[] waitingTimes;
 
     private static final Logger logger = LogManager.getLogger(Instance.class);
 
     public Instance(int[] waitingTimes) {
-        shortestDistances = new DistanceCache();
+        shortestDistances = new PropertyPositionDistances();
         m = waitingTimes.length - 1;
         this.waitingTimes = waitingTimes.clone();
         for (int i = 0; i <= m; i++) {
