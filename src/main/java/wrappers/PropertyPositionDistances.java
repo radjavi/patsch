@@ -1,14 +1,14 @@
 package wrappers;
 
 import models.*;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PropertyPositionDistances {
 
-    private HashMap<PropertyPosition, Integer> cache;
+    private ConcurrentHashMap<PropertyPosition, Integer> cache;
 
     public PropertyPositionDistances() {
-        cache = new HashMap<>();
+        cache = new ConcurrentHashMap<>();
     }
 
     public <F, T> void setDistance(F from, T to, int distance) {

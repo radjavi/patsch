@@ -75,26 +75,26 @@ public class RedundantPaths {
       // Parallelogram
       case "NE,N": // Parallelogram
       case "SE,S": // Parallelogram
-      // case "N,SW": // Hourglass
-      // case "S,NW": // Hourglass
+      case "NE,S": // Hourglass
+      case "SE,N": // Hourglass
         intermediate = new Position(penultimate.getX() - 1, penultimate.getY());
         break;
       case "NW,N": // Parallelogram
       case "SW,S": // Parallelogram
-      // case "N,SE": // Hourglass
-      // case "S,NE": // Hourglass
+      case "NW,S": // Hourglass
+      case "SW,N": // Hourglass
         intermediate = new Position(penultimate.getX() + 1, penultimate.getY());
         break;
       case "NE,E": // Parallelogram
       case "NW,W": // Parallelogram
-      // case "E,SW": // Hourglass
-      // case "W,SE": // Hourglass
+      case "NE,W": // Hourglass
+      case "NW,E": // Hourglass
         intermediate = new Position(penultimate.getX(), penultimate.getY() - 1);
         break;
       case "SE,E": // Parallelogram
       case "SW,W": // Parallelogram
-      // case "E,NW": // Hourglass
-      // case "W,NE": // Hourglass
+      case "SE,W": // Hourglass
+      case "SW,E": // Hourglass
         intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
         break;
     }

@@ -47,15 +47,17 @@ public class InstanceSolver {
 
     HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
     // System.out.println(instance.waitingTimesToString());
-    // int nrPaths = 0;
+    int nrPaths = 0;
     while (!paths.isEmpty()) {
       Path p = paths.pop();
-      // nrPaths++;
+      nrPaths++;
       Path solution = extendPath(instance, fingerprints, paths, p);
-      if (solution != null)
+      if (solution != null) {
+        logger.info("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
         return solution;
+      }
     }
-    // logger.info("nrPaths: {}", nrPaths);
+    logger.info("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
     return null;
   }
 
