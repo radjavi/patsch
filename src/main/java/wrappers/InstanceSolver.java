@@ -16,14 +16,15 @@ public class InstanceSolver {
   private static final Logger logger = LogManager.getLogger(InstanceSolver.class);
 
   public static Path solve(Instance instance) throws Exception {
-    SingleExecutor executor = SingleExecutor.getInstance();
-    if (executor == null) {
-      return solveSequential(instance);
-    }
-    return solveParallel(instance);
+    // SingleExecutor executor = SingleExecutor.getInstance();
+    // if (executor == null) {
+    //   return solveSequential(instance);
+    // }
+    // return solveParallel(instance);
+    return solveSequential(instance);
   }
 
-  private static Path solveSequential(Instance instance) throws Exception {
+  public static Path solveSequential(Instance instance) throws Exception {
     int m = instance.getM();
     if (instance.getA() > instance.getB()) {
       // Find correct d to return path from Proposition 1.
@@ -47,17 +48,17 @@ public class InstanceSolver {
 
     HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
     // System.out.println(instance.waitingTimesToString());
-    int nrPaths = 0;
+    //int nrPaths = 0;
     while (!paths.isEmpty()) {
       Path p = paths.pop();
-      nrPaths++;
+      //nrPaths++;
       Path solution = extendPath(instance, fingerprints, paths, p);
       if (solution != null) {
-        logger.info("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
+        //logger.info("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
         return solution;
       }
     }
-    logger.info("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
+    //logger.info("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
     return null;
   }
 
@@ -97,7 +98,7 @@ public class InstanceSolver {
     return null;
   }
 
-  private static Path solveParallel(Instance instance) throws Exception {
+  public static Path solveParallel(Instance instance) throws Exception {
     int m = instance.getM();
     if (instance.getA() > instance.getB()) {
       // Find correct d to return path from Proposition 1.
