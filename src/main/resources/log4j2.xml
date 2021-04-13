@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
+  <!-- Define custom levels before using them for filtering below. -->
+  <CustomLevels>
+    <CustomLevel name="RESULT" intLevel="350" />
+  </CustomLevels>
+
   <Appenders>
     <RollingFile 
       name="LogFile" 
-      fileName="logs/${date:yyyy-MM-dd}/app.log" 
-      filePattern="logs/%d{yyyy-MM-dd}/app_%i.log">
+      fileName="logs/${date:yyyy-MM-dd}/log/app-${date:HH:mm:ss}.log" 
+      filePattern="logs/%d{yyyy-MM-dd}/log/app-%d{HH:mm:ss}_%i.log">
       <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
       <Policies>
         <OnStartupTriggeringPolicy />
-        <TimeBasedTriggeringPolicy />
       </Policies>
       
       <DefaultRolloverStrategy max="1000" />
@@ -17,11 +21,31 @@
     <Console name="Console" target="SYSTEM_OUT">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
     </Console>
+
+    <RollingFile 
+      name="ResultFile" 
+      fileName="logs/${date:yyyy-MM-dd}/result/result-${date:HH:mm:ss}.log" 
+      filePattern="logs/%d{yyyy-MM-dd}/result/result-%d{HH:mm:ss}_%i.log">
+      <PatternLayout pattern="%msg%n"/>
+      <Policies>
+        <OnStartupTriggeringPolicy />
+      </Policies>
+      
+      <DefaultRolloverStrategy max="1000" />
+
+      <Filters>
+        <!-- First deny warn, error and fatal messages -->
+        <ThresholdFilter level="warn"  onMatch="DENY" onMismatch="NEUTRAL"/>
+        <!-- Then accept result, warn, error, fatal and deny debug/trace -->
+        <ThresholdFilter level="result"  onMatch="ACCEPT" onMismatch="DENY"/>
+    </Filters>
+    </RollingFile>
   </Appenders>
   <Loggers>
     <Root level="all">
       <AppenderRef ref="LogFile" level="all"/>
       <AppenderRef ref="Console" level="info"/>
+      <AppenderRef ref="ResultFile" level="result"/><!-- ONLY 'result' here -->
     </Root>
   </Loggers>
 </Configuration>

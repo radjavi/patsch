@@ -7,9 +7,11 @@ import java.util.*;
 
 // Import log4j classes.
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 
 public class Search {
+    final static Level RESULT = Level.forName("RESULT", 350);
     private static final Logger logger = LogManager.getLogger(Search.class);
 
     /**
@@ -130,8 +132,10 @@ public class Search {
         }
 
         logger.info("----- {} CRITICAL INSTANCES -----", C.size());
+        logger.log(RESULT, "m={}", m);
         C.forEach((i, s) -> {
-            logger.info("{}: {}", i.waitingTimesToString(), s);
+            //logger.info("{}: {}", i.waitingTimesToString(), s);
+            logger.log(RESULT, "{} {}", i.waitingTimesToString(), s);
         });
         logger.info("---------------------------------");
 
