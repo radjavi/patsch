@@ -46,3 +46,6 @@ build
 
 # Bin
 bin/*
+
+#visualizer
+visualizer/figures
