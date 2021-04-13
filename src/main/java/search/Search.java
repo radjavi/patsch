@@ -240,8 +240,10 @@ public class Search {
         }
 
         logger.info("----- {} CRITICAL INSTANCES -----", C.size());
+        logger.log(RESULT, "m={}", m);
         C.forEach((i, s) -> {
-            logger.info("{}: {}", i.waitingTimesToString(), s);
+            //logger.info("{}: {}", i.waitingTimesToString(), s);
+            logger.log(RESULT, "{} {}", i.waitingTimesToString(), s);
         });
         logger.info("---------------------------------");
 
