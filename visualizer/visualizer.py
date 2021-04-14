@@ -3,10 +3,12 @@ import re
 import matplotlib.pyplot as plt
 import sys
 import os
+import json
 from pathlib import Path
 
 
 def plotVisualizer(solution, m, instance):
+    instanceList = json.loads(instance)
     CoordinatesX = []
     CoordinatesY = []
     tuples = re.findall("\([0-9]+\,[0-9]+\)", solution)
@@ -18,13 +20,21 @@ def plotVisualizer(solution, m, instance):
 
     X_zipped = list(zip(*CoordinatesX))
     Y_zipped = list(zip(*CoordinatesY))
-    figure = plt.figure()
-    plt.plot((X_zipped[0]), (X_zipped[1]))
-    plt.plot((Y_zipped[0]), (Y_zipped[1]))
+    fig, ax = plt.subplots()
+    plt.plot((X_zipped[0]), (X_zipped[1]), marker='o', label="Robot 1")
+    plt.plot((Y_zipped[0]), (Y_zipped[1]), marker='o', label="Robot 2")
+    ax.set_yticklabels(["-"] + [f"({t}) {i}" for i, t in enumerate(instanceList)] + ["-"])
     plt.axis([0, len(path)-1, -1, m+1])
+    plt.xticks(range(0, len(path)))
+    plt.grid(True, linestyle="dashed")
+    plt.legend()
+    plt.title(instance)
+    plt.ylabel("(Waiting Time) Station")
+    plt.xlabel("Time unit")
 
-    figure.savefig("figures/m="+str(m) + "/" + instance)
+    fig.savefig("figures/m="+str(m) + "/" + instance)
     plt.close()
+    print(f"{instanceList} done.")
 
 
 if __name__ == "__main__":
