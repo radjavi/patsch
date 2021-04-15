@@ -45,10 +45,12 @@ public class App {
         // System.out.println( "f:" + Arrays.toString(path2.getF_i()) +  " s: "+Arrays.toString( path2.getS_i()));
         // System.out.println(path1.betterThan(path2));
 
-        //int[] waitingTimes = new int[]{16,16,7,16,2,16,16,16,16};
-        //Arrays.fill(waitingTimes, 2*m);
-        //Instance i = new Instance(waitingTimes);
-        //System.out.println(i.getValidGraph().toStringTriangle());
+        // int r = Integer.MAX_VALUE;
+        // int[] waitingTimes = new int[]{24,4,2,24,24,24,24,24,24};
+        // //Arrays.fill(waitingTimes, 2*m);
+        // Instance i = new Instance(waitingTimes);
+        // System.out.println(i.getValidGraph().toStringTriangle());
+        // logger.info("[{},{}]", i.getA(), i.getB());
         long startTime = System.nanoTime();
         Search.searchForCriticalInstances(m);
         //logger.info(i.solve());

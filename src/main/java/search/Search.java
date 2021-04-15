@@ -157,7 +157,7 @@ public class Search {
         ConcurrentLinkedQueue<Instance> U = new ConcurrentLinkedQueue<>();
         ConcurrentHashMap<Instance, Path> C = new ConcurrentHashMap<>();
         Set<Instance> visitedInstances = ConcurrentHashMap.newKeySet();
-        int r = 3 * m;
+        int r = 4 * m;
 
         // INIT
         logger.info("Generating M_0...");
@@ -200,7 +200,9 @@ public class Search {
         SingleExecutor executor = SingleExecutor.getInstance();
         ConcurrentLinkedQueue<Instance> UNext = new ConcurrentLinkedQueue<>();
         logger.info("Searching for critical instances...");
+        int level = 0;
         while (true) {
+            logger.info("Level: {}, Size of U: {}", level, U.size());
             ArrayList<Callable<List<Instance>>> callables = new ArrayList<>();
             for (Instance u : U) {
                 callables.add(new ParallelSearchWorker(u, C, maximalInfeasibleInstances,
@@ -215,6 +217,7 @@ public class Search {
             U.clear();
             U.addAll(UNext);
             UNext.clear();
+            level++;
         }
         logger.info("Found critical instances");
 
@@ -266,7 +269,7 @@ public class Search {
             // logger.info("maximal size: {}, visited size: {}",
             // maximalInfeasibleInstances.size(), visitedInstances.size());
             Instance u = U.pop();
-            // logger.info("Solving {}...", u.waitingTimesToString());
+            //logger.info("{}", u.waitingTimesToString());
             Path solution = u.solve();
             if (solution != null) {
                 for (int i = 0; i <= m; i++) {
