@@ -14,12 +14,12 @@ public class Search {
     final static Level RESULT = Level.forName("RESULT", 350);
     private static final Logger logger = LogManager.getLogger(Search.class);
 
-    public static Map<Instance, Path> searchForCriticalInstances(int m) throws Exception {
+    public static Map<Instance, Path> searchForCriticalInstances(int m, int r) throws Exception {
         SingleExecutor executor = SingleExecutor.getInstance();
         if (executor == null) {
-            return searchForCriticalInstancesSequential(m);
+            return searchForCriticalInstancesSequential(m, r);
         }
-        return searchForCriticalInstancesParallel(m);
+        return searchForCriticalInstancesParallel(m, r);
     }
 
     /**
@@ -27,13 +27,12 @@ public class Search {
      * @return
      * @throws Exception
      */
-    public static Map<Instance, Path> searchForCriticalInstancesSequential(int m) throws Exception {
+    public static Map<Instance, Path> searchForCriticalInstancesSequential(int m, int r) throws Exception {
         if (m < 2)
             return null;
         LinkedList<Instance> U = new LinkedList<>();
         HashMap<Instance, Path> C = new HashMap<>();
         HashSet<Instance> visitedInstances = new HashSet<>();
-        int r = 3 * m;
 
         // INIT
         logger.info("Generating M_0...");
@@ -151,13 +150,12 @@ public class Search {
 
     }
 
-    public static Map<Instance, Path> searchForCriticalInstancesParallel(int m) throws Exception {
+    public static Map<Instance, Path> searchForCriticalInstancesParallel(int m, int r) throws Exception {
         if (m < 2)
             return null;
         ConcurrentLinkedQueue<Instance> U = new ConcurrentLinkedQueue<>();
         ConcurrentHashMap<Instance, Path> C = new ConcurrentHashMap<>();
         Set<Instance> visitedInstances = ConcurrentHashMap.newKeySet();
-        int r = 4 * m;
 
         // INIT
         logger.info("Generating M_0...");

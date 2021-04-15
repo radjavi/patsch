@@ -25,6 +25,11 @@ public class App {
             logger.fatal("Number of threads must be greater than 0");
             return;
         }
+        int r = args.length > 2 ? Integer.parseInt(args[2]) : 4 * m;
+        if (r < 1) {
+            logger.fatal("Roof value must be greater than 1");
+            return;
+        }
         SingleExecutor executor = SingleExecutor.init(nrThreads);
         // Path path1 = new Path(new Instance(new int[]{10,5,2,3,4,8,10}));
         // Path path2 = new Path(new Instance(new int[]{10,5,2,3,4,8,10}));
@@ -52,7 +57,7 @@ public class App {
         // System.out.println(i.getValidGraph().toStringTriangle());
         // logger.info("[{},{}]", i.getA(), i.getB());
         long startTime = System.nanoTime();
-        Search.searchForCriticalInstances(m);
+        Search.searchForCriticalInstances(m, r);
         //logger.info(i.solve());
         long stopTime = System.nanoTime();
         logger.info("Search took {} seconds.", (stopTime - startTime) * 1e-9);
