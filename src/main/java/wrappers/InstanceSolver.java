@@ -86,7 +86,7 @@ public class InstanceSolver {
   private static LinkedList<Path> findWildcardPathsLeft(Instance instance) throws Exception {
     LinkedList<Path> validPaths = new LinkedList<>();
     int a = instance.getA();
-    if (a <= 1)
+    if (a == 0)
       return validPaths;
     int[] ys = new int[2 * (a + 1) - 1];
     int value = a;
@@ -136,7 +136,7 @@ public class InstanceSolver {
     LinkedList<Path> validPaths = new LinkedList<>();
     int m = instance.getM();
     int b = instance.getB();
-    if (b >= m - 1)
+    if (b == m)
       return validPaths;
     int[] xs = new int[2 * (m - b + 1) - 1];
     int value = b;
