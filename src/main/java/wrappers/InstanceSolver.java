@@ -54,17 +54,17 @@ public class InstanceSolver {
 
     HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
     // System.out.println(instance.waitingTimesToString());
-    // int nrPaths = 0;
+    int nrPaths = 0;
     while (!paths.isEmpty()) {
       Path p = paths.pop();
-      // nrPaths++;
+      nrPaths++;
       Path solution = extendPath(instance, fingerprints, paths, p);
       if (solution != null) {
-        // logger.info("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
+        logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
         return solution;
       }
     }
-    // logger.info("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
+    logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
     return null;
   }
 
@@ -187,7 +187,7 @@ public class InstanceSolver {
     for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
       Path pq = new Path(p);
       pq.addPositionLast(q);
-      if (!pq.redundant() && pq.valid()) {
+      if (pq.valid()) {
         if (pq.isValidCycle() && pq.visitsAllProperties()) {
           return pq;
         } else {
@@ -195,7 +195,7 @@ public class InstanceSolver {
           // if (pqp != null)
           // return pqp;
           ArrayList<Integer> fingerprint = pq.fingerprint();
-          if (!fingerprints.contains(fingerprint)) {
+          if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
             fingerprints.add(fingerprint);
             paths.add(pq);
           }
