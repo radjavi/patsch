@@ -89,7 +89,6 @@ public class InstanceSolver {
     int a = instance.getA();
     if (a == 0)
       return validPaths;
-    HashSet<ArrayList<Integer>> fingerPrints = new HashSet<>();
     int[] ys = new int[2 * (a + 1) - 1];
     int value = a;
     int step = -1;
@@ -115,6 +114,7 @@ public class InstanceSolver {
       }
     }
 
+    HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
     while (!paths.isEmpty()) {
       Path p = paths.pop();
       for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
@@ -124,9 +124,9 @@ public class InstanceSolver {
         Path pq = new Path(p);
         pq.addPositionLast(q);
         if (pq.valid()) {
-          ArrayList<Integer> fingerPrint = pq.fingerprint();
-          if (!fingerPrints.contains(fingerPrint) && !pq.redundant()) {
-            fingerPrints.add(fingerPrint);
+          ArrayList<Integer> fingerprint = pq.fingerprint();
+          if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
+            fingerprints.add(fingerprint);
             if ((length == ys.length - 1))
               validPaths.add(pq);
             else
@@ -146,7 +146,6 @@ public class InstanceSolver {
     if (b == m)
       return validPaths;
     int[] xs = new int[2 * (m - b + 1) - 1];
-    HashSet<ArrayList<Integer>> fingerPrints = new HashSet<>();
     int value = b;
     int step = 1;
     for (int x = 0; x < xs.length; x++) {
@@ -171,6 +170,7 @@ public class InstanceSolver {
       }
     }
 
+    HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
     while (!paths.isEmpty()) {
       Path p = paths.pop();
       for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
@@ -180,9 +180,9 @@ public class InstanceSolver {
         Path pq = new Path(p);
         pq.addPositionLast(q);
         if (pq.valid()) {
-          ArrayList<Integer> fingerPrint = pq.fingerprint();
-          if (!fingerPrints.contains(fingerPrint) && !pq.redundant()) {
-            fingerPrints.add(fingerPrint);
+          ArrayList<Integer> fingerprint = pq.fingerprint();
+          if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
+            fingerprints.add(fingerprint);
             if ((length == xs.length - 1))
               validPaths.add(pq);
             else
