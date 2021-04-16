@@ -71,7 +71,7 @@ public class InstanceSolver {
   private static LinkedList<Path> findWildcardPaths(Instance instance) throws Exception {
     LinkedList<Path> validPaths = new LinkedList<>();
     LinkedList<Path> leftPaths = findWildcardPathsLeft(instance);
-    
+
     if (leftPaths == null)
       return null;
     else
@@ -123,25 +123,19 @@ public class InstanceSolver {
           continue;
         Path pq = new Path(p);
         pq.addPositionLast(q);
-        ArrayList<Integer> fingerPrint = pq.fingerprint();
         if (pq.valid()) {
-          if ((length == ys.length - 1) ){
-           if( !pq.redundant() && !fingerPrints.contains(fingerPrint)){
-            validPaths.add(pq);
+          ArrayList<Integer> fingerPrint = pq.fingerprint();
+          if (!fingerPrints.contains(fingerPrint) && !pq.redundant()) {
             fingerPrints.add(fingerPrint);
-           }
-              
+            if ((length == ys.length - 1))
+              validPaths.add(pq);
+            else
+              paths.add(pq);
           }
-           
-          else{
-            paths.add(pq);
-           
-          }
-          
         }
       }
     }
-    
+
     return validPaths.isEmpty() ? null : validPaths;
   }
 
@@ -185,17 +179,14 @@ public class InstanceSolver {
           continue;
         Path pq = new Path(p);
         pq.addPositionLast(q);
-        ArrayList<Integer> fingerPrint = pq.fingerprint();
         if (pq.valid()) {
-          if ((length == xs.length - 1)){
-            if (!pq.redundant() && !fingerPrints.contains(fingerPrint)){
+          ArrayList<Integer> fingerPrint = pq.fingerprint();
+          if (!fingerPrints.contains(fingerPrint) && !pq.redundant()) {
+            fingerPrints.add(fingerPrint);
+            if ((length == xs.length - 1))
               validPaths.add(pq);
-              fingerPrints.add(fingerPrint);
-            }
-              
-          }
-          else{
-            paths.add(pq);            
+            else
+              paths.add(pq);
           }
         }
       }
@@ -208,7 +199,7 @@ public class InstanceSolver {
     for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
       Path pq = new Path(p);
       pq.addPositionLast(q);
-      if ( pq.valid()) {
+      if (pq.valid()) {
         if (pq.isValidCycle() && pq.visitsAllProperties()) {
           return pq;
         } else {
@@ -216,7 +207,7 @@ public class InstanceSolver {
           // if (pqp != null)
           // return pqp;
           ArrayList<Integer> fingerprint = pq.fingerprint();
-          if (!pq.redundant() && !fingerprints.contains(fingerprint)) {
+          if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
             fingerprints.add(fingerprint);
             paths.add(pq);
           }
