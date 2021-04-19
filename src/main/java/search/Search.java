@@ -153,7 +153,7 @@ public class Search {
     public static Map<Instance, Path> searchForCriticalInstancesParallel(int m, int r) throws Exception {
         if (m < 2)
             return null;
-        ConcurrentLinkedQueue<Instance> U = new ConcurrentLinkedQueue<>();
+        InstanceLevelBuckets U = new InstanceLevelBuckets();
         ConcurrentHashMap<Instance, Path> C = new ConcurrentHashMap<>();
         Set<Instance> visitedInstances = ConcurrentHashMap.newKeySet();
 
@@ -162,11 +162,6 @@ public class Search {
         HashMap<Instance, Path> m_0 = criticalsWithEmptyIntersection(m);
         logger.debug("Generated M_0 - {} instances", m_0.size());
         C.putAll(m_0); // M_0
-        logger.trace("-------- C --------");
-        C.forEach((i, s) -> {
-            logger.trace(i.waitingTimesToString() + ": " + s);
-        });
-        logger.trace("-------------------");
         // C.putAll(criticalsWithShortWaitingTimes(m)); // M_1
 
         // Generate lower bound instances
@@ -180,9 +175,14 @@ public class Search {
                 U.add(lowerBoundInstance);
             }
         }
-        logger.debug("Proceeding with {} lower bound instances", U.size());
+        //logger.debug("Proceeding with {} lower bound instances", U.allInstances().size());
+        logger.trace("-------- C --------");
+        C.forEach((i, s) -> {
+            logger.trace(i.waitingTimesToString() + ": " + s);
+        });
+        //logger.trace("-------------------");
         logger.trace("-------- U --------");
-        U.forEach(i -> logger.trace(i.waitingTimesToString()));
+        U.allInstances().forEach(i -> logger.trace(i.waitingTimesToString()));
         logger.trace("-------------------");
 
         // Generate a stock of instances
@@ -196,25 +196,26 @@ public class Search {
 
         // SEARCH
         SingleExecutor executor = SingleExecutor.getInstance();
-        ConcurrentLinkedQueue<Instance> UNext = new ConcurrentLinkedQueue<>();
         logger.info("Searching for critical instances...");
         int level = 0;
-        while (true) {
-            logger.info("Level: {}, Size of U: {}", level, U.size());
+        while (!U.isEmpty()) {
+            Set<Instance> levelInstances = U.poll(level);
+            if (levelInstances == null) {
+                level++;
+                continue;
+            }
+            logger.info("Level: {}, Size of U: {}", level, levelInstances.size());
             ArrayList<Callable<List<Instance>>> callables = new ArrayList<>();
-            for (Instance u : U) {
+            for (Instance u : levelInstances) {
                 callables.add(new ParallelSearchWorker(u, C, maximalInfeasibleInstances,
                         visitedInstances, m, r));
             }
             List<Future<List<Instance>>> futures = executor.getExecutor().invokeAll(callables);
             for (Future<List<Instance>> future : futures) {
-                UNext.addAll(future.get());
+                for (Instance i : future.get()) {
+                    U.add(i);
+                }
             }
-            if (UNext.isEmpty())
-                break;
-            U.clear();
-            U.addAll(UNext);
-            UNext.clear();
             level++;
         }
         logger.info("Found critical instances");
