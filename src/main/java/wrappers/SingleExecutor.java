@@ -14,7 +14,7 @@ public class SingleExecutor {
 
   private SingleExecutor(int nrThreads) {
     this.nrThreads = nrThreads;
-    this.executor = Executors.newFixedThreadPool(nrThreads);
+    this.executor = Executors.newWorkStealingPool(nrThreads);
   }
 
   public synchronized static SingleExecutor init(int nrThreads) {

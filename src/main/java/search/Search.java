@@ -1,10 +1,10 @@
 package search;
 
 import models.*;
-import wrappers.InstanceSolver;
-
+import wrappers.*;
 import java.util.*;
-
+import java.util.concurrent.*;
+import com.google.common.primitives.Ints;
 // Import log4j classes.
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
@@ -14,18 +14,25 @@ public class Search {
     final static Level RESULT = Level.forName("RESULT", 350);
     private static final Logger logger = LogManager.getLogger(Search.class);
 
+    public static Map<Instance, Path> searchForCriticalInstances(int m, int r) throws Exception {
+        SingleExecutor executor = SingleExecutor.getInstance();
+        if (executor == null) {
+            return searchForCriticalInstancesSequential(m, r);
+        }
+        return searchForCriticalInstancesParallel(m, r);
+    }
+
     /**
      * @param m
      * @return
      * @throws Exception
      */
-    public static HashMap<Instance, Path> searchForCriticalInstances(int m) throws Exception {
+    public static Map<Instance, Path> searchForCriticalInstancesSequential(int m, int r) throws Exception {
         if (m < 2)
             return null;
         LinkedList<Instance> U = new LinkedList<>();
         HashMap<Instance, Path> C = new HashMap<>();
         HashSet<Instance> visitedInstances = new HashSet<>();
-        int r = 2 * m;
 
         // INIT
         logger.info("Generating M_0...");
@@ -57,7 +64,7 @@ public class Search {
 
         // Generate a stock of instances
         logger.info("Generating maximal infeasible instances...");
-        HashSet<Instance> maximalInfeasibleInstances = generateStockOfInstances(m, r);
+        HashSet<Instance> maximalInfeasibleInstances = generateMaximalInfeasible(m, r);
         logger.debug("Generated {} maximal infeasible instances",
                 maximalInfeasibleInstances.size());
         logger.trace("---- Maximal Infeasible Instances ----");
@@ -81,7 +88,7 @@ public class Search {
                     break;
                 }
             }
-            ArrayList<Instance> vs = new ArrayList<>(m+1);
+            ArrayList<Instance> vs = new ArrayList<>(m + 1);
             for (int i = 0; i <= m; i++) {
                 if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] == r)
                     continue;
@@ -143,7 +150,104 @@ public class Search {
 
     }
 
-    public static HashSet<Instance> generateStockOfInstances(int m, int r) throws Exception {
+    public static Map<Instance, Path> searchForCriticalInstancesParallel(int m, int r) throws Exception {
+        if (m < 2)
+            return null;
+        InstanceLevelBuckets U = new InstanceLevelBuckets();
+        ConcurrentHashMap<Instance, Path> C = new ConcurrentHashMap<>();
+        Set<Instance> visitedInstances = ConcurrentHashMap.newKeySet();
+
+        // INIT
+        logger.info("Generating M_0...");
+        HashMap<Instance, Path> m_0 = criticalsWithEmptyIntersection(m);
+        logger.debug("Generated M_0 - {} instances", m_0.size());
+        C.putAll(m_0); // M_0
+        // C.putAll(criticalsWithShortWaitingTimes(m)); // M_1
+
+        // Generate lower bound instances
+        logger.info("Generating lower bound instances...");
+        HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
+        for (Instance lowerBoundInstance : lowerBoundInstances) {
+            Path solution = new Instance(lowerBoundInstance.getWaitingTimes()).solve();
+            if (solution != null)
+                C.put(lowerBoundInstance, solution);
+            else if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null) {
+                U.add(lowerBoundInstance);
+            }
+        }
+        //logger.debug("Proceeding with {} lower bound instances", U.allInstances().size());
+        logger.trace("-------- C --------");
+        C.forEach((i, s) -> {
+            logger.trace(i.waitingTimesToString() + ": " + s);
+        });
+        //logger.trace("-------------------");
+        logger.trace("-------- U --------");
+        U.allInstances().forEach(i -> logger.trace(i.waitingTimesToString()));
+        logger.trace("-------------------");
+
+        // Generate a stock of instances
+        logger.info("Generating maximal infeasible instances...");
+        HashSet<Instance> maximalInfeasibleInstances = generateMaximalInfeasible(m, r);
+        logger.debug("Generated {} maximal infeasible instances",
+                maximalInfeasibleInstances.size());
+        logger.trace("---- Maximal Infeasible Instances ----");
+        maximalInfeasibleInstances.forEach(i -> logger.trace(i.waitingTimesToString()));
+        logger.trace("--------------------------------------");
+
+        // SEARCH
+        SingleExecutor executor = SingleExecutor.getInstance();
+        logger.info("Searching for critical instances...");
+        int level = 0;
+        while (!U.isEmpty()) {
+            Set<Instance> levelInstances = U.poll(level);
+            if (levelInstances == null) {
+                level++;
+                continue;
+            }
+            logger.info("Level: {}, Size of U: {}", level, levelInstances.size());
+            ArrayList<Callable<List<Instance>>> callables = new ArrayList<>();
+            for (Instance u : levelInstances) {
+                callables.add(new ParallelSearchWorker(u, C, maximalInfeasibleInstances,
+                        visitedInstances, m, r));
+            }
+            List<Future<List<Instance>>> futures = executor.getExecutor().invokeAll(callables);
+            for (Future<List<Instance>> future : futures) {
+                for (Instance i : future.get()) {
+                    U.add(i);
+                }
+            }
+            level++;
+        }
+        logger.info("Found critical instances");
+
+        // Add reversed critical instances
+        logger.info("Creating reversed critical instances...");
+        HashMap<Instance, Path> CReversed = new HashMap<>();
+        for (Instance critical : C.keySet()) {
+            Instance criticalReversed = critical.getReversed();
+            if (!critical.equals(criticalReversed)) {
+                Path solution = criticalReversed.solve();
+                CReversed.put(criticalReversed, solution);
+            }
+        }
+        C.putAll(CReversed);
+
+        // Test if critical
+        logger.info("Testing if instances are critical...");
+        for (Instance i : C.keySet()) {
+            boolean critical = i.isCritical();
+            if (!critical)
+                logger.trace("{} is NOT critical", i.waitingTimesToString());
+            assert critical : i.waitingTimesToString() + " is NOT critical.";
+        }
+
+        printResults(C, m, r);
+
+        return C;
+
+    }
+
+    public static HashSet<Instance> generateMaximalInfeasible(int m, int r) throws Exception {
         HashSet<Instance> maximalInfeasibleInstances = new HashSet<>();
         HashSet<Instance> visitedInstances = new HashSet<>();
         LinkedList<Instance> U = new LinkedList<>();
@@ -158,7 +262,7 @@ public class Search {
             // logger.info("maximal size: {}, visited size: {}",
             // maximalInfeasibleInstances.size(), visitedInstances.size());
             Instance u = U.pop();
-            // logger.info("Solving {}...", u.waitingTimesToString());
+            //logger.info("{}", u.waitingTimesToString());
             Path solution = u.solve();
             if (solution != null) {
                 for (int i = 0; i <= m; i++) {
@@ -202,7 +306,7 @@ public class Search {
         return maximalInfeasibleInstances;
     }
 
-    private static HashSet<Instance> lowerBoundInstances(HashMap<Instance, Path> C, int m) {
+    private static HashSet<Instance> lowerBoundInstances(Map<Instance, Path> C, int m) {
         HashSet<Instance> allLowerBoundInstances = new HashSet<>();
         for (int b = 0; b <= m; b++) {
             for (int a = 0; a <= b; a++) {
@@ -254,124 +358,102 @@ public class Search {
         return new Instance(waitingTimes);
     }
 
-    private static HashMap<Instance, Path> criticalsWithShortWaitingTimes(int m) throws Exception {
-        HashMap<Instance, Path> C = new HashMap<>();
-        if (m < 5)
-            return C;
+    private static void printResults(Map<Instance, Path> C, int m, int r) {
+        Instance[] sortedInstances = C.keySet().toArray(new Instance[0]);
+        Arrays.sort(sortedInstances, (i1, i2) -> {
+            int min1 = Ints.min(i1.getWaitingTimes());
+            int min2 = Ints.min(i2.getWaitingTimes());
+            if (min1 < min2) return -1;
+            else if (min1 > min2) return 1;
+            else {
+                int length1 = i1.getB() - i1.getA();
+                int length2 = i2.getB() - i2.getA();
+                if (length1 < length2) return -1;
+                else if (length1 > length2) return 1;
+                else return 0;
+            }
+        });
+        logger.log(RESULT, "m={}, r={}", m, r);
+        logger.log(RESULT, "----- {} CRITICAL INSTANCES -----", C.size());
+        int currentTime = 0;
+        for (Instance critical : sortedInstances) {
+            int minTime = Ints.min(critical.getWaitingTimes());
+            if (minTime > currentTime) {
+                currentTime = minTime;
+                logger.log(RESULT, "-- Minimum Waiting Time: {} --", currentTime);
+            }
+            Path solution = C.get(critical);
+            int a = critical.getA();
+            int b = critical.getB();
+            String intervalString = a > b ? "[]" : "[" + a + "," + b + "]";
+            logger.log(RESULT, "{} {} {}", critical.waitingTimesToString(), intervalString, solution);
+        }
+        logger.info("---------------------------------");
+    }
 
-        // t_k = 1 for 1 <= k <= m-1
-        for (int k = 1; k < m; k++) {
-            int[] waitingTimes = new int[m + 1];
+    private static class ParallelSearchWorker implements Callable<List<Instance>> {
+        private final Instance u;
+        private final Map<Instance, Path> C;
+        private final Set<Instance> maximalInfeasibleInstances;
+        private final Set<Instance> visitedInstances;
+        private final int m;
+        private final int r;
+
+        public ParallelSearchWorker(Instance u, Map<Instance, Path> C,
+                Set<Instance> maximalInfeasibleInstances, Set<Instance> visitedInstances, int m,
+                int r) {
+            this.u = u;
+            this.C = C;
+            this.maximalInfeasibleInstances = maximalInfeasibleInstances;
+            this.visitedInstances = visitedInstances;
+            this.m = m;
+            this.r = r;
+        }
+
+        @Override
+        public List<Instance> call() throws Exception {
+            List<Instance> U = new ArrayList<>();
+            // Instance u = U.poll();
+            Instance uR = u.getReversed();
+            Instance greaterInfeasible = null;
+            Instance referenceInstance = u;
+            for (Instance greater : maximalInfeasibleInstances) {
+                if (u.lessThan(greater)) {
+                    greaterInfeasible = greater;
+                    break;
+                } else if (uR.lessThan(greater)) {
+                    greaterInfeasible = greater;
+                    referenceInstance = uR;
+                    break;
+                }
+            }
+            ArrayList<Instance> vs = new ArrayList<>(m + 1);
             for (int i = 0; i <= m; i++) {
-                if (i < k)
-                    waitingTimes[i] = 2 * Math.max(i, m - i - 1);
-                else if (i == k)
-                    waitingTimes[i] = 1;
-                else
-                    waitingTimes[i] = 2 * Math.max(i - 1, m - i);
-            }
-            Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solve();
-            C.put(instance, solution);
-        }
+                if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] == r)
+                    continue;
+                if (referenceInstance.getWaitingTimes()[i] == r)
+                    continue;
+                int[] newWaitingTimes = referenceInstance.getWaitingTimes().clone();
+                newWaitingTimes[i]++;
+                Instance v = new Instance(newWaitingTimes);
+                Instance vR = v.getReversed();
 
-        // t_k = t_{k+1} = 2 for 1 <= k < k+1 <= m-1
-        for (int k = 1; k < m; k++) {
-            int[] waitingTimes = new int[m + 1];
-            for (int i = 0; i <= m; i++) {
-                if (i < k)
-                    waitingTimes[i] = 2 * Math.max(i, m - i - 2);
-                else if (i == k)
-                    waitingTimes[i] = 2;
-                else if (i == k + 1)
-                    waitingTimes[i] = 2;
-                else
-                    waitingTimes[i] = 2 * Math.max(i - 2, m - i);
-            }
-            Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solve();
-            C.put(instance, solution);
-        }
-
-        // t_k = 2 && t_{k+1} = 3 for 1 <= k <= (m-1)/2
-        for (int k = 1; k <= (m - 1) / 2; k++) {
-            int[] waitingTimes = new int[m + 1];
-            if (k == 1) {
-                waitingTimes[0] = 2 * (m - 3);
-                waitingTimes[1] = 2;
-                waitingTimes[2] = 3;
-                for (int i = 3; i <= m; i++) {
-                    waitingTimes[i] = 2 * Math.max(i - 2, m - i);
-                }
-            } else {
-                for (int i = 0; i <= m; i++) {
-                    if (i <= k - 2)
-                        waitingTimes[i] = 2 * Math.max(i, m - i - 1);
-                    else if (i == k - 1)
-                        waitingTimes[i] = 2 * Math.max(k - 1, m == 5 ? m - k - 1 : m - k - 2);
-                    else if (i == k)
-                        waitingTimes[i] = 2;
-                    else if (i == k + 1)
-                        waitingTimes[i] = 3;
-                    else
-                        waitingTimes[i] = 2 * Math.max(i - 1, m - i);
+                if (!visitedInstances.contains(v) && !visitedInstances.contains(vR)
+                        && v.geqToSomeIn(C.keySet()) == null) {
+                    vs.add(v);
+                    visitedInstances.add(v);
                 }
             }
-            Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solve();
-            C.put(instance, solution);
-        }
-
-        // t_k = t_{k+1} = 3 for 2 <= k < k+1 <= m-2
-        for (int k = 2; k <= m - 3; k++) {
-            int[] waitingTimes = new int[m + 1];
-            if (k == 2) {
-                waitingTimes[0] = 2 * (m - 3);
-                waitingTimes[1] = 2 * (m - 4);
-                waitingTimes[2] = 3;
-                waitingTimes[3] = 3;
-                for (int i = 3; i <= m; i++) {
-                    waitingTimes[i] = 2 * Math.max(i - 2, m - i);
-                }
-            } else {
-                for (int i = 0; i <= m; i++) {
-                    if (i <= k - 1)
-                        waitingTimes[i] = 2 * Math.max(i, m - i - 3);
-                    else if (i == k)
-                        waitingTimes[i] = 3;
-                    else if (i == k + 1)
-                        waitingTimes[i] = 3;
-                    else
-                        waitingTimes[i] = 2 * Math.max(i - 3, m - i);
-                }
+            for (Instance v : vs) {
+                Path solution = new Instance(v.getWaitingTimes()).solve();
+                if (solution != null) {
+                    C.put(v, solution);
+                    logger.info("Found critical instance {}: {}", v.waitingTimesToString(),
+                            solution);
+                } else
+                    U.add(v);
             }
-            Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solve();
-            C.put(instance, solution);
+            return U;
         }
-
-        // t_k = 2 && t_{k-1} = t_{k+1} = 4 for 2 <= k <= m-2
-        if (m > 5) {
-            for (int k = 2; k <= m - 2; k++) {
-                int[] waitingTimes = new int[m + 1];
-                for (int i = 0; i <= m; i++) {
-                    if (i <= k - 2)
-                        waitingTimes[i] = 2 * Math.max(i, m - i - 2);
-                    else if (i == k - 1)
-                        waitingTimes[i] = 4;
-                    else if (i == k)
-                        waitingTimes[i] = 2;
-                    else if (i == k + 1)
-                        waitingTimes[i] = 4;
-                    else
-                        waitingTimes[i] = 2 * Math.max(i - 2, m - i);
-                }
-                Instance instance = new Instance(waitingTimes);
-                Path solution = instance.solve();
-                C.put(instance, solution);
-            }
-        }
-
-        return C;
     }
 }

@@ -16,16 +16,17 @@ public class InstanceSolver {
   private static final Logger logger = LogManager.getLogger(InstanceSolver.class);
 
   public static Path solve(Instance instance) throws Exception {
-    SingleExecutor executor = SingleExecutor.getInstance();
-    if (executor == null) {
-      return solveSequential(instance);
-    }
-    return solveParallel(instance);
+    // SingleExecutor executor = SingleExecutor.getInstance();
+    // if (executor == null) {
+    // return solveSequential(instance);
+    // }
+    // return solveParallel(instance);
+    return solveSequential(instance);
   }
 
-  private static Path solveSequential(Instance instance) throws Exception {
+  public static Path solveSequential(Instance instance) throws Exception {
     int m = instance.getM();
-    if (instance.getA() > instance.getB()) {
+    if (instance.getA() > instance.getB() || (instance.getA() == 0 && instance.getB() == instance.getM())) {
       // Find correct d to return path from Proposition 1.
       for (int d = 0; d <= m; d++) {
         Instance critical = Search.criticalWithEmptyIntersection(m, d);
@@ -35,8 +36,14 @@ public class InstanceSolver {
       return null;
     }
     LinkedList<Path> paths = new LinkedList<>();
+    LinkedList<Path> wildcards = findWildcardPaths(instance);
+    if (wildcards == null)
+      return null;
+    else if (!wildcards.isEmpty())
+      paths.addAll(wildcards);
+    else
+      initPathsToSolve(instance, paths);
 
-    initPathsToSolve(instance, paths);
     // logger.trace("{} - Initial number of paths: {}",
     // instance.waitingTimesToString(),
     // paths.size());
@@ -47,18 +54,144 @@ public class InstanceSolver {
 
     HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
     // System.out.println(instance.waitingTimesToString());
-    int nrPaths = 0;
+    //int nrPaths = 0;
     while (!paths.isEmpty()) {
       Path p = paths.pop();
-      nrPaths++;
+      //nrPaths++;
       Path solution = extendPath(instance, fingerprints, paths, p);
       if (solution != null) {
-        logger.info("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
+        //logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
         return solution;
       }
     }
-    logger.info("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
+    //logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
     return null;
+  }
+
+  private static LinkedList<Path> findWildcardPaths(Instance instance) throws Exception {
+    LinkedList<Path> validPaths = new LinkedList<>();
+    LinkedList<Path> leftPaths = findWildcardPathsLeft(instance);
+
+    if (leftPaths == null)
+      return null;
+    else
+      validPaths.addAll(leftPaths);
+    LinkedList<Path> rightPaths = findWildcardPathsRight(instance);
+    if (rightPaths == null)
+      return null;
+    else
+      validPaths.addAll(rightPaths);
+    return validPaths;
+  }
+
+  private static LinkedList<Path> findWildcardPathsLeft(Instance instance) throws Exception {
+    LinkedList<Path> validPaths = new LinkedList<>();
+    int a = instance.getA();
+    if (a == 0)
+      return validPaths;
+    int[] ys = new int[2 * (a + 1) - 1];
+    int value = a;
+    int step = -1;
+    for (int y = 0; y < ys.length; y++) {
+      ys[y] = value;
+      if (value == 0)
+        step = 1;
+      value += step;
+    }
+
+    LinkedList<Path> paths = new LinkedList<>();
+    Property property = instance.getProperty(ys[0]);
+    for (Position u : property.getPositions()) {
+      if (!instance.isValidPos(u))
+        continue;
+      for (Position v : instance.getValidGraph().getNeighbours(u)) {
+        if (v.getY() != ys[1])
+          continue;
+        Path path = new Path(instance);
+        path.addPositionLast(u);
+        path.addPositionLast(v);
+        paths.add(path);
+      }
+    }
+
+    HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
+    while (!paths.isEmpty()) {
+      Path p = paths.pop();
+      for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
+        int length = p.getLength() + 1;
+        if (q.getY() != ys[length])
+          continue;
+        Path pq = new Path(p);
+        pq.addPositionLast(q);
+        if (pq.valid()) {
+          ArrayList<Integer> fingerprint = pq.fingerprint();
+          if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
+            fingerprints.add(fingerprint);
+            if ((length == ys.length - 1))
+              validPaths.add(pq);
+            else
+              paths.add(pq);
+          }
+        }
+      }
+    }
+
+    return validPaths.isEmpty() ? null : validPaths;
+  }
+
+  private static LinkedList<Path> findWildcardPathsRight(Instance instance) throws Exception {
+    LinkedList<Path> validPaths = new LinkedList<>();
+    int m = instance.getM();
+    int b = instance.getB();
+    if (b == m)
+      return validPaths;
+    int[] xs = new int[2 * (m - b + 1) - 1];
+    int value = b;
+    int step = 1;
+    for (int x = 0; x < xs.length; x++) {
+      xs[x] = value;
+      if (value == m)
+        step = -1;
+      value += step;
+    }
+
+    LinkedList<Path> paths = new LinkedList<>();
+    Property property = instance.getProperty(xs[0]);
+    for (Position u : property.getPositions()) {
+      if (!instance.isValidPos(u))
+        continue;
+      for (Position v : instance.getValidGraph().getNeighbours(u)) {
+        if (v.getX() != xs[1])
+          continue;
+        Path path = new Path(instance);
+        path.addPositionLast(u);
+        path.addPositionLast(v);
+        paths.add(path);
+      }
+    }
+
+    HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
+    while (!paths.isEmpty()) {
+      Path p = paths.pop();
+      for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
+        int length = p.getLength() + 1;
+        if (q.getX() != xs[length])
+          continue;
+        Path pq = new Path(p);
+        pq.addPositionLast(q);
+        if (pq.valid()) {
+          ArrayList<Integer> fingerprint = pq.fingerprint();
+          if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
+            fingerprints.add(fingerprint);
+            if ((length == xs.length - 1))
+              validPaths.add(pq);
+            else
+              paths.add(pq);
+          }
+        }
+      }
+    }
+    return validPaths.isEmpty() ? null : validPaths;
   }
 
   private static Path extendPath(Instance instance, Set<ArrayList<Integer>> fingerprints,
@@ -66,7 +199,7 @@ public class InstanceSolver {
     for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
       Path pq = new Path(p);
       pq.addPositionLast(q);
-      if (!pq.redundant() && pq.valid()) {
+      if (pq.valid()) {
         if (pq.isValidCycle() && pq.visitsAllProperties()) {
           return pq;
         } else {
@@ -74,7 +207,7 @@ public class InstanceSolver {
           // if (pqp != null)
           // return pqp;
           ArrayList<Integer> fingerprint = pq.fingerprint();
-          if (!fingerprints.contains(fingerprint)) {
+          if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
             fingerprints.add(fingerprint);
             paths.add(pq);
           }
@@ -97,7 +230,7 @@ public class InstanceSolver {
     return null;
   }
 
-  private static Path solveParallel(Instance instance) throws Exception {
+  public static Path solveParallel(Instance instance) throws Exception {
     int m = instance.getM();
     if (instance.getA() > instance.getB()) {
       // Find correct d to return path from Proposition 1.

@@ -225,18 +225,21 @@ public class Instance {
         return new Instance(waitingTimes);
     }
 
+    public int level() {
+        int m = this.getM();
+        int sum = 0;
+        for (int i = 0; i <= m; i++) {
+            sum += this.getWaitingTimes()[i] - 1;
+        }
+        return sum;
+    }
+
     public int getM() {
         return m;
     }
 
     public String waitingTimesToString() {
-        String s = "[";
-        for (Integer i : waitingTimes) {
-            s += i + ",";
-        }
-        s = s.substring(0, s.length() - 1);
-        s += "]";
-        return s;
+        return Arrays.toString(this.getWaitingTimes()).replaceAll("\\s+","").replaceAll("\\[","(").replaceAll("\\]",")");
     }
 
     public int[] getWaitingTimes() {
