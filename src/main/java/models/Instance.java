@@ -239,13 +239,7 @@ public class Instance {
     }
 
     public String waitingTimesToString() {
-        String s = "[";
-        for (Integer i : waitingTimes) {
-            s += i + ",";
-        }
-        s = s.substring(0, s.length() - 1);
-        s += "]";
-        return s;
+        return Arrays.toString(this.getWaitingTimes()).replaceAll("\\s+","").replaceAll("\\[","(").replaceAll("\\]",")");
     }
 
     public int[] getWaitingTimes() {

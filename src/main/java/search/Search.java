@@ -4,7 +4,7 @@ import models.*;
 import wrappers.*;
 import java.util.*;
 import java.util.concurrent.*;
-
+import com.google.common.primitives.Ints;
 // Import log4j classes.
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
@@ -241,13 +241,7 @@ public class Search {
             assert critical : i.waitingTimesToString() + " is NOT critical.";
         }
 
-        logger.info("----- {} CRITICAL INSTANCES -----", C.size());
-        logger.log(RESULT, "m={}", m);
-        C.forEach((i, s) -> {
-            //logger.info("{}: {}", i.waitingTimesToString(), s);
-            logger.log(RESULT, "{} {}", i.waitingTimesToString(), s);
-        });
-        logger.info("---------------------------------");
+        printResults(C, m, r);
 
         return C;
 
@@ -364,125 +358,37 @@ public class Search {
         return new Instance(waitingTimes);
     }
 
-    private static HashMap<Instance, Path> criticalsWithShortWaitingTimes(int m) throws Exception {
-        HashMap<Instance, Path> C = new HashMap<>();
-        if (m < 5)
-            return C;
-
-        // t_k = 1 for 1 <= k <= m-1
-        for (int k = 1; k < m; k++) {
-            int[] waitingTimes = new int[m + 1];
-            for (int i = 0; i <= m; i++) {
-                if (i < k)
-                    waitingTimes[i] = 2 * Math.max(i, m - i - 1);
-                else if (i == k)
-                    waitingTimes[i] = 1;
-                else
-                    waitingTimes[i] = 2 * Math.max(i - 1, m - i);
+    private static void printResults(Map<Instance, Path> C, int m, int r) {
+        Instance[] sortedInstances = C.keySet().toArray(new Instance[0]);
+        Arrays.sort(sortedInstances, (i1, i2) -> {
+            int min1 = Ints.min(i1.getWaitingTimes());
+            int min2 = Ints.min(i2.getWaitingTimes());
+            if (min1 < min2) return -1;
+            else if (min1 > min2) return 1;
+            else {
+                int length1 = i1.getB() - i1.getA();
+                int length2 = i2.getB() - i2.getA();
+                if (length1 < length2) return -1;
+                else if (length1 > length2) return 1;
+                else return 0;
             }
-            Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solve();
-            C.put(instance, solution);
-        }
-
-        // t_k = t_{k+1} = 2 for 1 <= k < k+1 <= m-1
-        for (int k = 1; k < m; k++) {
-            int[] waitingTimes = new int[m + 1];
-            for (int i = 0; i <= m; i++) {
-                if (i < k)
-                    waitingTimes[i] = 2 * Math.max(i, m - i - 2);
-                else if (i == k)
-                    waitingTimes[i] = 2;
-                else if (i == k + 1)
-                    waitingTimes[i] = 2;
-                else
-                    waitingTimes[i] = 2 * Math.max(i - 2, m - i);
+        });
+        logger.log(RESULT, "m={}, r={}", m, r);
+        logger.log(RESULT, "----- {} CRITICAL INSTANCES -----", C.size());
+        int currentTime = 0;
+        for (Instance critical : sortedInstances) {
+            int minTime = Ints.min(critical.getWaitingTimes());
+            if (minTime > currentTime) {
+                currentTime = minTime;
+                logger.log(RESULT, "-- Minimum Waiting Time: {} --", currentTime);
             }
-            Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solve();
-            C.put(instance, solution);
+            Path solution = C.get(critical);
+            int a = critical.getA();
+            int b = critical.getB();
+            String intervalString = a > b ? "[]" : "[" + a + "," + b + "]";
+            logger.log(RESULT, "{} {} {}", critical.waitingTimesToString(), intervalString, solution);
         }
-
-        // t_k = 2 && t_{k+1} = 3 for 1 <= k <= (m-1)/2
-        for (int k = 1; k <= (m - 1) / 2; k++) {
-            int[] waitingTimes = new int[m + 1];
-            if (k == 1) {
-                waitingTimes[0] = 2 * (m - 3);
-                waitingTimes[1] = 2;
-                waitingTimes[2] = 3;
-                for (int i = 3; i <= m; i++) {
-                    waitingTimes[i] = 2 * Math.max(i - 2, m - i);
-                }
-            } else {
-                for (int i = 0; i <= m; i++) {
-                    if (i <= k - 2)
-                        waitingTimes[i] = 2 * Math.max(i, m - i - 1);
-                    else if (i == k - 1)
-                        waitingTimes[i] = 2 * Math.max(k - 1, m == 5 ? m - k - 1 : m - k - 2);
-                    else if (i == k)
-                        waitingTimes[i] = 2;
-                    else if (i == k + 1)
-                        waitingTimes[i] = 3;
-                    else
-                        waitingTimes[i] = 2 * Math.max(i - 1, m - i);
-                }
-            }
-            Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solve();
-            C.put(instance, solution);
-        }
-
-        // t_k = t_{k+1} = 3 for 2 <= k < k+1 <= m-2
-        for (int k = 2; k <= m - 3; k++) {
-            int[] waitingTimes = new int[m + 1];
-            if (k == 2) {
-                waitingTimes[0] = 2 * (m - 3);
-                waitingTimes[1] = 2 * (m - 4);
-                waitingTimes[2] = 3;
-                waitingTimes[3] = 3;
-                for (int i = 3; i <= m; i++) {
-                    waitingTimes[i] = 2 * Math.max(i - 2, m - i);
-                }
-            } else {
-                for (int i = 0; i <= m; i++) {
-                    if (i <= k - 1)
-                        waitingTimes[i] = 2 * Math.max(i, m - i - 3);
-                    else if (i == k)
-                        waitingTimes[i] = 3;
-                    else if (i == k + 1)
-                        waitingTimes[i] = 3;
-                    else
-                        waitingTimes[i] = 2 * Math.max(i - 3, m - i);
-                }
-            }
-            Instance instance = new Instance(waitingTimes);
-            Path solution = instance.solve();
-            C.put(instance, solution);
-        }
-
-        // t_k = 2 && t_{k-1} = t_{k+1} = 4 for 2 <= k <= m-2
-        if (m > 5) {
-            for (int k = 2; k <= m - 2; k++) {
-                int[] waitingTimes = new int[m + 1];
-                for (int i = 0; i <= m; i++) {
-                    if (i <= k - 2)
-                        waitingTimes[i] = 2 * Math.max(i, m - i - 2);
-                    else if (i == k - 1)
-                        waitingTimes[i] = 4;
-                    else if (i == k)
-                        waitingTimes[i] = 2;
-                    else if (i == k + 1)
-                        waitingTimes[i] = 4;
-                    else
-                        waitingTimes[i] = 2 * Math.max(i - 2, m - i);
-                }
-                Instance instance = new Instance(waitingTimes);
-                Path solution = instance.solve();
-                C.put(instance, solution);
-            }
-        }
-
-        return C;
+        logger.info("---------------------------------");
     }
 
     private static class ParallelSearchWorker implements Callable<List<Instance>> {
