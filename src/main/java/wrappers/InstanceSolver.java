@@ -54,34 +54,29 @@ public class InstanceSolver {
 
     HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
     // System.out.println(instance.waitingTimesToString());
-    //int nrPaths = 0;
+    // int nrPaths = 0;
     while (!paths.isEmpty()) {
       Path p = paths.pop();
-      //nrPaths++;
+      // nrPaths++;
       Path solution = extendPath(instance, fingerprints, paths, p);
       if (solution != null) {
-        //logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
+        // logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
         return solution;
       }
     }
-    //logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
+    // logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
     return null;
   }
 
   private static LinkedList<Path> findWildcardPaths(Instance instance) throws Exception {
-    LinkedList<Path> validPaths = new LinkedList<>();
-    LinkedList<Path> leftPaths = findWildcardPathsLeft(instance);
-
-    if (leftPaths == null)
-      return null;
-    else
-      validPaths.addAll(leftPaths);
-    LinkedList<Path> rightPaths = findWildcardPathsRight(instance);
-    if (rightPaths == null)
-      return null;
-    else
-      validPaths.addAll(rightPaths);
-    return validPaths;
+    int a = instance.getA();
+    int b = instance.getB();
+    int m = instance.getM();
+    if (a == 0 && b == m)
+      return new LinkedList<Path>();
+    int left = a;
+    int right = m - b;
+    return left >= right ? findWildcardPathsLeft(instance) : findWildcardPathsRight(instance);
   }
 
   private static LinkedList<Path> findWildcardPathsLeft(Instance instance) throws Exception {
