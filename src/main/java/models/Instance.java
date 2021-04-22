@@ -383,11 +383,16 @@ public class Instance {
         if ((o == null) || (o.getClass() != this.getClass()))
             return false;
         Instance ins = (Instance) o;
-        return Arrays.equals(this.getWaitingTimes(), ins.getWaitingTimes());
+        return Arrays.equals(this.getWaitingTimes(), ins.getWaitingTimes()) || Arrays.equals(this.getWaitingTimes(), ins.getReversed().getWaitingTimes());
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(this.getWaitingTimes());
+        int n = this.getWaitingTimes().length;
+        int hash = 7;
+        for (int i = 0; i <= n / 2; i++) {
+            hash = 31 * hash + this.getWaitingTimes()[i] + this.getWaitingTimes()[(n - 1) - i];
+        }
+        return hash;
     }
 }
