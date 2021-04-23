@@ -395,13 +395,17 @@ public class Instance {
     public int hashCode() {
         int n = this.getWaitingTimes().length;
         int hash = 7;
-        for (int i = 0; i <= n / 2; i++) {
-            int i1 = this.getWaitingTimes()[i];
-            int i2 = this.getWaitingTimes()[(n - 1) - i];
+        int left = 0;
+        int right = n - 1;
+        while (left <= right) {
+            int i1 = this.getWaitingTimes()[left];
+            int i2 = this.getWaitingTimes()[right];
             int k1 = i1 <= i2 ? i1 : i2;
             int k2 = i1 <= i2 ? i2 : i1;
-            int cantor = (1 / 2) * (k1 + k2) * (k1 + k2 + 1) + k2;
+            int cantor = (k1 + k2) * (k1 + k2 + 1) / 2 + k2;
             hash = 31 * hash + cantor;
+            left++;
+            right--;
         }
         return hash;
     }
