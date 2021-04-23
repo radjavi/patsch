@@ -42,10 +42,9 @@ public class Position implements Comparable<Position> {
 
   @Override
   public int hashCode() {
-    int hash = 7;
-    hash = 31 * hash + this.getX();
-    hash = 31 * hash + this.getY();
-    return hash;
+    int result = Integer.hashCode(this.getX());
+    result = 31 * result + Integer.hashCode(this.getY());
+    return result;
   }
 
   @Override
