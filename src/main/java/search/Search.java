@@ -97,13 +97,11 @@ public class Search {
                 int[] newWaitingTimes = referenceInstance.getWaitingTimes().clone();
                 newWaitingTimes[i]++;
                 Instance v = new Instance(newWaitingTimes);
-                Instance vR = v.getReversed();
+                if (!visitedInstances.add(v))
+                    continue;
 
-                if (!visitedInstances.contains(v) && !visitedInstances.contains(vR)
-                        && v.geqToSomeIn(C.keySet()) == null) {
+                if (v.geqToSomeIn(C.keySet()) == null)
                     vs.add(v);
-                    visitedInstances.add(v);
-                }
             }
             for (Instance v : vs) {
                 Path solution = new Instance(v.getWaitingTimes()).solve();
@@ -117,18 +115,6 @@ public class Search {
         }
         logger.info("Found critical instances");
 
-        // Add reversed critical instances
-        logger.info("Creating reversed critical instances...");
-        HashMap<Instance, Path> CReversed = new HashMap<>();
-        for (Instance critical : C.keySet()) {
-            Instance criticalReversed = critical.getReversed();
-            if (!critical.equals(criticalReversed)) {
-                Path solution = criticalReversed.solve();
-                CReversed.put(criticalReversed, solution);
-            }
-        }
-        C.putAll(CReversed);
-
         // Test if critical
         logger.info("Testing if instances are critical...");
         for (Instance i : C.keySet()) {
@@ -136,15 +122,14 @@ public class Search {
             if (!critical)
                 logger.trace("{} is NOT critical", i.waitingTimesToString());
             assert critical : i.waitingTimesToString() + " is NOT critical.";
+            Instance reversed = i.getReversed();
+            boolean reversedCritical = reversed.isCritical();
+            if (!reversedCritical)
+                logger.trace("{} is NOT critical", reversed.waitingTimesToString());
+            assert reversedCritical : reversed.waitingTimesToString() + " is NOT critical.";
         }
 
-        logger.info("----- {} CRITICAL INSTANCES -----", C.size());
-        logger.log(RESULT, "m={}", m);
-        C.forEach((i, s) -> {
-            //logger.info("{}: {}", i.waitingTimesToString(), s);
-            logger.log(RESULT, "{} {}", i.waitingTimesToString(), s);
-        });
-        logger.info("---------------------------------");
+        printResults(C, m, r);
 
         return C;
 
@@ -220,18 +205,6 @@ public class Search {
         }
         logger.info("Found critical instances");
 
-        // Add reversed critical instances
-        logger.info("Creating reversed critical instances...");
-        HashMap<Instance, Path> CReversed = new HashMap<>();
-        for (Instance critical : C.keySet()) {
-            Instance criticalReversed = critical.getReversed();
-            if (!critical.equals(criticalReversed)) {
-                Path solution = criticalReversed.solve();
-                CReversed.put(criticalReversed, solution);
-            }
-        }
-        C.putAll(CReversed);
-
         // Test if critical
         logger.info("Testing if instances are critical...");
         for (Instance i : C.keySet()) {
@@ -239,6 +212,11 @@ public class Search {
             if (!critical)
                 logger.trace("{} is NOT critical", i.waitingTimesToString());
             assert critical : i.waitingTimesToString() + " is NOT critical.";
+            Instance reversed = i.getReversed();
+            boolean reversedCritical = reversed.isCritical();
+            if (!reversedCritical)
+                logger.trace("{} is NOT critical", reversed.waitingTimesToString());
+            assert reversedCritical : reversed.waitingTimesToString() + " is NOT critical.";
         }
 
         printResults(C, m, r);
@@ -311,9 +289,7 @@ public class Search {
         for (int b = 0; b <= m; b++) {
             for (int a = 0; a <= b; a++) {
                 Instance g = Instance.lowerBoundInstance(m, a, b);
-                Instance gR = g.getReversed();
-                if (g.geqToSomeIn(C.keySet()) == null && !allLowerBoundInstances.contains(g)
-                        && !allLowerBoundInstances.contains(gR)) {
+                if (g.geqToSomeIn(C.keySet()) == null && !allLowerBoundInstances.contains(g)) {
                     allLowerBoundInstances.add(g);
                 }
             }
@@ -338,10 +314,9 @@ public class Search {
 
         for (int d = 0; d <= m - 1; d++) {
             Instance instance = criticalWithEmptyIntersection(m, d);
-            Instance instanceR = instance.getReversed();
             Path solution = InstanceSolver.billiardBallPath(instance, d);
             Set<Instance> criticals = C.keySet();
-            if (!criticals.contains(instance) && !criticals.contains(instanceR))
+            if (!criticals.contains(instance))
                 C.put(instance, solution);
         }
         return C;
@@ -358,8 +333,15 @@ public class Search {
         return new Instance(waitingTimes);
     }
 
-    private static void printResults(Map<Instance, Path> C, int m, int r) {
-        Instance[] sortedInstances = C.keySet().toArray(new Instance[0]);
+    private static void printResults(Map<Instance, Path> C, int m, int r) throws Exception {
+        ArrayList<Instance> instances = new ArrayList<>(C.keySet());
+        for (Instance critical : C.keySet()) {
+            Instance reversed = critical.getReversed();
+            if (Arrays.equals(critical.getWaitingTimes(), reversed.getWaitingTimes()))
+                continue;
+            instances.add(reversed);
+        }
+        Instance[] sortedInstances = instances.toArray(new Instance[0]);
         Arrays.sort(sortedInstances, (i1, i2) -> {
             int min1 = Ints.min(i1.getWaitingTimes());
             int min2 = Ints.min(i2.getWaitingTimes());
@@ -374,7 +356,7 @@ public class Search {
             }
         });
         logger.log(RESULT, "m={}, r={}", m, r);
-        logger.log(RESULT, "----- {} CRITICAL INSTANCES -----", C.size());
+        logger.log(RESULT, "----- {} CRITICAL INSTANCES -----", sortedInstances.length);
         int currentTime = 0;
         for (Instance critical : sortedInstances) {
             int minTime = Ints.min(critical.getWaitingTimes());
@@ -386,7 +368,7 @@ public class Search {
             int a = critical.getA();
             int b = critical.getB();
             String intervalString = a > b ? "[]" : "[" + a + "," + b + "]";
-            logger.log(RESULT, "{} {} {}", critical.waitingTimesToString(), intervalString, solution);
+            logger.log(RESULT, "{} {} {}", critical.waitingTimesToString(), intervalString, solution != null ? solution : critical.solve());
         }
         logger.info("---------------------------------");
     }
@@ -436,13 +418,10 @@ public class Search {
                 int[] newWaitingTimes = referenceInstance.getWaitingTimes().clone();
                 newWaitingTimes[i]++;
                 Instance v = new Instance(newWaitingTimes);
-                Instance vR = v.getReversed();
-
-                if (!visitedInstances.contains(v) && !visitedInstances.contains(vR)
-                        && v.geqToSomeIn(C.keySet()) == null) {
+                if (!visitedInstances.add(v))
+                    continue;
+                if (v.geqToSomeIn(C.keySet()) == null)
                     vs.add(v);
-                    visitedInstances.add(v);
-                }
             }
             for (Instance v : vs) {
                 Path solution = new Instance(v.getWaitingTimes()).solve();

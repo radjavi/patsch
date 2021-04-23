@@ -26,7 +26,8 @@ public class InstanceSolver {
 
   public static Path solveSequential(Instance instance) throws Exception {
     int m = instance.getM();
-    if (instance.getA() > instance.getB() || (instance.getA() == 0 && instance.getB() == instance.getM())) {
+    if (instance.getA() > instance.getB()
+        || (instance.getA() == 0 && instance.getB() == instance.getM())) {
       // Find correct d to return path from Proposition 1.
       for (int d = 0; d <= m; d++) {
         Instance critical = Search.criticalWithEmptyIntersection(m, d);
@@ -39,8 +40,13 @@ public class InstanceSolver {
     LinkedList<Path> wildcards = findWildcardPaths(instance);
     if (wildcards == null)
       return null;
-    else if (!wildcards.isEmpty())
-      paths.addAll(wildcards);
+    else if (!wildcards.isEmpty()) {
+      for (Path wildcard : wildcards) {
+        if (wildcard.isValidCycle() && wildcard.visitsAllProperties())
+          return wildcard;
+        paths.add(wildcard);
+      }
+    }
     else
       initPathsToSolve(instance, paths);
 
@@ -60,7 +66,7 @@ public class InstanceSolver {
       //nrPaths++;
       Path solution = extendPath(instance, fingerprints, paths, p);
       if (solution != null) {
-        //logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
+        // logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
         return solution;
       }
     }
@@ -69,19 +75,31 @@ public class InstanceSolver {
   }
 
   private static LinkedList<Path> findWildcardPaths(Instance instance) throws Exception {
-    LinkedList<Path> validPaths = new LinkedList<>();
-    LinkedList<Path> leftPaths = findWildcardPathsLeft(instance);
-
-    if (leftPaths == null)
-      return null;
-    else
-      validPaths.addAll(leftPaths);
-    LinkedList<Path> rightPaths = findWildcardPathsRight(instance);
-    if (rightPaths == null)
-      return null;
-    else
-      validPaths.addAll(rightPaths);
-    return validPaths;
+    int a = instance.getA();
+    int b = instance.getB();
+    int m = instance.getM();
+    if (a == 0 && b == m)
+      return new LinkedList<Path>();
+    int left = a;
+    int right = m - b;
+    LinkedList<Path> wildcardPathsLeft = new LinkedList<>();
+    LinkedList<Path> wildcardPathsRight = new LinkedList<>();
+    if (left > right) {
+      wildcardPathsLeft = findWildcardPathsLeft(instance);
+      if (wildcardPathsLeft == null)
+        return null;
+      wildcardPathsRight = findWildcardPathsRight(instance);
+      if (wildcardPathsRight == null)
+        return null;
+    } else {
+      wildcardPathsRight = findWildcardPathsRight(instance);
+      if (wildcardPathsRight == null)
+        return null;
+      wildcardPathsLeft = findWildcardPathsLeft(instance);
+      if (wildcardPathsLeft == null)
+        return null;
+    }
+    return left >= right ? wildcardPathsLeft : wildcardPathsRight;
   }
 
   private static LinkedList<Path> findWildcardPathsLeft(Instance instance) throws Exception {
@@ -200,17 +218,12 @@ public class InstanceSolver {
       Path pq = new Path(p);
       pq.addPositionLast(q);
       if (pq.valid()) {
-        if (pq.isValidCycle() && pq.visitsAllProperties()) {
+        if (pq.isValidCycle() && pq.visitsAllProperties())
           return pq;
-        } else {
-          // Path pqp = lookAhead(pq);
-          // if (pqp != null)
-          // return pqp;
-          ArrayList<Integer> fingerprint = pq.fingerprint();
-          if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
-            fingerprints.add(fingerprint);
-            paths.add(pq);
-          }
+        ArrayList<Integer> fingerprint = pq.fingerprint();
+        if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
+          fingerprints.add(fingerprint);
+          paths.add(pq);
         }
       }
     }
