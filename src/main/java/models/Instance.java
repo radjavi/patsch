@@ -386,12 +386,22 @@ public class Instance {
         return Arrays.equals(this.getWaitingTimes(), ins.getWaitingTimes()) || Arrays.equals(this.getWaitingTimes(), ins.getReversed().getWaitingTimes());
     }
 
+    /**
+     * Hashcode based on the Cantor pairing function to create a unique
+     * integer from two integers.
+     * An instance and its reversal gets equivalent hashcode values.
+     */
     @Override
     public int hashCode() {
         int n = this.getWaitingTimes().length;
         int hash = 7;
         for (int i = 0; i <= n / 2; i++) {
-            hash = 31 * hash + this.getWaitingTimes()[i] + this.getWaitingTimes()[(n - 1) - i];
+            int i1 = this.getWaitingTimes()[i];
+            int i2 = this.getWaitingTimes()[(n - 1) - i];
+            int k1 = i1 <= i2 ? i1 : i2;
+            int k2 = i1 <= i2 ? i2 : i1;
+            int cantor = (1 / 2) * (k1 + k2) * (k1 + k2 + 1) + k2;
+            hash = 31 * hash + cantor;
         }
         return hash;
     }
