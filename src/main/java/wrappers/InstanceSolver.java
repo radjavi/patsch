@@ -84,7 +84,7 @@ public class InstanceSolver {
     int right = m - b;
     LinkedList<Path> wildcardPathsLeft = new LinkedList<>();
     LinkedList<Path> wildcardPathsRight = new LinkedList<>();
-    if (left < right) {
+    if (left > right) {
       wildcardPathsLeft = findWildcardPathsLeft(instance);
       if (wildcardPathsLeft == null)
         return null;
