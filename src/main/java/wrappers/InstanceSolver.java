@@ -26,8 +26,9 @@ public class InstanceSolver {
 
   public static Path solveSequential(Instance instance) throws Exception {
     int m = instance.getM();
-    if (instance.getA() > instance.getB()
-        || (instance.getA() == 0 && instance.getB() == instance.getM())) {
+    int a = instance.getA();
+    int b = instance.getB();
+    if (a > b || (a == 0 && b == m) || (a == 0 && b == 0) || (a == m && b == m)) {
       // Find correct d to return path from Proposition 1.
       for (int d = 0; d <= m; d++) {
         Instance critical = Search.criticalWithEmptyIntersection(m, d);
