@@ -18,7 +18,6 @@ public class Instance {
     private static final Logger logger = LogManager.getLogger(Instance.class);
 
     public Instance(int[] waitingTimes) {
-        shortestDistances = new PropertyPositionDistances();
         m = waitingTimes.length - 1;
         this.waitingTimes = waitingTimes.clone();
         for (int i = 0; i <= m; i++) {
@@ -104,6 +103,8 @@ public class Instance {
      * @return the shortest distance to p
      */
     public <F, T> int distance(F from, T to) throws Exception {
+        if (shortestDistances == null)
+            shortestDistances = new PropertyPositionDistances();
         Integer cachedDistance = shortestDistances.getDistance(from, to);
         if (cachedDistance != null)
             return cachedDistance;
