@@ -71,7 +71,7 @@ public class Property {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 31 * hash + this.getIndex();
+        hash = 31 * hash + Integer.hashCode(this.getIndex());
         return hash;
     }
 }

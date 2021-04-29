@@ -38,12 +38,20 @@ public class PropertyPositionDistances {
     }
 
     public class PropertyPosition {
-        Property prop;
-        Position pos;
+        Property property;
+        Position position;
 
-        public PropertyPosition(Property prop, Position pos) {
-            this.prop = prop;
-            this.pos = pos;
+        public PropertyPosition(Property property, Position position) {
+            this.property = property;
+            this.position = position;
+        }
+
+        public Property getProperty() {
+            return this.property;
+        }
+
+        public Position getPosition() {
+            return this.position;
         }
 
         public boolean equals(Object o) {
@@ -52,14 +60,14 @@ public class PropertyPositionDistances {
             if ((o == null) || (o.getClass() != this.getClass()))
                 return false;
             PropertyPosition propPos = (PropertyPosition) o;
-            return prop.getIndex() == (propPos.prop.getIndex()) && pos.equals(propPos.pos);
+            return this.getProperty().equals(propPos.getProperty()) && this.getPosition().equals(propPos.getPosition());
         }
 
         public int hashCode() {
             int hash = 7;
-            hash = 31 * hash + pos.getX();
-            hash = 31 * hash + pos.getY();
-            hash = 31 * hash + prop.getIndex();
+            hash = 31 * hash + Integer.hashCode(this.getPosition().getX());
+            hash = 31 * hash + Integer.hashCode(this.getPosition().getY());
+            hash = 31 * hash + Integer.hashCode(this.getProperty().getIndex());
             return hash;
 
         }
