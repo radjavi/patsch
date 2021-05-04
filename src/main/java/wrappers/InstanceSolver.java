@@ -121,7 +121,7 @@ public class InstanceSolver {
     LinkedList<Path> paths = new LinkedList<>();
     Property property = instance.getProperty(ys[0]);
     for (Position u : property.getPositions()) {
-      if (!instance.isValidPos(u))
+      if (!instance.isValidPos(u) || u.getY() != ys[0])
         continue;
       for (Position v : instance.getValidGraph().getNeighbours(u)) {
         if (v.getY() != ys[1])
@@ -177,7 +177,7 @@ public class InstanceSolver {
     LinkedList<Path> paths = new LinkedList<>();
     Property property = instance.getProperty(xs[0]);
     for (Position u : property.getPositions()) {
-      if (!instance.isValidPos(u))
+      if (!instance.isValidPos(u) || u.getX() != xs[0])
         continue;
       for (Position v : instance.getValidGraph().getNeighbours(u)) {
         if (v.getX() != xs[1])
