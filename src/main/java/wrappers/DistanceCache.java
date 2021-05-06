@@ -3,11 +3,11 @@ package wrappers;
 import models.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PropertyPositionDistances {
+public class DistanceCache {
 
     private ConcurrentHashMap<PropertyPosition, Integer> cache;
 
-    public PropertyPositionDistances() {
+    public DistanceCache() {
         cache = new ConcurrentHashMap<>();
     }
 

@@ -12,7 +12,7 @@ public class Instance {
     private PositionGraph validGraph;
     private Integer a;
     private Integer b;
-    private PropertyPositionDistances shortestDistances;
+    private DistanceCache shortestDistances;
     private int[] waitingTimes;
 
     private static final Logger logger = LogManager.getLogger(Instance.class);
@@ -103,8 +103,13 @@ public class Instance {
      * @return the shortest distance to p
      */
     public <F, T> int distance(F from, T to) throws Exception {
+        if ((!(from instanceof Position) && !(from instanceof Property)))
+            throw new IllegalArgumentException("'from' is not an instance of Position or Property, but rather: " + from.getClass().getName());
+        if ((!(to instanceof Position) && !(to instanceof Property)))
+            throw new IllegalArgumentException("'to' is not an instance of Position or Property, but rather: " + to.getClass().getName());
+
         if (shortestDistances == null)
-            shortestDistances = new PropertyPositionDistances();
+            shortestDistances = new DistanceCache();
         Integer cachedDistance = shortestDistances.getDistance(from, to);
         if (cachedDistance != null)
             return cachedDistance;
@@ -118,7 +123,6 @@ public class Instance {
      * May be improved.
      */
     public <F, T> Path shortestPath(F from, T to) throws Exception {
-
         if (from instanceof Position && to instanceof Position)
             return shortestPath((Position) from, (Position) to);
         HashSet<Position> fromSet = new HashSet<>();
@@ -187,7 +191,6 @@ public class Instance {
     }
 
     public Path solve() throws Exception {
-
         return InstanceSolver.solve(this);
     }
 

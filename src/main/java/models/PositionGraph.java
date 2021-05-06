@@ -6,14 +6,14 @@ public class PositionGraph {
   private HashMap<Position, HashSet<Position>> graph;
 
   public PositionGraph(HashSet<Position> positions) {
-    graph = connectVertices(positions);
+    graph = connect(positions);
   }
 
   /**
    * Returns a mapping of each vertex in a triangle graph to its adjacent
    * vertices.
    */
-  private static HashMap<Position, HashSet<Position>> connectVertices(Set<Position> positions) {
+  private static HashMap<Position, HashSet<Position>> connect(Set<Position> positions) {
     HashMap<Position, HashSet<Position>> map = new HashMap<>();
     positions.forEach(pos -> {
       HashSet<Position> neighbours = new HashSet<>();
@@ -51,7 +51,7 @@ public class PositionGraph {
       return;
     Set<Position> newPositions = graph.keySet();
     newPositions.remove(position);
-    graph = connectVertices(newPositions);
+    graph = connect(newPositions);
   }
 
   @Override
@@ -94,5 +94,3 @@ public class PositionGraph {
   }
 
 }
-
-// (0,0): (0,1), ...
