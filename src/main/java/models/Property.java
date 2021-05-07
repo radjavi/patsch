@@ -57,12 +57,11 @@ public class Property {
         return s;
     }
 
-    // May be improved (same instance?).
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if ((obj == null) || (obj.getClass() != this.getClass()))
+        if (!(obj instanceof Property))
             return false;
         Property prop = (Property) obj;
         return this.getIndex() == prop.getIndex();
@@ -70,8 +69,7 @@ public class Property {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Integer.hashCode(this.getIndex());
+        int hash = Integer.hashCode(this.getIndex());
         return hash;
     }
 }

@@ -37,7 +37,7 @@ public class DistanceCache {
         return null;
     }
 
-    public class PropertyPosition {
+    private class PropertyPosition {
         Property property;
         Position position;
 
@@ -57,15 +57,14 @@ public class DistanceCache {
         public boolean equals(Object o) {
             if (this == o)
                 return true;
-            if ((o == null) || (o.getClass() != this.getClass()))
+            if (!(o instanceof PropertyPosition))
                 return false;
             PropertyPosition propPos = (PropertyPosition) o;
             return this.getProperty().equals(propPos.getProperty()) && this.getPosition().equals(propPos.getPosition());
         }
 
         public int hashCode() {
-            int hash = 7;
-            hash = 31 * hash + Integer.hashCode(this.getPosition().getX());
+            int hash = Integer.hashCode(this.getPosition().getX());
             hash = 31 * hash + Integer.hashCode(this.getPosition().getY());
             hash = 31 * hash + Integer.hashCode(this.getProperty().getIndex());
             return hash;

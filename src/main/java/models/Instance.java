@@ -8,12 +8,12 @@ import org.apache.logging.log4j.LogManager;
 
 public class Instance {
     private int m;
-    private Property[] properties;
-    private PositionGraph validGraph;
+    private int[] waitingTimes;
     private Integer a;
     private Integer b;
+    private Property[] properties;
+    private PositionGraph validGraph;
     private DistanceCache shortestDistances;
-    private int[] waitingTimes;
 
     private static final Logger logger = LogManager.getLogger(Instance.class);
 
@@ -384,32 +384,26 @@ public class Instance {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if ((o == null) || (o.getClass() != this.getClass()))
+        if (!(o instanceof Instance))
             return false;
         Instance ins = (Instance) o;
         return Arrays.equals(this.getWaitingTimes(), ins.getWaitingTimes()) || Arrays.equals(this.getWaitingTimes(), ins.getReversed().getWaitingTimes());
     }
 
     /**
-     * Hashcode based on the Cantor pairing function to create a unique
-     * integer from two integers.
-     * An instance and its reversal gets equivalent hashcode values.
+     * An instance and its reversal gets equivalent hash codes.
      */
     @Override
     public int hashCode() {
-        int n = this.getWaitingTimes().length;
+        Instance reversed = this.getReversed();
+        Instance reference = this;
+        int diff = Arrays.compare(this.getWaitingTimes(), reversed.getWaitingTimes());
+        if (diff < 0)
+            reference = reversed;
+
         int hash = 7;
-        int left = 0;
-        int right = n - 1;
-        while (left <= right) {
-            int i1 = this.getWaitingTimes()[left];
-            int i2 = this.getWaitingTimes()[right];
-            int k1 = i1 <= i2 ? i1 : i2;
-            int k2 = i1 <= i2 ? i2 : i1;
-            int cantor = (k1 + k2) * (k1 + k2 + 1) / 2 + k2;
-            hash = 31 * hash + cantor;
-            left++;
-            right--;
+        for (int t : reference.getWaitingTimes()) {
+            hash = 31 * hash + Integer.hashCode(t);
         }
         return hash;
     }

@@ -34,7 +34,7 @@ public class Position implements Comparable<Position> {
   public boolean equals(Object o) {
     if (this == o)
       return true;
-    if ((o == null) || (o.getClass() != this.getClass()))
+    if (!(o instanceof Position))
       return false;
     Position pos = (Position) o;
     return x == pos.getX() && y == pos.getY();
