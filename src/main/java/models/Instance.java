@@ -247,7 +247,11 @@ public class Instance {
     }
 
     public int[] getWaitingTimes() {
-        return waitingTimes;
+        return this.waitingTimes;
+    }
+
+    public int getWaitingTime(int index) {
+        return this.getWaitingTimes()[index];
     }
 
     public PositionGraph getValidGraph() {
@@ -263,9 +267,9 @@ public class Instance {
     }
 
     public Property getProperty(int index) {
-        if (index < 0 || index >= properties.length)
+        if (index < 0 || index >= this.getProperties().length)
             return null;
-        return properties[index];
+        return this.getProperties()[index];
     }
 
     public int getPropertyWaitingTime(int index) {
@@ -303,7 +307,7 @@ public class Instance {
         int m = waitingTimes.length - 1;
         Property[] properties = new Property[m + 1];
         for (int i = 0; i <= m; i++) {
-            properties[i] = new Property(m, waitingTimes[i], i);
+            properties[i] = new Property(this, i);
         }
 
         return properties;

@@ -3,17 +3,34 @@ package models;
 import java.util.HashSet;
 
 public class Range {
+    private final Property property;
     private final int a;
     private final int b;
     private final HashSet<Position> positions;
 
-    public Range(int m, int waitingTime, int index) {
-        a = Math.max(0, index - (waitingTime / 2));
-        b = Math.min(index + (waitingTime / 2), m);
-        positions = createPositions(m, index);
+    public Range(Property property) {
+        this.property = property;
+        a = computeA();
+        b = computeB();
+        positions = createPositions();
     }
 
-    private HashSet<Position> createPositions(int m, int index) {
+    private int computeA() {
+        int index = this.getProperty().getIndex();
+        int waitingTime = this.getProperty().getWaitingTime();
+        return Math.max(0, index - (waitingTime / 2));
+    }
+
+    private int computeB() {
+        int index = this.getProperty().getIndex();
+        int waitingTime = this.getProperty().getWaitingTime();
+        int m = this.getProperty().getInstance().getM();
+        return Math.min(index + (waitingTime / 2), m);
+    }
+
+    private HashSet<Position> createPositions() {
+        int m = this.getProperty().getInstance().getM();
+        
         HashSet<Position> positions = new HashSet<>();
         for (int x = a; x <= b; x++) {
             for (int y = 0; y <= x; y++) {
@@ -31,19 +48,23 @@ public class Range {
         return positions;
     }
 
+    public Property getProperty() {
+        return this.property;
+    }
+
     public HashSet<Position> getPositions() {
-        return positions;
+        return this.positions;
     }
 
     public boolean hasPosition(Position p) {
-        return positions.contains(p);
+        return this.getPositions().contains(p);
     }
 
     public int getA() {
-        return a;
+        return this.a;
     }
 
     public int getB() {
-        return b;
+        return this.b;
     }
 }

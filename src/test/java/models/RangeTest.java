@@ -7,6 +7,7 @@ public class RangeTest {
   @Test
   public void testRangePositions() {
     int[] waitingTimes = { 5, 4, 1, 2 };
+    Instance instance = new Instance(waitingTimes);
 
     Position[][] expectedPositionSets = {
         {
@@ -40,7 +41,7 @@ public class RangeTest {
     };
 
     for (int i = 0; i < waitingTimes.length; i++) {
-      Range range = new Range(waitingTimes.length - 1, waitingTimes[i], i);
+      Range range = instance.getProperty(i).getRange();
       
       assertEquals(("i:" + i + "," + range.getPositions().toString()), expectedPositionSets[i].length, range.getPositions().size());
       

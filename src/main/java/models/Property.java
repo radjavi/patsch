@@ -4,18 +4,21 @@ import java.util.HashSet;
 
 public class Property {
     private final int index;
-    private final int waitingTime;
+    private final Instance instance;
     private final HashSet<Position> positions;
     private final Range range;
 
-    public Property(int m, int waitingTime, int index) {
-        this.positions = this.positions(m, index);
+    public Property(Instance instance, int index) {
         this.index = index;
-        this.waitingTime = waitingTime;
-        this.range = new Range(m, waitingTime, index);
+        this.instance = instance;
+        this.positions = this.createPositions();
+        this.range = new Range(this);
     }
 
-    private HashSet<Position> positions(int m, int index) {
+    private HashSet<Position> createPositions() {
+        int index = this.getIndex();
+        int m = this.instance.getM();
+
         HashSet<Position> positions = new HashSet<>();
         for (int x = index + 1; x <= m; x++) {
             positions.add(new Position(x, index));
@@ -24,6 +27,10 @@ public class Property {
             positions.add(new Position(index, y));
         }
         return positions;
+    }
+
+    public Instance getInstance() {
+        return this.instance;
     }
 
     public HashSet<Position> getPositions() {
@@ -43,7 +50,7 @@ public class Property {
     }
 
     public int getWaitingTime() {
-        return this.waitingTime;
+        return this.getInstance().getWaitingTime(this.getIndex());
     }
 
     @Override

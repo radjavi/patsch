@@ -9,7 +9,7 @@ import org.apache.logging.log4j.LogManager;
 
 public class RedundantPaths {
   // Define a static logger variable so that it references the
-  // Logger instance named "App".
+  // Logger instance named "RedundantPaths".
   private static final Logger logger = LogManager.getLogger(RedundantPaths.class);
 
   private static String direction(Position from, Position to) {
