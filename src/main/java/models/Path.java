@@ -1,6 +1,8 @@
 package models;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import wrappers.RedundantPaths;
 
 public class Path {
@@ -136,7 +138,7 @@ public class Path {
     for (Property property : properties) {
       int p = property.getIndex();
       ListIterator<Position> iterator = path.listIterator();
-      int i = 0;    
+      int i = 0;
       while (iterator.hasNext()) {
         if (property.hasPosition(iterator.next())) {
           s_i[p] = i;
@@ -248,13 +250,13 @@ public class Path {
     return true;
   }
 
-  public boolean redundant() throws Exception {
-    return RedundantPaths.length2(this) || RedundantPaths.length3(this);
+  public boolean redundant(AtomicInteger nrOfPaths) throws Exception {
+    return RedundantPaths.length2(this, nrOfPaths) || RedundantPaths.length3(this);
   }
 
   /**
-   * The fingerprint of a path from position s to position f is an array that contains:
-   * [s_x, s_y, t_x, t_y, s-s_0, ..., s-s_m, f-f_0, ..., f-f_m]
+   * The fingerprint of a path from position s to position f is an array that
+   * contains: [s_x, s_y, t_x, t_y, s-s_0, ..., s-s_m, f-f_0, ..., f-f_m]
    * 
    * @return
    */

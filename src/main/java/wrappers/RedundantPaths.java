@@ -1,6 +1,8 @@
 package wrappers;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import models.*;
 
 // Import log4j classes.
@@ -31,7 +33,7 @@ public class RedundantPaths {
    * @param pq
    * @return
    */
-  public static boolean length2(Path pq) throws Exception {
+  public static boolean length2(Path pq, AtomicInteger nrOfPaths) throws Exception {
     if (pq.getLength() < 2)
       return false;
 
@@ -47,8 +49,7 @@ public class RedundantPaths {
     String directionPath = direction1 + "," + direction2;
 
     // Diagonal
-    if (Math.abs(antepenultimate.getX() - q.getX()) == 1
-        && Math.abs(antepenultimate.getY() - q.getY()) == 1)
+    if (Math.abs(antepenultimate.getX() - q.getX()) == 1 && Math.abs(antepenultimate.getY() - q.getY()) == 1)
       return true;
 
     switch (directionPath) {
@@ -68,7 +69,6 @@ public class RedundantPaths {
           return true;
         break;
     }
-
 
     Position intermediate = null;
     switch (directionPath) {
@@ -102,6 +102,7 @@ public class RedundantPaths {
       ArrayList<Position> newPathPositions = new ArrayList<>(pq.getPath());
       newPathPositions.set(newPathPositions.size() - 2, intermediate);
       Path newPath = new Path(instance, newPathPositions);
+      nrOfPaths.incrementAndGet();
       if (newPath.valid())
         return true;
     }
@@ -118,7 +119,6 @@ public class RedundantPaths {
     Position antepenultimate = path.get(path.size() - 3);
     Position penultimate = path.get(path.size() - 2);
     Position q = pq.getLast();
-
 
     String direction1 = direction(preantepenultimate, antepenultimate);
     String direction2 = direction(antepenultimate, penultimate);

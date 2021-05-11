@@ -1,6 +1,8 @@
 package models;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import wrappers.*;
 // Import log4j classes.
 import org.apache.logging.log4j.Logger;
@@ -104,9 +106,11 @@ public class Instance {
      */
     public <F, T> int distance(F from, T to) throws Exception {
         if ((!(from instanceof Position) && !(from instanceof Property)))
-            throw new IllegalArgumentException("'from' is not an instance of Position or Property, but rather: " + from.getClass().getName());
+            throw new IllegalArgumentException(
+                    "'from' is not an instance of Position or Property, but rather: " + from.getClass().getName());
         if ((!(to instanceof Position) && !(to instanceof Property)))
-            throw new IllegalArgumentException("'to' is not an instance of Position or Property, but rather: " + to.getClass().getName());
+            throw new IllegalArgumentException(
+                    "'to' is not an instance of Position or Property, but rather: " + to.getClass().getName());
 
         if (shortestDistances == null)
             shortestDistances = new DistanceCache();
@@ -191,7 +195,11 @@ public class Instance {
     }
 
     public Path solve() throws Exception {
-        return InstanceSolver.solve(this);
+        return InstanceSolver.solve(this, new AtomicInteger(0));
+    }
+
+    public Path solve(AtomicInteger nrOfSolved) throws Exception {
+        return InstanceSolver.solve(this, nrOfSolved);
     }
 
     public boolean isCritical() throws Exception {
@@ -243,7 +251,8 @@ public class Instance {
     }
 
     public String waitingTimesToString() {
-        return Arrays.toString(this.getWaitingTimes()).replaceAll("\\s+","").replaceAll("\\[","(").replaceAll("\\]",")");
+        return Arrays.toString(this.getWaitingTimes()).replaceAll("\\s+", "").replaceAll("\\[", "(").replaceAll("\\]",
+                ")");
     }
 
     public int[] getWaitingTimes() {
@@ -391,7 +400,8 @@ public class Instance {
         if (!(o instanceof Instance))
             return false;
         Instance ins = (Instance) o;
-        return Arrays.equals(this.getWaitingTimes(), ins.getWaitingTimes()) || Arrays.equals(this.getWaitingTimes(), ins.getReversed().getWaitingTimes());
+        return Arrays.equals(this.getWaitingTimes(), ins.getWaitingTimes())
+                || Arrays.equals(this.getWaitingTimes(), ins.getReversed().getWaitingTimes());
     }
 
     /**
