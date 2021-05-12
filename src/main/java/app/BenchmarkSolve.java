@@ -38,7 +38,7 @@ public class BenchmarkSolve {
 
         int nrFeasible = 0;
         int nrInfeasible = 0;
-
+        ArrayList<LogObject> logObjects = new ArrayList<>(10000);
         Random random = new Random(1);
 
         while (nrFeasible < nrOfInstances || nrInfeasible < nrOfInstances) {
@@ -49,19 +49,45 @@ public class BenchmarkSolve {
             if (a > b || (a == 0 && b == m) || (a == 0 && b == 0) || (a == m && b == m))
                 continue;
 
-            long before = System.nanoTime();
             AtomicInteger nrOfPaths = new AtomicInteger(0);
+            long before = System.nanoTime();
             Path sol = instance.solve(nrOfPaths);
-            if ((sol != null && nrFeasible < nrOfInstances) || (sol == null && nrInfeasible < nrOfInstances))
-                logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(),
-                        sol != null ? "feasible" : "infeasible", (System.nanoTime() - before) * 1E-6, nrOfPaths);
+            long after = System.nanoTime();
+            if ((sol != null && nrFeasible < nrOfInstances) || (sol == null && nrInfeasible < nrOfInstances)) {
+                LogObject objectToLog = new LogObject(instance, (after - before) * 1E-6,
+                        sol != null ? "feasible" : "infeasible", nrOfPaths);
+                logObjects.add(objectToLog);
+            }
+
             if (sol == null)
                 nrInfeasible++;
             else
                 nrFeasible++;
 
+            if (nrFeasible % 200 == 0 || nrInfeasible % 200 == 0)
+                logger.info("nrFeasible: {}, nrInfeasible: {}", nrFeasible, nrInfeasible);
         }
+
+        logObjects.sort((l1, l2) -> l1.feasibleInfeasible.compareTo(l2.feasibleInfeasible));
+
+        for (LogObject logObject : logObjects)
+            logger.log(RESULT, "{} {} {} {}", logObject.instance.waitingTimesToString(), logObject.feasibleInfeasible,
+                    logObject.etTime, logObject.nrPaths);
 
     }
 
+    private static class LogObject {
+        Instance instance;
+        double etTime;
+        String feasibleInfeasible;
+        AtomicInteger nrPaths;
+
+        public LogObject(Instance instance, double etTime, String feasibleInfeasible, AtomicInteger nrPaths) {
+            this.instance = instance;
+            this.etTime = etTime;
+            this.feasibleInfeasible = feasibleInfeasible;
+            this.nrPaths = nrPaths;
+        }
+
+    }
 }
