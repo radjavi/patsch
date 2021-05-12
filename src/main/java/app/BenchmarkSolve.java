@@ -1,11 +1,8 @@
 package app;
 
-import search.*;
 import models.*;
-import wrappers.*;
+
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 // Import log4j classes.
@@ -38,7 +35,7 @@ public class BenchmarkSolve {
 
         int nrFeasible = 0;
         int nrInfeasible = 0;
-        ArrayList<LogObject> logObjects = new ArrayList<>(10000);
+
         Random random = new Random(1);
 
         while (nrFeasible < nrOfInstances || nrInfeasible < nrOfInstances) {
@@ -54,9 +51,8 @@ public class BenchmarkSolve {
             Path sol = instance.solve(nrOfPaths);
             long after = System.nanoTime();
             if ((sol != null && nrFeasible < nrOfInstances) || (sol == null && nrInfeasible < nrOfInstances)) {
-                LogObject objectToLog = new LogObject(instance.getWaitingTimes(), (after - before) * 1E-6,
-                        sol != null ? "feasible" : "infeasible", nrOfPaths.get());
-                logObjects.add(objectToLog);
+                logger.log(RESULT, "{} {} {} {}", Arrays.toString(waitingTimes),
+                        sol == null ? "infeasible" : "feasible", (after - before) * 1E-6, nrOfPaths);
             }
 
             if (sol == null)
@@ -66,27 +62,6 @@ public class BenchmarkSolve {
 
             if (nrFeasible % 200 == 0 || nrInfeasible % 200 == 0)
                 logger.info("nrFeasible: {}, nrInfeasible: {}", nrFeasible, nrInfeasible);
-        }
-
-        logObjects.sort((l1, l2) -> l1.feasibleInfeasible.compareTo(l2.feasibleInfeasible));
-
-        for (LogObject logObject : logObjects)
-            logger.log(RESULT, "{} {} {} {}", Arrays.toString(logObject.waitingTimes), logObject.feasibleInfeasible,
-                    logObject.etTime, logObject.nrPaths);
-
-    }
-
-    private static class LogObject {
-        int[] waitingTimes;
-        double etTime;
-        String feasibleInfeasible;
-        int nrPaths;
-
-        public LogObject(int[] waitingTimes, double etTime, String feasibleInfeasible, int nrPaths) {
-            this.waitingTimes = waitingTimes;
-            this.etTime = etTime;
-            this.feasibleInfeasible = feasibleInfeasible;
-            this.nrPaths = nrPaths;
         }
 
     }
