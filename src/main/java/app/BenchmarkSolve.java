@@ -51,7 +51,7 @@ public class BenchmarkSolve {
             Path sol = instance.solve(nrOfPaths);
             long after = System.nanoTime();
             if ((sol != null && nrFeasible < nrOfInstances) || (sol == null && nrInfeasible < nrOfInstances)) {
-                logger.log(RESULT, "{} {} {} {}", Arrays.toString(waitingTimes),
+                logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(),
                         sol == null ? "infeasible" : "feasible", (after - before) * 1E-6, nrOfPaths);
             }
 
@@ -59,9 +59,6 @@ public class BenchmarkSolve {
                 nrInfeasible++;
             else
                 nrFeasible++;
-
-            if (nrFeasible % 200 == 0 || nrInfeasible % 200 == 0)
-                logger.info("nrFeasible: {}, nrInfeasible: {}", nrFeasible, nrInfeasible);
         }
 
     }
