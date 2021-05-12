@@ -54,7 +54,7 @@ public class BenchmarkSolve {
             Path sol = instance.solve(nrOfPaths);
             long after = System.nanoTime();
             if ((sol != null && nrFeasible < nrOfInstances) || (sol == null && nrInfeasible < nrOfInstances)) {
-                LogObject objectToLog = new LogObject(instance, (after - before) * 1E-6,
+                LogObject objectToLog = new LogObject(instance.getWaitingTimes(), (after - before) * 1E-6,
                         sol != null ? "feasible" : "infeasible", nrOfPaths);
                 logObjects.add(objectToLog);
             }
@@ -71,19 +71,19 @@ public class BenchmarkSolve {
         logObjects.sort((l1, l2) -> l1.feasibleInfeasible.compareTo(l2.feasibleInfeasible));
 
         for (LogObject logObject : logObjects)
-            logger.log(RESULT, "{} {} {} {}", logObject.instance.waitingTimesToString(), logObject.feasibleInfeasible,
+            logger.log(RESULT, "{} {} {} {}", Arrays.toString(logObject.waitingTimes), logObject.feasibleInfeasible,
                     logObject.etTime, logObject.nrPaths);
 
     }
 
     private static class LogObject {
-        Instance instance;
+        int[] waitingTimes;
         double etTime;
         String feasibleInfeasible;
         AtomicInteger nrPaths;
 
-        public LogObject(Instance instance, double etTime, String feasibleInfeasible, AtomicInteger nrPaths) {
-            this.instance = instance;
+        public LogObject(int[] waitingTimes, double etTime, String feasibleInfeasible, AtomicInteger nrPaths) {
+            this.waitingTimes = waitingTimes;
             this.etTime = etTime;
             this.feasibleInfeasible = feasibleInfeasible;
             this.nrPaths = nrPaths;
