@@ -5,6 +5,7 @@ import models.*;
 import wrappers.*;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 // Import log4j classes.
@@ -41,55 +42,61 @@ public class BenchmarkSolve {
             return;
         }
 
-        AtomicInteger infeasible = new AtomicInteger(0);
+        int nrFeasible = 0;
+        int nrInfeasible = 0;
         SingleExecutor executor = SingleExecutor.init(nrThreads);
+        Random random = new Random(1);
 
-        ArrayList<Callable<Void>> runnables = new ArrayList<>();
-        for (int i = 0; i < nrThreads; i++) {
-            runnables.add(new ParallelBenchWorker(infeasible, nrOfInstances, m, r, i));
-        }
-        executor.getExecutor().invokeAll(runnables);
-        if (executor != null)
-            executor.shutdown();
-
-    }
-
-    private static class ParallelBenchWorker implements Callable<Void> {
-        private AtomicInteger nrOfInfeasible;
-        private final int nrOfInstances;
-        private final int m;
-        private final int r;
-        private final int seed;
-
-        public ParallelBenchWorker(AtomicInteger nrOfInfeasible, int nrOfInstances, int m, int r, int seed) {
-            this.nrOfInfeasible = nrOfInfeasible;
-            this.nrOfInstances = nrOfInstances;
-            this.m = m;
-            this.r = r;
-            this.seed = seed;
-        }
-
-        @Override
-        public Void call() throws Exception {
-            Random random = new Random(seed);
-            while (nrOfInfeasible.get() < nrOfInstances) {
+        while (nrFeasible < nrOfInstances || nrInfeasible < nrOfInstances) {
+            ArrayList<Callable<Path>> callables = new ArrayList<>(1000);
+            for (int i = 0; i < 1000; i++) {
                 int[] waitingTimes = random.ints(m + 1, 1, r + 1).toArray();
                 Instance instance = new Instance(waitingTimes);
                 int a = instance.getA();
                 int b = instance.getB();
                 if (a > b || (a == 0 && b == m) || (a == 0 && b == 0) || (a == m && b == m))
                     continue;
-                long before = System.nanoTime();
-                AtomicInteger nrOfPaths = new AtomicInteger(0);
-                Path sol = instance.solve(nrOfPaths);
-                if (sol == null) {
-                    nrOfInfeasible.incrementAndGet();
-                    logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(),
-                            sol != null ? "feasible" : "infeasible", (System.nanoTime() - before) * 1E-6, nrOfPaths);
-
-                }
+                callables.add(new ParallelBenchWorker(instance, nrFeasible, nrInfeasible, nrOfInstances));
             }
-            return null;
+
+            List<Future<Path>> futures = executor.getExecutor().invokeAll(callables);
+            for (Future<Path> future : futures) {
+                Path sol = future.get();
+                if (sol != null)
+                    nrFeasible++;
+                else
+                    nrInfeasible++;
+            }
+        }
+
+        if (executor != null)
+            executor.shutdown();
+
+    }
+
+    private static class ParallelBenchWorker implements Callable<Path> {
+        private Instance instance;
+        private int nrFeasible;
+        private int nrInfeasible;
+        private int nrOfInstances;
+
+        public ParallelBenchWorker(Instance instance, int nrFeasible, int nrInfeasible, int nrOfInstances) {
+            this.instance = instance;
+            this.nrFeasible = nrFeasible;
+            this.nrInfeasible = nrInfeasible;
+            this.nrOfInstances = nrOfInstances;
+        }
+
+        @Override
+        public Path call() throws Exception {
+            long before = System.nanoTime();
+            AtomicInteger nrOfPaths = new AtomicInteger(0);
+            Path sol = instance.solve(nrOfPaths);
+            if ((sol != null && nrFeasible < nrOfInstances) || (sol == null && nrInfeasible < nrOfInstances))
+                logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(),
+                        sol != null ? "feasible" : "infeasible", (System.nanoTime() - before) * 1E-6, nrOfPaths);
+
+            return sol;
         }
     }
 }
