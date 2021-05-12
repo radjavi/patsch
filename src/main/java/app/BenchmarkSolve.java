@@ -58,8 +58,14 @@ public class BenchmarkSolve {
             }
             Arrays.sort(totaltime);
             double median = totaltime[5];
+            if ((sol != null && nrFeasible < nrOfInstances) || (sol == null && nrInfeasible < nrOfInstances)) {
             logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(), sol == null ? "infeasible" : "feasible",
                     median, nrOfPaths);
+            }
+            if (sol == null)
+                nrInfeasible++;
+            else
+                nrFeasible++;
 
         }
 
