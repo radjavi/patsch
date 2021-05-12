@@ -55,7 +55,7 @@ public class BenchmarkSolve {
             long after = System.nanoTime();
             if ((sol != null && nrFeasible < nrOfInstances) || (sol == null && nrInfeasible < nrOfInstances)) {
                 LogObject objectToLog = new LogObject(instance.getWaitingTimes(), (after - before) * 1E-6,
-                        sol != null ? "feasible" : "infeasible", nrOfPaths);
+                        sol != null ? "feasible" : "infeasible", nrOfPaths.get());
                 logObjects.add(objectToLog);
             }
 
@@ -80,9 +80,9 @@ public class BenchmarkSolve {
         int[] waitingTimes;
         double etTime;
         String feasibleInfeasible;
-        AtomicInteger nrPaths;
+        int nrPaths;
 
-        public LogObject(int[] waitingTimes, double etTime, String feasibleInfeasible, AtomicInteger nrPaths) {
+        public LogObject(int[] waitingTimes, double etTime, String feasibleInfeasible, int nrPaths) {
             this.waitingTimes = waitingTimes;
             this.etTime = etTime;
             this.feasibleInfeasible = feasibleInfeasible;
