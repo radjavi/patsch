@@ -36,67 +36,32 @@ public class BenchmarkSolve {
             return;
         }
 
-        int nrThreads = args.length > 3 ? Integer.parseInt(args[3]) : 1;
-        if (nrThreads < 1) {
-            logger.fatal("Number of threads must be greater than 0");
-            return;
-        }
-
         int nrFeasible = 0;
         int nrInfeasible = 0;
-        SingleExecutor executor = SingleExecutor.init(nrThreads);
+
         Random random = new Random(1);
 
         while (nrFeasible < nrOfInstances || nrInfeasible < nrOfInstances) {
-            ArrayList<Callable<Path>> callables = new ArrayList<>(1000);
-            for (int i = 0; i < 1000; i++) {
-                int[] waitingTimes = random.ints(m + 1, 1, r + 1).toArray();
-                Instance instance = new Instance(waitingTimes);
-                int a = instance.getA();
-                int b = instance.getB();
-                if (a > b || (a == 0 && b == m) || (a == 0 && b == 0) || (a == m && b == m))
-                    continue;
-                callables.add(new ParallelBenchWorker(instance, nrFeasible, nrInfeasible, nrOfInstances));
-            }
+            int[] waitingTimes = random.ints(m + 1, 1, r + 1).toArray();
+            Instance instance = new Instance(waitingTimes);
+            int a = instance.getA();
+            int b = instance.getB();
+            if (a > b || (a == 0 && b == m) || (a == 0 && b == 0) || (a == m && b == m))
+                continue;
 
-            List<Future<Path>> futures = executor.getExecutor().invokeAll(callables);
-            for (Future<Path> future : futures) {
-                Path sol = future.get();
-                if (sol != null)
-                    nrFeasible++;
-                else
-                    nrInfeasible++;
-            }
-        }
-
-        if (executor != null)
-            executor.shutdown();
-
-    }
-
-    private static class ParallelBenchWorker implements Callable<Path> {
-        private Instance instance;
-        private int nrFeasible;
-        private int nrInfeasible;
-        private int nrOfInstances;
-
-        public ParallelBenchWorker(Instance instance, int nrFeasible, int nrInfeasible, int nrOfInstances) {
-            this.instance = instance;
-            this.nrFeasible = nrFeasible;
-            this.nrInfeasible = nrInfeasible;
-            this.nrOfInstances = nrOfInstances;
-        }
-
-        @Override
-        public Path call() throws Exception {
             long before = System.nanoTime();
             AtomicInteger nrOfPaths = new AtomicInteger(0);
             Path sol = instance.solve(nrOfPaths);
             if ((sol != null && nrFeasible < nrOfInstances) || (sol == null && nrInfeasible < nrOfInstances))
                 logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(),
                         sol != null ? "feasible" : "infeasible", (System.nanoTime() - before) * 1E-6, nrOfPaths);
+            if (sol == null)
+                nrInfeasible++;
+            else
+                nrFeasible++;
 
-            return sol;
         }
+
     }
+
 }
