@@ -89,12 +89,13 @@ public class BenchmarkSolve {
 
         @Override
         public Path call() throws Exception {
-            long before = System.nanoTime();
             AtomicInteger nrOfPaths = new AtomicInteger(0);
+            long before = System.nanoTime();
             Path sol = instance.solve(nrOfPaths);
+            long after = System.nanoTime();
             if ((sol != null && nrFeasible < nrOfInstances) || (sol == null && nrInfeasible < nrOfInstances))
                 logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(),
-                        sol != null ? "feasible" : "infeasible", (System.nanoTime() - before) * 1E-6, nrOfPaths);
+                        sol != null ? "feasible" : "infeasible", (after - before) * 1E-6, nrOfPaths);
 
             return sol;
         }
