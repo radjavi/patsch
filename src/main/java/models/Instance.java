@@ -5,8 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import wrappers.*;
 // Import log4j classes.
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 public class Instance {
     private int m;
@@ -16,8 +14,6 @@ public class Instance {
     private Property[] properties;
     private PositionGraph validGraph;
     private DistanceCache shortestDistances;
-
-    private static final Logger logger = LogManager.getLogger(Instance.class);
 
     public Instance(int[] waitingTimes) {
         m = waitingTimes.length - 1;

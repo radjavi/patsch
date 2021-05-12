@@ -45,20 +45,22 @@ public class BenchmarkSolve {
             int b = instance.getB();
             if (a > b || (a == 0 && b == m) || (a == 0 && b == 0) || (a == m && b == m))
                 continue;
-
+            double[] totaltime = new double[11];
+            Path sol = null;
             AtomicInteger nrOfPaths = new AtomicInteger(0);
-            long before = System.nanoTime();
-            Path sol = instance.solve(nrOfPaths);
-            long after = System.nanoTime();
-            if ((sol != null && nrFeasible < nrOfInstances) || (sol == null && nrInfeasible < nrOfInstances)) {
-                logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(),
-                        sol == null ? "infeasible" : "feasible", (after - before) * 1E-6, nrOfPaths);
+            for (int i = 0; i < 11; i++) {
+                nrOfPaths = new AtomicInteger(0);
+                long before = System.nanoTime();
+                sol = instance.solve(nrOfPaths);
+                long after = System.nanoTime();
+                double time = (after - before) * 1E-6;
+                totaltime[i] = time;
             }
+            Arrays.sort(totaltime);
+            double median = totaltime[5];
+            logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(), sol == null ? "infeasible" : "feasible",
+                    median, nrOfPaths);
 
-            if (sol == null)
-                nrInfeasible++;
-            else
-                nrFeasible++;
         }
 
     }
