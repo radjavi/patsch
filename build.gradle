@@ -19,7 +19,7 @@ java {
 }
 
 application {
-    mainClass = 'app.BenchmarkSolve' // Set App.java as entry-point
+    mainClass = 'app.BenchmarkSingleInstance' // Set App.java as entry-point
     applicationDefaultJvmArgs = ['-ea'] // Enable assertions
 }
 
