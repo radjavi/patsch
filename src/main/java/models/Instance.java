@@ -191,11 +191,15 @@ public class Instance {
     }
 
     public Path solve() throws Exception {
-        return InstanceSolver.solve(this, new AtomicInteger(0));
+        return InstanceSolver.solve(this, new int[] { 0 });
     }
 
-    public Path solve(AtomicInteger nrOfSolved) throws Exception {
+    public Path solve(int[] nrOfSolved) throws Exception {
         return InstanceSolver.solve(this, nrOfSolved);
+    }
+
+    public Path solveBASIC(int[] nrOfSolved) throws Exception {
+        return InstanceSolver.solveSequentialBASIC(this, nrOfSolved);
     }
 
     public boolean isCritical() throws Exception {

@@ -47,11 +47,12 @@ public class BenchmarkSolve {
                 continue;
             double[] totaltime = new double[11];
             Path sol = null;
-            AtomicInteger nrOfPaths = new AtomicInteger(0);
+            logger.info("solving:{}", instance.waitingTimesToString());
+            int[] nrOfPaths = new int[1];
             for (int i = 0; i < 11; i++) {
-                nrOfPaths = new AtomicInteger(0);
+                nrOfPaths[0] = 0;
                 long before = System.nanoTime();
-                sol = instance.solve(nrOfPaths);
+                sol = instance.solveBASIC(nrOfPaths);
                 long after = System.nanoTime();
                 double time = (after - before) * 1E-6;
                 totaltime[i] = time;
@@ -59,8 +60,8 @@ public class BenchmarkSolve {
             Arrays.sort(totaltime);
             double median = totaltime[5];
             if ((sol != null && nrFeasible < nrOfInstances) || (sol == null && nrInfeasible < nrOfInstances)) {
-            logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(), sol == null ? "infeasible" : "feasible",
-                    median, nrOfPaths);
+                logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(),
+                        sol == null ? "infeasible" : "feasible", median, nrOfPaths);
             }
             if (sol == null)
                 nrInfeasible++;

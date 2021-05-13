@@ -250,7 +250,7 @@ public class Path {
     return true;
   }
 
-  public boolean redundant(AtomicInteger nrOfPaths) throws Exception {
+  public boolean redundant(int[] nrOfPaths) throws Exception {
     return RedundantPaths.length2(this, nrOfPaths) || RedundantPaths.length3(this);
   }
 
