@@ -65,15 +65,15 @@ public class Search {
         logger.trace("-------------------");
 
         // Generate a stock of instances
-        // logger.info("Generating maximal infeasible instances...");
-        // HashSet<Instance> maximalInfeasibleInstances = generateMaximalInfeasible(m,
-        // r);
-        // logger.debug("Generated {} maximal infeasible instances",
-        // maximalInfeasibleInstances.size());
-        // logger.trace("---- Maximal Infeasible Instances ----");
-        // maximalInfeasibleInstances.forEach(i ->
-        // logger.trace(i.waitingTimesToString()));
-        // logger.trace("--------------------------------------");
+        logger.info("Generating maximal infeasible instances...");
+        HashSet<Instance> maximalInfeasibleInstances = generateMaximalInfeasible(m,
+        r);
+        logger.debug("Generated {} maximal infeasible instances",
+        maximalInfeasibleInstances.size());
+        logger.trace("---- Maximal Infeasible Instances ----");
+        maximalInfeasibleInstances.forEach(i ->
+        logger.trace(i.waitingTimesToString()));
+        logger.trace("--------------------------------------");
 
         // SEARCH
         logger.info("Searching for critical instances...");
@@ -86,23 +86,23 @@ public class Search {
             }
             logger.info("Level: {}, Size of U: {}", level, levelInstances.size());
             for (Instance u : levelInstances) {
-                // Instance uR = u.getReversed();
-                // Instance greaterInfeasible = null;
+                Instance uR = u.getReversed();
+                Instance greaterInfeasible = null;
                 Instance referenceInstance = u;
-                // for (Instance greater : maximalInfeasibleInstances) {
-                // if (u.lessThan(greater)) {
-                // greaterInfeasible = greater;
-                // break;
-                // } else if (uR.lessThan(greater)) {
-                // greaterInfeasible = greater;
-                // referenceInstance = uR;
-                // break;
-                // }
-                // }
+                for (Instance greater : maximalInfeasibleInstances) {
+                if (u.lessThan(greater)) {
+                greaterInfeasible = greater;
+                break;
+                } else if (uR.lessThan(greater)) {
+                greaterInfeasible = greater;
+                referenceInstance = uR;
+                break;
+                }
+                }
                 ArrayList<Instance> vs = new ArrayList<>(m + 1);
                 for (int i = 0; i <= m; i++) {
-                    // if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] == r)
-                    // continue;
+                    if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] == r)
+                        continue;
                     if (referenceInstance.getWaitingTimes()[i] == r)
                         continue;
                     int[] newWaitingTimes = referenceInstance.getWaitingTimes().clone();
