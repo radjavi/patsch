@@ -124,7 +124,7 @@ public class Instance {
      */
     public <F, T> Path shortestPath(F from, T to) throws Exception {
         if (from instanceof Position && to instanceof Position)
-            return shortestPath((Position) from, (Position) to); 
+            return shortestPathAStar((Position) from, (Position) to); // BASIC
         HashSet<Position> fromSet = new HashSet<>();
         HashSet<Position> toSet = new HashSet<>();
         if (from instanceof Position)
@@ -161,9 +161,64 @@ public class Instance {
             }
         }
 
-        return shortestPath(bestF, bestT); 
+        return shortestPathAStar(bestF, bestT);  // BASIC
+    }
+    private Path shortestPathAStar(Position from, Position to) throws Exception{
+        if (from == null || to == null)
+            return null;
+
+        HashMap<Position, Double> gScore = new HashMap<>();
+        validGraph.getPositions().forEach(p -> gScore.put(p, Double.MAX_VALUE));
+        gScore.put(from, 0.0);
+
+        HashMap<Position, Double> fScore = new HashMap<>();
+        validGraph.getPositions().forEach(p -> fScore.put(p, Double.MAX_VALUE));
+        fScore.put(from, from.euclideanDistance(to));
+
+        PriorityQueue<Position> openSet = new PriorityQueue<>((p1, p2) -> {
+            if (fScore.get(p1) < fScore.get(p2))
+                return -1;
+            if (fScore.get(p1) > fScore.get(p2))
+                return 1;
+            return 0;
+        });
+        openSet.add(from);
+
+        HashMap<Position, Position> cameFrom = new HashMap<>();
+
+        while (!openSet.isEmpty()) {
+            Position current = openSet.remove();
+            if (current.equals(to))
+                return reconstructPath(cameFrom, current);
+
+            HashSet<Position> neighbours = validGraph.getNeighbours(current);
+
+            for (Position neighbour : neighbours) {
+                Double tentativeGScore = gScore.get(current) + 1;
+                if (tentativeGScore < gScore.get(neighbour)) {
+                    cameFrom.put(neighbour, current);
+                    gScore.put(neighbour, tentativeGScore);
+                    fScore.put(neighbour, tentativeGScore + neighbour.euclideanDistance(to));
+                    if (!openSet.contains(neighbour))
+                        openSet.add(neighbour);
+                }
+            }
+        }
+
+        return null;
     }
 
+    private Path reconstructPath(HashMap<Position, Position> cameFrom, Position end) throws Exception {
+        Path path = new Path(this);
+        path.addPositionFirst(end);
+        Position current = end;
+        while (cameFrom.get(current) != null) {
+            Position previous = cameFrom.get(current);
+            path.addPositionFirst(previous);
+            current = previous;
+        }
+        return path;
+    }
 
 
     private Path shortestPath(Position from, Position to) throws Exception {
