@@ -34,7 +34,7 @@ public class InstanceSolver {
       return null;
     }
     LinkedList<Path> paths = new LinkedList<>();
-    initPathsToSolveBASIC(instance, paths);
+    initPathsToSolve(instance, paths);
 
     while (!paths.isEmpty()) {
       Path p = paths.pop();
