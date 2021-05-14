@@ -11,7 +11,7 @@ public class Property {
     public Property(Instance instance, int index) {
         this.index = index;
         this.instance = instance;
-        this.positions = this.createPositions();
+        this.positions = this.createPositionsBASIC();
         this.range = new Range(this);
     }
 
