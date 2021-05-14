@@ -54,6 +54,7 @@ public class Search {
         HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
         for (Instance lowerBoundInstance : lowerBoundInstances) {
             Path solution = new Instance(lowerBoundInstance.getWaitingTimes()).solve();
+            totalInstances++;
             if (solution != null)
                 C.put(lowerBoundInstance, solution);
             else if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null) {
