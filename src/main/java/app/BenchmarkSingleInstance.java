@@ -42,7 +42,8 @@ public class BenchmarkSingleInstance {
         logger.info("{} {} {} {}", infeasibleInstance.waitingTimesToString(), sol == null ? "infeasible" : "feasible",
                 median, nrOfPaths[0]);
        
-
+        infeasibleInstance =null;
+        sol = null;
         // FEASIBLE
         int[] feaisible = new int[] { 16, 16, 7, 16, 3, 16, 16, 16, 16 };
         Instance feasibleInstance = new Instance(feaisible);
