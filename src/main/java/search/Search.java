@@ -35,6 +35,7 @@ public class Search {
         HashMap<Instance, Path> C = new HashMap<>();
         HashSet<Instance> visitedInstances = new HashSet<>();
         int totalInstances = 0;
+        int[] maxInfeasibleSolved = new int[1];
 
         // INIT
         logger.info("Generating M_0...");
@@ -67,7 +68,7 @@ public class Search {
         // Generate a stock of instances
         logger.info("Generating maximal infeasible instances...");
         HashSet<Instance> maximalInfeasibleInstances = generateMaximalInfeasible(m,
-        r);
+        r,maxInfeasibleSolved);
         logger.debug("Generated {} maximal infeasible instances",
         maximalInfeasibleInstances.size());
         logger.trace("---- Maximal Infeasible Instances ----");
@@ -143,7 +144,7 @@ public class Search {
         }
 
         printResults(C, m, r);
-        logger.info("TOTAL INSTANCES:" + totalInstances);
+        logger.info("TOTAL INSTANCES:" + (totalInstances+maxInfeasibleSolved[0]));
         return C;
 
     }
@@ -186,7 +187,7 @@ public class Search {
 
         // Generate a stock of instances
         logger.info("Generating maximal infeasible instances...");
-        HashSet<Instance> maximalInfeasibleInstances = generateMaximalInfeasible(m, r);
+        HashSet<Instance> maximalInfeasibleInstances = generateMaximalInfeasible(m, r, new int[]{1});
         logger.debug("Generated {} maximal infeasible instances", maximalInfeasibleInstances.size());
         logger.trace("---- Maximal Infeasible Instances ----");
         maximalInfeasibleInstances.forEach(i -> logger.trace(i.waitingTimesToString()));
@@ -237,7 +238,7 @@ public class Search {
 
     }
 
-    public static HashSet<Instance> generateMaximalInfeasible(int m, int r) throws Exception {
+    public static HashSet<Instance> generateMaximalInfeasible(int m, int r, int[] totalSolved) throws Exception {
         HashSet<Instance> maximalInfeasibleInstances = new HashSet<>();
         HashSet<Instance> visitedInstances = new HashSet<>();
         LinkedList<Instance> U = new LinkedList<>();
@@ -247,13 +248,14 @@ public class Search {
         Instance allRInstance = new Instance(allR);
         U.add(allRInstance);
         visitedInstances.add(allRInstance);
-
+        
         while (!U.isEmpty()) {
             // logger.info("maximal size: {}, visited size: {}",
             // maximalInfeasibleInstances.size(), visitedInstances.size());
             Instance u = U.pop();
             // logger.info("{}", u.waitingTimesToString());
             Path solution = u.solve();
+            totalSolved[0]++;
             if (solution != null) {
                 for (int i = 0; i <= m; i++) {
                     if (u.getWaitingTimes()[i] != r)
