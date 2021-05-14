@@ -31,7 +31,7 @@ public class BenchmarkSingleInstance {
         for (int i = 0; i < nrOfTries; i++) {
             nrOfPaths[0] = 0;
             long before = System.nanoTime();
-            sol = infeasibleInstance.solveBASIC(nrOfPaths);
+            sol = infeasibleInstance.solve(nrOfPaths);
             long after = System.nanoTime();
             double time = (after - before) * 1E-6;
             totaltime[i] = time;
@@ -54,7 +54,7 @@ public class BenchmarkSingleInstance {
         for (int i = 0; i < nrOfTries; i++) {
             nrOfPathsFeasible[0] = 0;
             long before = System.nanoTime();
-            solFeasible = feasibleInstance.solveBASIC(nrOfPathsFeasible);
+            solFeasible = feasibleInstance.solve(nrOfPathsFeasible);
             long after = System.nanoTime();
             double time = (after - before) * 1E-6;
             totaltimeFeasible[i] = time;
