@@ -35,12 +35,13 @@ public class InstanceSolver {
     }
     LinkedList<Path> paths = new LinkedList<>();
     initPathsToSolve(instance, paths);
+    HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
 
     while (!paths.isEmpty()) {
       Path p = paths.pop();
       if (nrOfSolved[0] % 1e6 < 10)
         System.out.println(nrOfSolved[0]);
-      Path solution = extendPathBASIC(instance, paths, p, nrOfSolved);
+      Path solution = extendPath(instance,fingerprints, paths, p, nrOfSolved);
       if (solution != null) {
 
         return solution;
