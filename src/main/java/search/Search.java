@@ -50,12 +50,7 @@ public class Search {
 
         // Generate lower bound instances
         logger.info("Generating lower bound instances...");
-        // HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
-        HashSet<Instance> lowerBoundInstances = new HashSet<>(); // BASIC
-        int[] ones = new int[m + 1];
-        Arrays.fill(ones, 1);
-        Instance one = new Instance(ones);
-        lowerBoundInstances.add(one); // BASIC
+        HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
         for (Instance lowerBoundInstance : lowerBoundInstances) {
             Path solution = new Instance(lowerBoundInstance.getWaitingTimes()).solve();
             if (solution != null)
