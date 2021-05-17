@@ -68,13 +68,10 @@ public class Search {
 
         // Generate a stock of instances
         logger.info("Generating maximal infeasible instances...");
-        HashSet<Instance> maximalInfeasibleInstances = generateMaximalInfeasible(m,
-        r,maxInfeasibleSolved);
-        logger.debug("Generated {} maximal infeasible instances",
-        maximalInfeasibleInstances.size());
+        HashSet<Instance> maximalInfeasibleInstances = generateMaximalInfeasible(m, r, maxInfeasibleSolved);
+        logger.debug("Generated {} maximal infeasible instances", maximalInfeasibleInstances.size());
         logger.trace("---- Maximal Infeasible Instances ----");
-        maximalInfeasibleInstances.forEach(i ->
-        logger.trace(i.waitingTimesToString()));
+        maximalInfeasibleInstances.forEach(i -> logger.trace(i.waitingTimesToString()));
         logger.trace("--------------------------------------");
 
         // SEARCH
@@ -92,14 +89,14 @@ public class Search {
                 Instance greaterInfeasible = null;
                 Instance referenceInstance = u;
                 for (Instance greater : maximalInfeasibleInstances) {
-                if (u.lessThan(greater)) {
-                greaterInfeasible = greater;
-                break;
-                } else if (uR.lessThan(greater)) {
-                greaterInfeasible = greater;
-                referenceInstance = uR;
-                break;
-                }
+                    if (u.lessThan(greater)) {
+                        greaterInfeasible = greater;
+                        break;
+                    } else if (uR.lessThan(greater)) {
+                        greaterInfeasible = greater;
+                        referenceInstance = uR;
+                        break;
+                    }
                 }
                 ArrayList<Instance> vs = new ArrayList<>(m + 1);
                 for (int i = 0; i <= m; i++) {
@@ -145,7 +142,7 @@ public class Search {
         }
 
         printResults(C, m, r);
-        logger.info("TOTAL INSTANCES:" + (totalInstances+maxInfeasibleSolved[0]));
+        logger.info("TOTAL INSTANCES:" + (totalInstances + maxInfeasibleSolved[0]));
         return C;
 
     }
@@ -156,7 +153,7 @@ public class Search {
         InstanceLevelBuckets U = new InstanceLevelBuckets();
         ConcurrentHashMap<Instance, Path> C = new ConcurrentHashMap<>();
         Set<Instance> visitedInstances = ConcurrentHashMap.newKeySet();
-
+        int nrSolved = 0;
         // INIT
         logger.info("Generating M_0...");
         HashMap<Instance, Path> m_0 = criticalsWithEmptyIntersection(m);
@@ -169,6 +166,7 @@ public class Search {
         HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
         for (Instance lowerBoundInstance : lowerBoundInstances) {
             Path solution = new Instance(lowerBoundInstance.getWaitingTimes()).solve();
+            nrSolved++;
             if (solution != null)
                 C.put(lowerBoundInstance, solution);
             else if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null) {
@@ -185,10 +183,10 @@ public class Search {
         logger.trace("-------- U --------");
         U.allInstances().forEach(i -> logger.trace(i.waitingTimesToString()));
         logger.trace("-------------------");
-
+        int[] maxInfeasibleSolved = new int[1];
         // Generate a stock of instances
         logger.info("Generating maximal infeasible instances...");
-        HashSet<Instance> maximalInfeasibleInstances = generateMaximalInfeasible(m, r, new int[]{1});
+        HashSet<Instance> maximalInfeasibleInstances = generateMaximalInfeasible(m, r, maxInfeasibleSolved);
         logger.debug("Generated {} maximal infeasible instances", maximalInfeasibleInstances.size());
         logger.trace("---- Maximal Infeasible Instances ----");
         maximalInfeasibleInstances.forEach(i -> logger.trace(i.waitingTimesToString()));
@@ -198,6 +196,7 @@ public class Search {
         SingleExecutor executor = SingleExecutor.getInstance();
         logger.info("Searching for critical instances...");
         int level = 0;
+        nrSolved += maxInfeasibleSolved[0];
         while (!U.isEmpty()) {
             Set<Instance> levelInstances = U.poll(level);
             if (levelInstances == null) {
@@ -205,15 +204,16 @@ public class Search {
                 continue;
             }
             logger.info("Level: {}, Size of U: {}", level, levelInstances.size());
-            ArrayList<Callable<List<Instance>>> callables = new ArrayList<>();
+            ArrayList<Callable<ThreadResult>> callables = new ArrayList<>();
             for (Instance u : levelInstances) {
                 callables.add(new ParallelSearchWorker(u, C, maximalInfeasibleInstances, visitedInstances, m, r));
             }
-            List<Future<List<Instance>>> futures = executor.getExecutor().invokeAll(callables);
-            for (Future<List<Instance>> future : futures) {
-                for (Instance i : future.get()) {
+            List<Future<ThreadResult>> futures = executor.getExecutor().invokeAll(callables);
+            for (Future<ThreadResult> future : futures) {
+                for (Instance i : future.get().U) {
                     U.add(i);
                 }
+                nrSolved += future.get().nrSolved;
             }
             level++;
         }
@@ -234,7 +234,7 @@ public class Search {
         }
 
         printResults(C, m, r);
-
+        logger.info("solved instances:" + nrSolved);
         return C;
 
     }
@@ -249,7 +249,7 @@ public class Search {
         Instance allRInstance = new Instance(allR);
         U.add(allRInstance);
         visitedInstances.add(allRInstance);
-        
+
         while (!U.isEmpty()) {
             // logger.info("maximal size: {}, visited size: {}",
             // maximalInfeasibleInstances.size(), visitedInstances.size());
@@ -392,13 +392,14 @@ public class Search {
         logger.info("---------------------------------");
     }
 
-    private static class ParallelSearchWorker implements Callable<List<Instance>> {
+    private static class ParallelSearchWorker implements Callable<ThreadResult> {
         private final Instance u;
         private final Map<Instance, Path> C;
         private final Set<Instance> maximalInfeasibleInstances;
         private final Set<Instance> visitedInstances;
         private final int m;
         private final int r;
+        private int nrSolved;
 
         public ParallelSearchWorker(Instance u, Map<Instance, Path> C, Set<Instance> maximalInfeasibleInstances,
                 Set<Instance> visitedInstances, int m, int r) {
@@ -411,7 +412,7 @@ public class Search {
         }
 
         @Override
-        public List<Instance> call() throws Exception {
+        public ThreadResult call() throws Exception {
             List<Instance> U = new ArrayList<>();
             // Instance u = U.poll();
             Instance uR = u.getReversed();
@@ -443,13 +444,25 @@ public class Search {
             }
             for (Instance v : vs) {
                 Path solution = new Instance(v.getWaitingTimes()).solve();
+                nrSolved++;
                 if (solution != null) {
                     C.put(v, solution);
                     logger.info("Found critical instance {}: {}", v.waitingTimesToString(), solution);
                 } else
                     U.add(v);
             }
-            return U;
+            ThreadResult tR = new ThreadResult(U, nrSolved);
+            return tR;
+        }
+    }
+
+    private static class ThreadResult {
+        List<Instance> U;
+        int nrSolved;
+
+        public ThreadResult(List<Instance> U, int nrSolved) {
+            this.U = U;
+            this.nrSolved = nrSolved;
         }
     }
 }
