@@ -2,6 +2,8 @@ package app;
 
 import models.*;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -52,16 +54,19 @@ public class BenchmarkSolve {
             for (int i = 0; i < 11; i++) {
                 nrOfPaths[0] = 0;
                 long before = System.nanoTime();
-                sol = instance.solveBASIC(nrOfPaths);
+                sol = instance.solve(nrOfPaths);
                 long after = System.nanoTime();
                 double time = (after - before) * 1E-6;
                 totaltime[i] = time;
             }
             Arrays.sort(totaltime);
             double median = totaltime[5];
+            DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+            df.setMaximumFractionDigits(8);
+            String medianS = (df.format(median));
             if ((sol != null && nrFeasible < nrOfInstances) || (sol == null && nrInfeasible < nrOfInstances)) {
                 logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(),
-                        sol == null ? "infeasible" : "feasible", median, nrOfPaths);
+                        sol == null ? "infeasible" : "feasible", medianS, nrOfPaths[0]);
             }
             if (sol == null)
                 nrInfeasible++;

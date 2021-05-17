@@ -41,7 +41,7 @@ public class InstanceSolver {
       Path p = paths.pop();
       if (nrOfSolved[0] % 1e6 < 10)
         System.out.println(nrOfSolved[0]);
-      Path solution = extendPath(instance,fingerprints, paths, p, nrOfSolved);
+      Path solution = extendPath(instance, fingerprints, paths, p, nrOfSolved);
       if (solution != null) {
 
         return solution;
@@ -270,6 +270,10 @@ public class InstanceSolver {
       if (pq.valid()) {
         if (pq.isValidCycle() && pq.visitsAllProperties())
           return pq;
+        Path pqp = lookAhead(pq);
+        nrOfSolved[0]++;
+        if (pqp != null)
+          return pqp;
         ArrayList<Integer> fingerprint = pq.fingerprint();
         if (!fingerprints.contains(fingerprint) && !pq.redundant(nrOfSolved)) {
           fingerprints.add(fingerprint);
