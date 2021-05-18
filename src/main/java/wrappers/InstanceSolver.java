@@ -9,15 +9,19 @@ import com.google.common.collect.Sets;
 
 // Import log4j classes.
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 
 public class InstanceSolver {
-
+  final static Level RESULT = Level.forName("RESULT", 350);
   private static final Logger logger = LogManager.getLogger(InstanceSolver.class);
 
-  public static Path solve(Instance instance, int[] nrOfSolved) throws Exception {
+  public static Path solve(Instance instance) throws Exception {
+    return solveSequential(instance);
+  }
 
-    return solveSequential(instance, nrOfSolved);
+  public static Path solve(Instance instance, int[] nrOfPaths) throws Exception {
+    return solveSequential(instance, nrOfPaths);
   }
 
   public static Path solveSequentialBASIC(Instance instance, int[] nrOfSolved) throws Exception {
@@ -52,7 +56,7 @@ public class InstanceSolver {
 
   }
 
-  public static Path solveSequential(Instance instance, int[] nrOfSolved) throws Exception {
+  public static Path solveSequential(Instance instance) throws Exception {
     int m = instance.getM();
     int a = instance.getA();
     int b = instance.getB();
@@ -65,8 +69,13 @@ public class InstanceSolver {
       }
       return null;
     }
+    int[] nrOfPaths = new int[1];
+    long before = System.nanoTime();
+    long after = 0;
+    double et = 0;
+
     LinkedList<Path> paths = new LinkedList<>();
-    LinkedList<Path> wildcards = findWildcardPaths(instance, nrOfSolved);
+    LinkedList<Path> wildcards = findWildcardPaths(instance, nrOfPaths);
     if (wildcards == null)
       return null;
     else if (!wildcards.isEmpty()) {
@@ -92,7 +101,65 @@ public class InstanceSolver {
     while (!paths.isEmpty()) {
       Path p = paths.pop();
       // nrPaths++;
-      Path solution = extendPath(instance, fingerprints, paths, p, nrOfSolved);
+      Path solution = extendPath(instance, fingerprints, paths, p, nrOfPaths);
+      if (solution != null) {
+        // logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(),
+        // nrPaths);
+        after = System.nanoTime();
+        et = (after - before) * 1E-6;
+        logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(), "feasible", et, nrOfPaths[0]);
+        return solution;
+      }
+    }
+    // logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(),
+    // nrPaths);
+    after = System.nanoTime();
+    et = (after - before) * 1E-6;
+    logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(), "infeasible", et, nrOfPaths[0]);
+    return null;
+  }
+
+  public static Path solveSequential(Instance instance, int[] nrOfPaths) throws Exception {
+    int m = instance.getM();
+    int a = instance.getA();
+    int b = instance.getB();
+    if (a > b || (a == 0 && b == m) || (a == 0 && b == 0) || (a == m && b == m)) {
+      // Find correct d to return path from Proposition 1.
+      for (int d = 0; d <= m; d++) {
+        Instance critical = Search.criticalWithEmptyIntersection(m, d);
+        if (critical.lessThanOrEqualTo(instance))
+          return billiardBallPath(instance, d);
+      }
+      return null;
+    }
+    LinkedList<Path> paths = new LinkedList<>();
+    LinkedList<Path> wildcards = findWildcardPaths(instance, nrOfPaths);
+    if (wildcards == null)
+      return null;
+    else if (!wildcards.isEmpty()) {
+      for (Path wildcard : wildcards) {
+        if (wildcard.isValidCycle() && wildcard.visitsAllProperties())
+          return wildcard;
+        paths.add(wildcard);
+      }
+    } else
+      initPathsToSolve(instance, paths);
+
+    // logger.trace("{} - Initial number of paths: {}",
+    // instance.waitingTimesToString(),
+    // paths.size());
+    // Table<Position, Position, Path> bestValidPaths = HashBasedTable.create();
+    // for (Path p : paths) {
+    // bestValidPaths.put(p.getFirst(), p.getLast(), p);
+    // }
+
+    HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
+    // System.out.println(instance.waitingTimesToString());
+    // int nrPaths = 0;
+    while (!paths.isEmpty()) {
+      Path p = paths.pop();
+      // nrPaths++;
+      Path solution = extendPath(instance, fingerprints, paths, p, nrOfPaths);
       if (solution != null) {
         // logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(),
         // nrPaths);

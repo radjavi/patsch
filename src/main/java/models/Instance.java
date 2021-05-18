@@ -124,7 +124,7 @@ public class Instance {
      */
     public <F, T> Path shortestPath(F from, T to) throws Exception {
         if (from instanceof Position && to instanceof Position)
-            return shortestPath((Position) from, (Position) to); 
+            return shortestPath((Position) from, (Position) to);
         HashSet<Position> fromSet = new HashSet<>();
         HashSet<Position> toSet = new HashSet<>();
         if (from instanceof Position)
@@ -161,10 +161,8 @@ public class Instance {
             }
         }
 
-        return shortestPath(bestF, bestT); 
+        return shortestPath(bestF, bestT);
     }
-
-
 
     private Path shortestPath(Position from, Position to) throws Exception {
         if (from == null || to == null)
@@ -193,11 +191,11 @@ public class Instance {
     }
 
     public Path solve() throws Exception {
-        return InstanceSolver.solve(this, new int[] { 0 });
+        return InstanceSolver.solve(this);
     }
 
-    public Path solve(int[] nrOfSolved) throws Exception {
-        return InstanceSolver.solve(this, nrOfSolved);
+    public Path solve(int[] nrOfPaths) throws Exception {
+        return InstanceSolver.solve(this, nrOfPaths);
     }
 
     public Path solveBASIC(int[] nrOfSolved) throws Exception {

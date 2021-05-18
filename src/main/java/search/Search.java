@@ -238,13 +238,7 @@ public class Search {
             // maximalInfeasibleInstances.size(), visitedInstances.size());
             Instance u = U.pop();
             // logger.info("{}", u.waitingTimesToString());
-            int[] nrOfPaths = new int[1];
-            long before = System.nanoTime();
-            Path solution = u.solve(nrOfPaths);
-            long after = System.nanoTime();
-            double et = (after - before) * 1E-6;
-            logger.log(RESULT, "{} {} {} {}", u.waitingTimesToString(), solution == null ? "infeasible" : "feasible",
-                    et, nrOfPaths[0]);
+            Path solution = u.solve();
 
             if (solution != null) {
                 for (int i = 0; i <= m; i++) {
@@ -432,13 +426,7 @@ public class Search {
                     vs.add(v);
             }
             for (Instance v : vs) {
-                long before = System.nanoTime();
-                int[] nrOfPaths = new int[1];
-                Path solution = new Instance(v.getWaitingTimes()).solve(nrOfPaths);
-                long after = System.nanoTime();
-                double et = (after - before) * 1E-6;
-                logger.log(RESULT, "{} {} {} {}", v.waitingTimesToString(),
-                        solution == null ? "infeasible" : "feasible", et, nrOfPaths[0]);
+                Path solution = new Instance(v.getWaitingTimes()).solve();
 
                 if (solution != null) {
                     C.put(v, solution);
