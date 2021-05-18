@@ -46,8 +46,10 @@ public class App {
         // path2.addPositionLast(new Position(3,1));
         // path2.addPositionLast(new Position(4,2));
 
-        // System.out.println( "f:" + Arrays.toString( path1.getF_i()) + " s: "+Arrays.toString( path1.getS_i()));
-        // System.out.println( "f:" + Arrays.toString(path2.getF_i()) +  " s: "+Arrays.toString( path2.getS_i()));
+        // System.out.println( "f:" + Arrays.toString( path1.getF_i()) + " s:
+        // "+Arrays.toString( path1.getS_i()));
+        // System.out.println( "f:" + Arrays.toString(path2.getF_i()) + " s:
+        // "+Arrays.toString( path2.getS_i()));
         // System.out.println(path1.betterThan(path2));
 
         // int r = Integer.MAX_VALUE;
@@ -58,7 +60,7 @@ public class App {
         // logger.info("[{},{}]", i.getA(), i.getB());
         long startTime = System.nanoTime();
         Search.searchForCriticalInstances(m, r);
-        //logger.info(i.solve());
+        // logger.info(i.solve());
         long stopTime = System.nanoTime();
         logger.info("Search took {} seconds.", (stopTime - startTime) * 1e-9);
         if (executor != null)
