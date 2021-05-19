@@ -198,6 +198,7 @@ public class Search {
         int level = 0;
         nrSolved += maxInfeasibleSolved[0];
         while (!U.isEmpty()) {
+            visitedInstances = ConcurrentHashMap.newKeySet();
             Set<Instance> levelInstances = U.poll(level);
             if (levelInstances == null) {
                 level++;
