@@ -190,6 +190,7 @@ public class Search {
         logger.info("Searching for critical instances...");
         int level = 0;
         while (!U.isEmpty()) {
+            visitedInstances = ConcurrentHashMap.newKeySet();
             Set<Instance> levelInstances = U.poll(level);
             if (levelInstances == null) {
                 level++;
