@@ -16,15 +16,6 @@ public class InstanceSolver {
   private static final Logger logger = LogManager.getLogger(InstanceSolver.class);
 
   public static Path solve(Instance instance) throws Exception {
-    // SingleExecutor executor = SingleExecutor.getInstance();
-    // if (executor == null) {
-    // return solveSequential(instance);
-    // }
-    // return solveParallel(instance);
-    return solveSequential(instance);
-  }
-
-  public static Path solveSequential(Instance instance) throws Exception {
     int m = instance.getM();
     int a = instance.getA();
     int b = instance.getB();
@@ -38,45 +29,30 @@ public class InstanceSolver {
       return null;
     }
     LinkedList<Path> paths = new LinkedList<>();
-    LinkedList<Path> wildcards = findWildcardPaths(instance);
-    if (wildcards == null)
+    LinkedList<Path> babysittingPaths = findBabysittingPaths(instance);
+    if (babysittingPaths == null)
       return null;
-    else if (!wildcards.isEmpty()) {
-      for (Path wildcard : wildcards) {
-        if (wildcard.isSolutionCycle())
-          return wildcard;
-        paths.add(wildcard);
+    else if (!babysittingPaths.isEmpty()) {
+      for (Path babysittingPath : babysittingPaths) {
+        if (babysittingPath.isSolutionCycle())
+          return babysittingPath;
+        paths.add(babysittingPath);
       }
     } else
       initPathsToSolve(instance, paths);
 
-    // logger.trace("{} - Initial number of paths: {}",
-    // instance.waitingTimesToString(),
-    // paths.size());
-    // Table<Position, Position, Path> bestValidPaths = HashBasedTable.create();
-    // for (Path p : paths) {
-    // bestValidPaths.put(p.getFirst(), p.getLast(), p);
-    // }
-
     HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
-    // System.out.println(instance.waitingTimesToString());
-    // int nrPaths = 0;
     while (!paths.isEmpty()) {
       Path p = paths.pop();
-      // nrPaths++;
       Path solution = extendPath(instance, fingerprints, paths, p);
       if (solution != null) {
-        // logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(),
-        // nrPaths);
         return solution;
       }
     }
-    // logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(),
-    // nrPaths);
     return null;
   }
 
-  private static LinkedList<Path> findWildcardPaths(Instance instance) throws Exception {
+  private static LinkedList<Path> findBabysittingPaths(Instance instance) throws Exception {
     int a = instance.getA();
     int b = instance.getB();
     int m = instance.getM();
@@ -84,27 +60,27 @@ public class InstanceSolver {
       return new LinkedList<Path>();
     int left = a;
     int right = m - b;
-    LinkedList<Path> wildcardPathsLeft = new LinkedList<>();
-    LinkedList<Path> wildcardPathsRight = new LinkedList<>();
+    LinkedList<Path> babysittingPathsLeft = new LinkedList<>();
+    LinkedList<Path> babysittingPathsRight = new LinkedList<>();
     if (left > right) {
-      wildcardPathsLeft = findWildcardPathsLeft(instance);
-      if (wildcardPathsLeft == null)
+      babysittingPathsLeft = findBabysittingPathsLeft(instance);
+      if (babysittingPathsLeft == null)
         return null;
-      wildcardPathsRight = findWildcardPathsRight(instance);
-      if (wildcardPathsRight == null)
+      babysittingPathsRight = findBabysittingPathsRight(instance);
+      if (babysittingPathsRight == null)
         return null;
     } else {
-      wildcardPathsRight = findWildcardPathsRight(instance);
-      if (wildcardPathsRight == null)
+      babysittingPathsRight = findBabysittingPathsRight(instance);
+      if (babysittingPathsRight == null)
         return null;
-      wildcardPathsLeft = findWildcardPathsLeft(instance);
-      if (wildcardPathsLeft == null)
+      babysittingPathsLeft = findBabysittingPathsLeft(instance);
+      if (babysittingPathsLeft == null)
         return null;
     }
-    return left >= right ? wildcardPathsLeft : wildcardPathsRight;
+    return left >= right ? babysittingPathsLeft : babysittingPathsRight;
   }
 
-  private static LinkedList<Path> findWildcardPathsLeft(Instance instance) throws Exception {
+  private static LinkedList<Path> findBabysittingPathsLeft(Instance instance) throws Exception {
     LinkedList<Path> validPaths = new LinkedList<>();
     int a = instance.getA();
     if (a == 0)
@@ -159,7 +135,7 @@ public class InstanceSolver {
     return validPaths.isEmpty() ? null : validPaths;
   }
 
-  private static LinkedList<Path> findWildcardPathsRight(Instance instance) throws Exception {
+  private static LinkedList<Path> findBabysittingPathsRight(Instance instance) throws Exception {
     LinkedList<Path> validPaths = new LinkedList<>();
     int m = instance.getM();
     int b = instance.getB();
@@ -245,38 +221,6 @@ public class InstanceSolver {
     return null;
   }
 
-  public static Path solveParallel(Instance instance) throws Exception {
-    int m = instance.getM();
-    if (instance.getA() > instance.getB()) {
-      // Find correct d to return path from Proposition 1.
-      for (int d = 0; d <= m; d++) {
-        Instance critical = Search.criticalWithEmptyIntersection(m, d);
-        if (critical.lessThanOrEqualTo(instance))
-          return billiardBallPath(instance, d);
-      }
-      return null;
-    }
-    ConcurrentLinkedQueue<Path> paths = new ConcurrentLinkedQueue<>();
-
-    initPathsToSolve(instance, paths);
-    // logger.trace("{} - Initial number of paths: {}",
-    // instance.waitingTimesToString(),
-    // paths.size());
-
-    SingleExecutor executor = SingleExecutor.getInstance();
-    // int nrTasks = Math.min(paths.size(), executor.getNrThreads());
-    int nrTasks = executor.getNrThreads();
-    Semaphore available = new Semaphore(1, true);
-    AtomicInteger nrBlocked = new AtomicInteger(0);
-    ArrayList<Callable<Path>> callables = new ArrayList<>();
-    Set<ArrayList<Integer>> fingerprints = Sets.newConcurrentHashSet();
-    for (int i = 0; i < nrTasks; i++) {
-      callables.add(new ParallelInstanceSolver(paths, fingerprints, instance, nrBlocked, nrTasks, available));
-    }
-
-    return executor.getExecutor().invokeAny(callables);
-  }
-
   public static Path billiardBallPath(Instance instance, int d) throws Exception {
     int m = instance.getM();
     int slopeXConstant = -1;
@@ -354,50 +298,6 @@ public class InstanceSolver {
         if (addedPaths.get(v) == null)
           addedPaths.put(v, new HashSet<>());
         addedPaths.get(v).add(u);
-      }
-    }
-    // addedPaths.forEach((p1, p2) -> logger.trace("Added: {}->{}", p1, p2));
-    // paths.forEach(p -> logger.trace("Path: {}", p));
-  }
-
-  private static class ParallelInstanceSolver implements Callable<Path> {
-    private final ConcurrentLinkedQueue<Path> paths;
-    private final Set<ArrayList<Integer>> fingerprints;
-    private final Instance instance;
-    private final AtomicInteger nrBlocked;
-    private final int nrThreads;
-    private final Semaphore semaphore;
-
-    public ParallelInstanceSolver(ConcurrentLinkedQueue<Path> paths, Set<ArrayList<Integer>> fingerprints,
-        Instance instance, AtomicInteger nrBlocked, int nrThreads, Semaphore semaphore) {
-      this.paths = paths;
-      this.fingerprints = fingerprints;
-      this.instance = instance;
-      this.nrBlocked = nrBlocked;
-      this.nrThreads = nrThreads;
-      this.semaphore = semaphore;
-    }
-
-    @Override
-    public Path call() throws Exception {
-      while (true) {
-        nrBlocked.incrementAndGet();
-        if (paths.peek() == null && nrBlocked.get() == nrThreads)
-          return null;
-        Path p = null;
-        while (p == null) {
-          semaphore.acquire();
-          Path temp = paths.peek();
-          if (temp != null) {
-            nrBlocked.decrementAndGet();
-            p = paths.poll();
-          }
-          semaphore.release();
-        }
-
-        Path solution = extendPath(instance, fingerprints, paths, p);
-        if (solution != null)
-          return solution;
       }
     }
   }
