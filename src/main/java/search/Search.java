@@ -100,9 +100,9 @@ public class Search {
                 }
                 ArrayList<Instance> vs = new ArrayList<>(m + 1);
                 for (int i = 0; i <= m; i++) {
-                    if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] == r)
+                    if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] >= r)
                         continue;
-                    if (referenceInstance.getWaitingTimes()[i] == r)
+                    if (referenceInstance.getWaitingTimes()[i] >= r)
                         continue;
                     int[] newWaitingTimes = referenceInstance.getWaitingTimes().clone();
                     newWaitingTimes[i]++;
@@ -281,7 +281,7 @@ public class Search {
                 }
                 maximalInfeasibleInstances.add(u);
                 for (int i = 0; i <= m; i++) {
-                    if (u.getWaitingTimes()[i] == r)
+                    if (u.getWaitingTimes()[i] >= r)
                         continue;
                     int[] waitingTimes = u.getWaitingTimes().clone();
                     waitingTimes[i]++;
@@ -431,9 +431,9 @@ public class Search {
             }
             ArrayList<Instance> vs = new ArrayList<>(m + 1);
             for (int i = 0; i <= m; i++) {
-                if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] == r)
+                if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] >= r)
                     continue;
-                if (referenceInstance.getWaitingTimes()[i] == r)
+                if (referenceInstance.getWaitingTimes()[i] >= r)
                     continue;
                 int[] newWaitingTimes = referenceInstance.getWaitingTimes().clone();
                 newWaitingTimes[i]++;
