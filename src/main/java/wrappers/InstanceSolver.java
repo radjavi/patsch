@@ -43,12 +43,11 @@ public class InstanceSolver {
       return null;
     else if (!wildcards.isEmpty()) {
       for (Path wildcard : wildcards) {
-        if (wildcard.isValidCycle() && wildcard.visitsAllProperties())
+        if (wildcard.isSolutionCycle())
           return wildcard;
         paths.add(wildcard);
       }
-    }
-    else
+    } else
       initPathsToSolve(instance, paths);
 
     // logger.trace("{} - Initial number of paths: {}",
@@ -61,17 +60,19 @@ public class InstanceSolver {
 
     HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
     // System.out.println(instance.waitingTimesToString());
-    //int nrPaths = 0;
+    // int nrPaths = 0;
     while (!paths.isEmpty()) {
       Path p = paths.pop();
-      //nrPaths++;
+      // nrPaths++;
       Path solution = extendPath(instance, fingerprints, paths, p);
       if (solution != null) {
-        // logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
+        // logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(),
+        // nrPaths);
         return solution;
       }
     }
-    //logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(), nrPaths);
+    // logger.trace("Instance: {}, nrPaths: {}", instance.waitingTimesToString(),
+    // nrPaths);
     return null;
   }
 
@@ -219,7 +220,7 @@ public class InstanceSolver {
       Path pq = new Path(p);
       pq.addPositionLast(q);
       if (pq.valid()) {
-        if (pq.isValidCycle() && pq.visitsAllProperties())
+        if (pq.isSolutionCycle())
           return pq;
         ArrayList<Integer> fingerprint = pq.fingerprint();
         if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
@@ -238,7 +239,7 @@ public class InstanceSolver {
     while (reverseIterator.hasNext()) {
       pqp.addPositionLast(reverseIterator.next());
     }
-    if (pqp.valid() && pqp.isValidCycle() && pqp.visitsAllProperties()) {
+    if (pqp.isSolutionCycle()) {
       return pqp;
     }
     return null;
@@ -270,8 +271,7 @@ public class InstanceSolver {
     ArrayList<Callable<Path>> callables = new ArrayList<>();
     Set<ArrayList<Integer>> fingerprints = Sets.newConcurrentHashSet();
     for (int i = 0; i < nrTasks; i++) {
-      callables.add(
-          new ParallelInstanceSolver(paths, fingerprints, instance, nrBlocked, nrTasks, available));
+      callables.add(new ParallelInstanceSolver(paths, fingerprints, instance, nrBlocked, nrTasks, available));
     }
 
     return executor.getExecutor().invokeAny(callables);
@@ -322,8 +322,7 @@ public class InstanceSolver {
     return path;
   }
 
-  private static void initPathsToSolve(Instance instance, AbstractCollection<Path> paths)
-      throws Exception {
+  private static void initPathsToSolve(Instance instance, AbstractCollection<Path> paths) throws Exception {
     HashMap<Position, HashSet<Position>> addedPaths = new HashMap<>();
     Property[] properties = instance.getProperties();
     int minNrNeighbours = Integer.MAX_VALUE;
@@ -369,9 +368,8 @@ public class InstanceSolver {
     private final int nrThreads;
     private final Semaphore semaphore;
 
-    public ParallelInstanceSolver(ConcurrentLinkedQueue<Path> paths,
-        Set<ArrayList<Integer>> fingerprints, Instance instance, AtomicInteger nrBlocked,
-        int nrThreads, Semaphore semaphore) {
+    public ParallelInstanceSolver(ConcurrentLinkedQueue<Path> paths, Set<ArrayList<Integer>> fingerprints,
+        Instance instance, AtomicInteger nrBlocked, int nrThreads, Semaphore semaphore) {
       this.paths = paths;
       this.fingerprints = fingerprints;
       this.instance = instance;
