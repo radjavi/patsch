@@ -27,7 +27,8 @@ public class Search {
      * @return
      * @throws Exception
      */
-    public static Map<Instance, Path> searchForCriticalInstancesSequential(int m, int r) throws Exception {
+    public static Map<Instance, Path> searchForCriticalInstancesSequential(int m, int r)
+            throws Exception {
         if (m < 2)
             return null;
         InstanceLevelBuckets U = new InstanceLevelBuckets();
@@ -65,7 +66,8 @@ public class Search {
         // Generate a stock of instances
         logger.info("Generating maximal infeasible instances...");
         HashSet<Instance> maximalInfeasibleInstances = generateMaximalInfeasible(m, r);
-        logger.debug("Generated {} maximal infeasible instances", maximalInfeasibleInstances.size());
+        logger.debug("Generated {} maximal infeasible instances",
+                maximalInfeasibleInstances.size());
         logger.trace("---- Maximal Infeasible Instances ----");
         maximalInfeasibleInstances.forEach(i -> logger.trace(i.waitingTimesToString()));
         logger.trace("--------------------------------------");
@@ -113,7 +115,8 @@ public class Search {
                     Path solution = new Instance(v.getWaitingTimes()).solve();
                     if (solution != null) {
                         C.put(v, solution);
-                        logger.info("Found critical instance {}: {}", v.waitingTimesToString(), solution);
+                        logger.info("Found critical instance {}: {}", v.waitingTimesToString(),
+                                solution);
                     } else
                         U.add(v);
                 }
@@ -141,7 +144,8 @@ public class Search {
 
     }
 
-    public static Map<Instance, Path> searchForCriticalInstancesParallel(int m, int r) throws Exception {
+    public static Map<Instance, Path> searchForCriticalInstancesParallel(int m, int r)
+            throws Exception {
         if (m < 2)
             return null;
         InstanceLevelBuckets U = new InstanceLevelBuckets();
@@ -166,12 +170,12 @@ public class Search {
                 U.add(lowerBoundInstance);
             }
         }
-        //logger.debug("Proceeding with {} lower bound instances", U.allInstances().size());
+        // logger.debug("Proceeding with {} lower bound instances", U.allInstances().size());
         logger.trace("-------- C --------");
         C.forEach((i, s) -> {
             logger.trace(i.waitingTimesToString() + ": " + s);
         });
-        //logger.trace("-------------------");
+        // logger.trace("-------------------");
         logger.trace("-------- U --------");
         U.allInstances().forEach(i -> logger.trace(i.waitingTimesToString()));
         logger.trace("-------------------");
@@ -247,7 +251,7 @@ public class Search {
             // logger.info("maximal size: {}, visited size: {}",
             // maximalInfeasibleInstances.size(), visitedInstances.size());
             Instance u = U.pop();
-            //logger.info("{}", u.waitingTimesToString());
+            // logger.info("{}", u.waitingTimesToString());
             Path solution = u.solve();
             if (solution != null) {
                 for (int i = 0; i <= m; i++) {
@@ -352,14 +356,19 @@ public class Search {
         Arrays.sort(sortedInstances, (i1, i2) -> {
             int min1 = Ints.min(i1.getWaitingTimes());
             int min2 = Ints.min(i2.getWaitingTimes());
-            if (min1 < min2) return -1;
-            else if (min1 > min2) return 1;
+            if (min1 < min2)
+                return -1;
+            else if (min1 > min2)
+                return 1;
             else {
                 int length1 = i1.getB() - i1.getA();
                 int length2 = i2.getB() - i2.getA();
-                if (length1 < length2) return -1;
-                else if (length1 > length2) return 1;
-                else return 0;
+                if (length1 < length2)
+                    return -1;
+                else if (length1 > length2)
+                    return 1;
+                else
+                    return 0;
             }
         });
         logger.log(RESULT, "m={}, r={}", m, r);
@@ -371,11 +380,11 @@ public class Search {
                 currentTime = minTime;
                 logger.log(RESULT, "-- Minimum Waiting Time: {} --", currentTime);
             }
-            Path solution = C.get(critical);
             int a = critical.getA();
             int b = critical.getB();
             String intervalString = a > b ? "[]" : "[" + a + "," + b + "]";
-            logger.log(RESULT, "{} {} {}", critical.waitingTimesToString(), intervalString, solution != null ? solution : critical.solve());
+            logger.log(RESULT, "{} {} {}", critical.waitingTimesToString(), intervalString,
+                    critical.solve());
         }
         logger.info("---------------------------------");
     }
