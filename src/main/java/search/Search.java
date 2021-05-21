@@ -55,7 +55,7 @@ public class Search {
             if (solution != null)
                 C.put(lowerBoundInstance, solution);
             else if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null) {
-                U.add(lowerBoundInstance);
+                U.add(lowerBoundInstance, lowerBoundInstance.level());
             }
         }
         logger.debug("Proceeding with {} lower bound instances", U.allInstances().size());
@@ -118,7 +118,7 @@ public class Search {
                         logger.info("Found critical instance {}: {}", v.waitingTimesToString(),
                                 solution);
                     } else
-                        U.add(v);
+                        U.add(v, level + 1);
                 }
             }
             level++;
@@ -167,7 +167,7 @@ public class Search {
             if (solution != null)
                 C.put(lowerBoundInstance, solution);
             else if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null) {
-                U.add(lowerBoundInstance);
+                U.add(lowerBoundInstance, lowerBoundInstance.level());
             }
         }
         // logger.debug("Proceeding with {} lower bound instances", U.allInstances().size());
@@ -209,7 +209,7 @@ public class Search {
             List<Future<List<Instance>>> futures = executor.getExecutor().invokeAll(callables);
             for (Future<List<Instance>> future : futures) {
                 for (Instance i : future.get()) {
-                    U.add(i);
+                    U.add(i, level + 1);
                 }
             }
             level++;
