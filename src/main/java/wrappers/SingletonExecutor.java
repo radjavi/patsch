@@ -5,29 +5,29 @@ import java.util.concurrent.*;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-public class SingleExecutor {
-  private static SingleExecutor instance = null;
+public class SingletonExecutor {
+  private static SingletonExecutor instance = null;
   private int nrThreads = 1;
   private ExecutorService executor;
 
-  private static final Logger logger = LogManager.getLogger(SingleExecutor.class);
+  private static final Logger logger = LogManager.getLogger(SingletonExecutor.class);
 
-  private SingleExecutor(int nrThreads) {
+  private SingletonExecutor(int nrThreads) {
     this.nrThreads = nrThreads;
     this.executor = Executors.newWorkStealingPool(nrThreads);
   }
 
-  public synchronized static SingleExecutor init(int nrThreads) {
+  public synchronized static SingletonExecutor init(int nrThreads) {
     if (instance != null)
-      throw new AssertionError("SingleExecutor has already been initialized!");
+      throw new AssertionError("SingletonExecutor has already been initialized!");
     if (nrThreads < 2)
       return null;
 
-    instance = new SingleExecutor(nrThreads);
+    instance = new SingletonExecutor(nrThreads);
     return instance;
   }
 
-  public static SingleExecutor getInstance() {
+  public static SingletonExecutor getInstance() {
     return instance;
   }
 

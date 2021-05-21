@@ -15,7 +15,7 @@ public class Search {
     private static final Logger logger = LogManager.getLogger(Search.class);
 
     public static Map<Instance, Path> searchForCriticalInstances(int m, int r) throws Exception {
-        SingleExecutor executor = SingleExecutor.getInstance();
+        SingletonExecutor executor = SingletonExecutor.getInstance();
         if (executor == null) {
             return searchForCriticalInstancesSequential(m, r);
         }
@@ -190,7 +190,7 @@ public class Search {
         logger.trace("--------------------------------------");
 
         // SEARCH
-        SingleExecutor executor = SingleExecutor.getInstance();
+        SingletonExecutor executor = SingletonExecutor.getInstance();
         logger.info("Searching for critical instances...");
         int level = 0;
         while (!U.isEmpty()) {

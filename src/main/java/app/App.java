@@ -30,36 +30,12 @@ public class App {
             logger.fatal("Roof value must be greater than 1");
             return;
         }
-        SingleExecutor executor = SingleExecutor.init(nrThreads);
-        // Path path1 = new Path(new Instance(new int[]{10,5,2,3,4,8,10}));
-        // Path path2 = new Path(new Instance(new int[]{10,5,2,3,4,8,10}));
+        SingletonExecutor executor = SingletonExecutor.init(nrThreads);
 
-        // path1.addPositionLast(new Position(6,3)); // (6,3)(5,2)(4,1)(3,2)(4,2)
-        // path1.addPositionLast(new Position(5,2));
-        // path1.addPositionLast(new Position(4,1));
-        // path1.addPositionLast(new Position(3,2));
-        // path1.addPositionLast(new Position(4,2));
-
-        // path2.addPositionLast(new Position(6,3)); // (6,3)(5,2)(4,2)(3,1)(4,2)
-        // path2.addPositionLast(new Position(5,2));
-        // path2.addPositionLast(new Position(4,2));
-        // path2.addPositionLast(new Position(3,1));
-        // path2.addPositionLast(new Position(4,2));
-
-        // System.out.println( "f:" + Arrays.toString( path1.getF_i()) + " s: "+Arrays.toString( path1.getS_i()));
-        // System.out.println( "f:" + Arrays.toString(path2.getF_i()) +  " s: "+Arrays.toString( path2.getS_i()));
-        // System.out.println(path1.betterThan(path2));
-
-        // int r = Integer.MAX_VALUE;
-        // int[] waitingTimes = new int[]{24,4,2,24,24,24,24,24,24};
-        // //Arrays.fill(waitingTimes, 2*m);
-        // Instance i = new Instance(waitingTimes);
-        // System.out.println(i.getValidGraph().toStringTriangle());
-        // logger.info("[{},{}]", i.getA(), i.getB());
         long startTime = System.nanoTime();
         Search.searchForCriticalInstances(m, r);
-        //logger.info(i.solve());
         long stopTime = System.nanoTime();
+        
         logger.info("Search took {} seconds.", (stopTime - startTime) * 1e-9);
         if (executor != null)
             executor.shutdown();
