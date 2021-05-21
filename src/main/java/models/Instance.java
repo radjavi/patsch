@@ -13,7 +13,7 @@ public class Instance {
     private Integer b;
     private Property[] properties;
     private PositionGraph validGraph;
-    private DistanceCache shortestDistances;
+    private DistanceStorage shortestDistances;
 
     private static final Logger logger = LogManager.getLogger(Instance.class);
 
@@ -109,7 +109,7 @@ public class Instance {
             throw new IllegalArgumentException("'to' is not an instance of Position or Property, but rather: " + to.getClass().getName());
 
         if (shortestDistances == null)
-            shortestDistances = new DistanceCache();
+            shortestDistances = new DistanceStorage();
         Integer cachedDistance = shortestDistances.getDistance(from, to);
         if (cachedDistance != null)
             return cachedDistance;

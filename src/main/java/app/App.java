@@ -30,14 +30,12 @@ public class App {
             logger.fatal("Roof value must be greater than 1");
             return;
         }
-        SingleExecutor executor = SingleExecutor.init(nrThreads);
-
-
+        SingletonExecutor executor = SingletonExecutor.init(nrThreads);
 
         long startTime = System.nanoTime();
         Search.searchForCriticalInstances(m, r);
-        
         long stopTime = System.nanoTime();
+        
         logger.info("Search took {} seconds.", (stopTime - startTime) * 1e-9);
         if (executor != null)
             executor.shutdown();

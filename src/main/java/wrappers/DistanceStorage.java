@@ -3,11 +3,11 @@ package wrappers;
 import models.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DistanceCache {
+public class DistanceStorage {
 
     private ConcurrentHashMap<PropertyPosition, Integer> cache;
 
-    public DistanceCache() {
+    public DistanceStorage() {
         cache = new ConcurrentHashMap<>();
     }
 
@@ -16,7 +16,6 @@ public class DistanceCache {
             PropertyPosition propPos = new PropertyPosition((Property) from, (Position) to);
             cache.put(propPos, distance);
         }
-
         if (from instanceof Position && to instanceof Property) {
             PropertyPosition propPos = new PropertyPosition((Property) to, (Position) from);
             cache.put(propPos, distance);
@@ -24,12 +23,10 @@ public class DistanceCache {
     }
 
     public <F, T> Integer getDistance(F from, T to) {
-
         if (from instanceof Property && to instanceof Position) {
             PropertyPosition propPos = new PropertyPosition((Property) from, (Position) to);
             return cache.get(propPos);
         }
-
         if (from instanceof Position && to instanceof Property) {
             PropertyPosition propPos = new PropertyPosition((Property) to, (Position) from);
             return cache.get(propPos);
@@ -68,7 +65,6 @@ public class DistanceCache {
             hash = 31 * hash + Integer.hashCode(this.getPosition().getY());
             hash = 31 * hash + Integer.hashCode(this.getProperty().getIndex());
             return hash;
-
         }
     }
 

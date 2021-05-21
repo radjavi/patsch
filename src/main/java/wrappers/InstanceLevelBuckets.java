@@ -11,10 +11,8 @@ public class InstanceLevelBuckets {
     buckets = new ConcurrentHashMap<>();
   }
 
-  public void add(Instance instance) {
-    int level = instance.level();
-    if (buckets.get(level) == null)
-      buckets.put(level, ConcurrentHashMap.newKeySet());
+  public void add(Instance instance, int level) {
+    buckets.computeIfAbsent(level, l -> ConcurrentHashMap.newKeySet());
     buckets.get(level).add(instance);
   }
 

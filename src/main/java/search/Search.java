@@ -15,7 +15,7 @@ public class Search {
     private static final Logger logger = LogManager.getLogger(Search.class);
 
     public static Map<Instance, Path> searchForCriticalInstances(int m, int r) throws Exception {
-        SingleExecutor executor = SingleExecutor.getInstance();
+        SingletonExecutor executor = SingletonExecutor.getInstance();
         if (executor == null) {
             return searchForCriticalInstancesSequential(m, r);
         }
@@ -31,7 +31,6 @@ public class Search {
             throws Exception {
         if (m < 2)
             return null;
-        System.out.println("TEST");
         InstanceLevelBuckets U = new InstanceLevelBuckets();
         HashMap<Instance, Path> C = new HashMap<>();
         HashSet<Instance> visitedInstances = new HashSet<>();
@@ -59,7 +58,7 @@ public class Search {
             if (solution != null)
                 C.put(lowerBoundInstance, solution);
             else if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null) {
-                U.add(lowerBoundInstance);
+                U.add(lowerBoundInstance, lowerBoundInstance.level());
             }
         }
         logger.debug("Proceeding with {} lower bound instances", U.allInstances().size());
@@ -124,7 +123,7 @@ public class Search {
                         logger.info("Found critical instance {}: {}", v.waitingTimesToString(),
                                 solution);
                     } else
-                        U.add(v);
+                        U.add(v, level + 1);
                 }
             }
             level++;
@@ -175,11 +174,10 @@ public class Search {
             if (solution != null)
                 C.put(lowerBoundInstance, solution);
             else if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null) {
-                U.add(lowerBoundInstance);
+                U.add(lowerBoundInstance, lowerBoundInstance.level());
             }
         }
-        // logger.debug("Proceeding with {} lower bound instances",
-        // U.allInstances().size());
+        // logger.debug("Proceeding with {} lower bound instances", U.allInstances().size());
         logger.trace("-------- C --------");
         C.forEach((i, s) -> {
             logger.trace(i.waitingTimesToString() + ": " + s);
@@ -200,7 +198,7 @@ public class Search {
         logger.trace("--------------------------------------");
 
         // SEARCH
-        SingleExecutor executor = SingleExecutor.getInstance();
+        SingletonExecutor executor = SingletonExecutor.getInstance();
         logger.info("Searching for critical instances...");
         int level = 0;
         nrSolved += maxInfeasibleSolved[0];
@@ -220,7 +218,7 @@ public class Search {
             List<Future<ThreadResult>> futures = executor.getExecutor().invokeAll(callables);
             for (Future<ThreadResult> future : futures) {
                 for (Instance i : future.get().U) {
-                    U.add(i);
+                    U.add(i, level + 1);
                 }
                 nrSolved += future.get().nrSolved;
             }
