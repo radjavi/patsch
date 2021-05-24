@@ -368,6 +368,8 @@ public class Instance {
     }
 
     public boolean lessThan(Instance ins) {
+        if (!this.lessThanOrEqualTo(ins))
+            return false;
         boolean componentLessThan = false;
         for (int i = 0; i <= m; i++) {
             if (this.waitingTimes[i] < ins.waitingTimes[i]) {
@@ -377,10 +379,6 @@ public class Instance {
         }
         if (!componentLessThan)
             return false;
-        for (int i = 0; i <= m; i++) {
-            if (!(this.waitingTimes[i] == ins.waitingTimes[i] || this.waitingTimes[i] < ins.waitingTimes[i]))
-                return false;
-        }
         return true;
     }
 
