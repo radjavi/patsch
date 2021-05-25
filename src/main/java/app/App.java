@@ -33,9 +33,12 @@ public class App {
         SingletonExecutor executor = SingletonExecutor.init(nrThreads);
 
         long startTime = System.nanoTime();
-        Search.searchForCriticalInstances(m, r);
+
+        Search.searchForCriticalBASIC(m, r);
+        // Search.searchForCriticalImpl2(m, r);
+        // Search.searchForCriticalInstances(m, r);
         long stopTime = System.nanoTime();
-        
+
         logger.info("Search took {} seconds.", (stopTime - startTime) * 1e-9);
         if (executor != null)
             executor.shutdown();
