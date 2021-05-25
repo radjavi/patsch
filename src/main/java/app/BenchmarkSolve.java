@@ -40,7 +40,7 @@ public class BenchmarkSolve {
 
         Random random = new Random(1);
 
-        while (nrFeasible < nrOfInstances || nrInfeasible < nrOfInstances) {
+        While: while (nrFeasible < nrOfInstances || nrInfeasible < nrOfInstances) {
             int[] waitingTimes = random.ints(m + 1, 1, r + 1).toArray();
             Instance instance = new Instance(waitingTimes);
             int a = instance.getA();
@@ -49,12 +49,14 @@ public class BenchmarkSolve {
                 continue;
             double[] totaltime = new double[11];
             Path sol = null;
-            logger.info("solving:{}", instance.waitingTimesToString());
+
             int[] nrOfPaths = new int[1];
             for (int i = 0; i < 11; i++) {
                 nrOfPaths[0] = 0;
                 long before = System.nanoTime();
                 sol = instance.solve(nrOfPaths);
+                if ((sol != null && nrFeasible > nrOfInstances) || (sol == null && nrInfeasible > nrOfInstances))
+                    continue While;
                 long after = System.nanoTime();
                 double time = (after - before) * 1E-6;
                 totaltime[i] = time;
@@ -64,10 +66,8 @@ public class BenchmarkSolve {
             DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
             df.setMaximumFractionDigits(8);
             String medianS = (df.format(median));
-            if ((sol != null && nrFeasible < nrOfInstances) || (sol == null && nrInfeasible < nrOfInstances)) {
-                logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(),
-                        sol == null ? "infeasible" : "feasible", medianS, nrOfPaths[0]);
-            }
+            logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(), sol == null ? "infeasible" : "feasible",
+                    medianS, nrOfPaths[0]);
             if (sol == null)
                 nrInfeasible++;
             else
