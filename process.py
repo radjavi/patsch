@@ -8,7 +8,7 @@ def processData(file):
     allInstances = 0
     nrOfGreaterThanr = 0
     for line in file:
-        if line[0] != "[":
+        if line[0] != "(":
             continue
         allInstances += 1
         line_list = line.split(" ")
