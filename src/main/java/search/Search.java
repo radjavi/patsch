@@ -222,6 +222,7 @@ public class Search {
         HashSet<Instance> visitedInstances = new HashSet<>();
         int totalInstances = 0;
         int[] maxInfeasibleSolved = new int[1];
+        double parallelismTime = 0;
 
         // INIT
         logger.info("Generating M_0...");
@@ -270,7 +271,9 @@ public class Search {
                 continue;
             }
             logger.info("Level: {}, Size of U: {}", level, levelInstances.size());
+
             for (Instance u : levelInstances) {
+                long start = System.nanoTime();
                 Instance uR = u.getReversed();
                 Instance greaterInfeasible = null;
                 Instance referenceInstance = u;
@@ -308,6 +311,7 @@ public class Search {
                     } else
                         U.add(v, level + 1);
                 }
+                parallelismTime += (System.nanoTime() - start) * 1e-9;
             }
             level++;
         }
@@ -329,6 +333,7 @@ public class Search {
 
         printResults(C, m, r);
         logger.info("TOTAL INSTANCES:" + (totalInstances + maxInfeasibleSolved[0]));
+        logger.info("parallel portion: " + parallelismTime);
         return C;
 
     }

@@ -34,9 +34,9 @@ public class App {
 
         long startTime = System.nanoTime();
 
-        Search.searchForCriticalBASIC(m, r);
+        // Search.searchForCriticalBASIC(m, r);
         // Search.searchForCriticalImpl2(m, r);
-        // Search.searchForCriticalInstances(m, r);
+        Search.searchForCriticalInstances(m, r);
         long stopTime = System.nanoTime();
 
         logger.info("Search took {} seconds.", (stopTime - startTime) * 1e-9);
