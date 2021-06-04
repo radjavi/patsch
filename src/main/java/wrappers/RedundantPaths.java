@@ -31,7 +31,7 @@ public class RedundantPaths {
    * @param pq
    * @return
    */
-  public static boolean length2(Path pq) throws Exception {
+  public static boolean length2(Path pq, int[] validatedPaths) throws Exception {
     if (pq.getLength() < 2)
       return false;
 
@@ -40,8 +40,6 @@ public class RedundantPaths {
     Position antepenultimate = path.get(path.size() - 3);
     Position penultimate = path.get(path.size() - 2);
     Position q = pq.getLast();
-    if (penultimate.isLocked())
-      return false;
     PositionGraph validGraph = instance.getValidGraph();
 
     String direction1 = direction(antepenultimate, penultimate);
@@ -57,6 +55,8 @@ public class RedundantPaths {
       // Square Diamond
       case "N,N":
       case "S,S":
+        if (penultimate.isLockedX())
+          return false;
         Position right = new Position(penultimate.getX() + 1, penultimate.getY());
         Position left = new Position(penultimate.getX() - 1, penultimate.getY());
         if (validGraph.hasPosition(right) || validGraph.hasPosition(left))
@@ -64,13 +64,14 @@ public class RedundantPaths {
         break;
       case "E,E":
       case "W,W":
+        if (penultimate.isLockedY())
+          return false;
         Position above = new Position(penultimate.getX(), penultimate.getY() + 1);
         Position under = new Position(penultimate.getX(), penultimate.getY() - 1);
         if (validGraph.hasPosition(above) || validGraph.hasPosition(under))
           return true;
         break;
     }
-
 
     Position intermediate = null;
     switch (directionPath) {
@@ -79,24 +80,32 @@ public class RedundantPaths {
       case "SE,S": // Parallelogram
       case "NE,S": // Hourglass
       case "SE,N": // Hourglass
+        if (penultimate.isLockedX())
+          return false;
         intermediate = new Position(penultimate.getX() - 1, penultimate.getY());
         break;
       case "NW,N": // Parallelogram
       case "SW,S": // Parallelogram
       case "NW,S": // Hourglass
       case "SW,N": // Hourglass
+        if (penultimate.isLockedX())
+          return false;
         intermediate = new Position(penultimate.getX() + 1, penultimate.getY());
         break;
       case "NE,E": // Parallelogram
       case "NW,W": // Parallelogram
       case "NE,W": // Hourglass
       case "NW,E": // Hourglass
+        if (penultimate.isLockedY())
+          return false;
         intermediate = new Position(penultimate.getX(), penultimate.getY() - 1);
         break;
       case "SE,E": // Parallelogram
       case "SW,W": // Parallelogram
       case "SE,W": // Hourglass
       case "SW,E": // Hourglass
+        if (penultimate.isLockedY())
+          return false;
         intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
         break;
     }
@@ -104,6 +113,7 @@ public class RedundantPaths {
       ArrayList<Position> newPathPositions = new ArrayList<>(pq.getPath());
       newPathPositions.set(newPathPositions.size() - 2, intermediate);
       Path newPath = new Path(instance, newPathPositions);
+      validatedPaths[0]++;
       if (newPath.valid()){
         return true;
       }
@@ -122,8 +132,6 @@ public class RedundantPaths {
     Position antepenultimate = path.get(path.size() - 3);
     Position penultimate = path.get(path.size() - 2);
     Position q = pq.getLast();
-    if (antepenultimate.isLocked() || penultimate.isLocked())
-      return false;
 
 
     String direction1 = direction(preantepenultimate, antepenultimate);
@@ -136,21 +144,29 @@ public class RedundantPaths {
     switch (directionPath) {
       case "E,NE,E":
       case "W,NW,W":
+        if (antepenultimate.isLockedY() || penultimate.isLockedY())
+          return false;
         intermediate1 = new Position(antepenultimate.getX(), antepenultimate.getY() + 1);
         intermediate2 = new Position(penultimate.getX(), penultimate.getY() - 1);
         break;
       case "E,SE,E":
       case "W,SW,W":
+        if (antepenultimate.isLockedY() || penultimate.isLockedY())
+          return false;
         intermediate1 = new Position(antepenultimate.getX(), antepenultimate.getY() - 1);
         intermediate2 = new Position(penultimate.getX(), penultimate.getY() + 1);
         break;
       case "N,NW,N":
       case "S,SW,S":
+        if (antepenultimate.isLockedX() || penultimate.isLockedX())
+          return false;
         intermediate1 = new Position(antepenultimate.getX() - 1, antepenultimate.getY());
         intermediate2 = new Position(penultimate.getX() + 1, penultimate.getY());
         break;
       case "N,NE,N":
       case "S,SE,S":
+        if (antepenultimate.isLockedX() || penultimate.isLockedX())
+          return false;
         intermediate1 = new Position(antepenultimate.getX() + 1, antepenultimate.getY());
         intermediate2 = new Position(penultimate.getX() - 1, penultimate.getY());
         break;

@@ -191,7 +191,11 @@ public class Instance {
     }
 
     public Path solve() throws Exception {
-        return InstanceSolver.solve(this);
+        return InstanceSolver.solve(this, new int[]{0});
+    }
+
+    public Path solve(int[] validatedPaths) throws Exception {
+        return InstanceSolver.solve(this, validatedPaths);
     }
 
     public boolean isCritical() throws Exception {

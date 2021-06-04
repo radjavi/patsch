@@ -15,7 +15,7 @@ public class InstanceSolver {
 
   private static final Logger logger = LogManager.getLogger(InstanceSolver.class);
 
-  public static Path solve(Instance instance) throws Exception {
+  public static Path solve(Instance instance, int[] validatedPaths) throws Exception {
     int m = instance.getM();
     int a = instance.getA();
     int b = instance.getB();
@@ -29,7 +29,7 @@ public class InstanceSolver {
       return null;
     }
     LinkedList<Path> paths = new LinkedList<>();
-    LinkedList<Path> babysittingPaths = findBabysittingPaths(instance);
+    LinkedList<Path> babysittingPaths = findBabysittingPaths(instance, validatedPaths);
     if (babysittingPaths == null)
       return null;
     else if (!babysittingPaths.isEmpty()) {
@@ -45,7 +45,7 @@ public class InstanceSolver {
     while (!paths.isEmpty()) {
       Path p = paths.pop();
       
-      Path solution = extendPath(instance, fingerprints, paths, p);
+      Path solution = extendPath(instance, fingerprints, paths, p, validatedPaths);
       if (solution != null) {
         return solution;
       }
@@ -53,7 +53,7 @@ public class InstanceSolver {
     return null;
   }
 
-  private static LinkedList<Path> findBabysittingPaths(Instance instance) throws Exception {
+  private static LinkedList<Path> findBabysittingPaths(Instance instance, int[] validatedPaths) throws Exception {
     int a = instance.getA();
     int b = instance.getB();
     int m = instance.getM();
@@ -64,24 +64,24 @@ public class InstanceSolver {
     LinkedList<Path> babysittingPathsLeft = new LinkedList<>();
     LinkedList<Path> babysittingPathsRight = new LinkedList<>();
     if (left > right) {
-      babysittingPathsLeft = findBabysittingPathsLeft(instance);
+      babysittingPathsLeft = findBabysittingPathsLeft(instance, validatedPaths);
       if (babysittingPathsLeft == null)
         return null;
-      babysittingPathsRight = findBabysittingPathsRight(instance);
+      babysittingPathsRight = findBabysittingPathsRight(instance, validatedPaths);
       if (babysittingPathsRight == null)
         return null;
     } else {
-      babysittingPathsRight = findBabysittingPathsRight(instance);
+      babysittingPathsRight = findBabysittingPathsRight(instance, validatedPaths);
       if (babysittingPathsRight == null)
         return null;
-      babysittingPathsLeft = findBabysittingPathsLeft(instance);
+      babysittingPathsLeft = findBabysittingPathsLeft(instance, validatedPaths);
       if (babysittingPathsLeft == null)
         return null;
     }
     return left >= right ? babysittingPathsLeft : babysittingPathsRight;
   }
 
-  private static LinkedList<Path> findBabysittingPathsLeft(Instance instance) throws Exception {
+  private static LinkedList<Path> findBabysittingPathsLeft(Instance instance, int[] validatedPaths) throws Exception {
     LinkedList<Path> validPaths = new LinkedList<>();
     int a = instance.getA();
     if (a == 0)
@@ -106,8 +106,8 @@ public class InstanceSolver {
           continue;
         Position uCopy = new Position(u);
         Position vCopy = new Position(v);
-        uCopy.lock();
-        vCopy.lock();
+        uCopy.lockY();
+        vCopy.lockY();
 
         Path path = new Path(instance);
         path.addPositionLast(uCopy);
@@ -125,12 +125,12 @@ public class InstanceSolver {
           continue;
         Path pq = new Path(p);
         Position qCopy = new Position(q);
-        qCopy.lock();
+        qCopy.lockY();
         pq.addPositionLast(qCopy);
-        
+        validatedPaths[0]++;
         if (pq.valid()) {
           ArrayList<Integer> fingerprint = pq.fingerprint();
-          if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
+          if (!fingerprints.contains(fingerprint) && !pq.redundant(validatedPaths)) {
             fingerprints.add(fingerprint);
             if ((length == ys.length - 1))
               validPaths.add(pq);
@@ -144,7 +144,7 @@ public class InstanceSolver {
     return validPaths.isEmpty() ? null : validPaths;
   }
 
-  private static LinkedList<Path> findBabysittingPathsRight(Instance instance) throws Exception {
+  private static LinkedList<Path> findBabysittingPathsRight(Instance instance, int[] validatedPaths) throws Exception {
     LinkedList<Path> validPaths = new LinkedList<>();
     int m = instance.getM();
     int b = instance.getB();
@@ -170,8 +170,8 @@ public class InstanceSolver {
           continue;
           Position uCopy = new Position(u);
           Position vCopy = new Position(v);
-          uCopy.lock();
-          vCopy.lock();
+          uCopy.lockX();
+          vCopy.lockX();
   
           Path path = new Path(instance);
           path.addPositionLast(uCopy);
@@ -189,12 +189,13 @@ public class InstanceSolver {
           continue;
         Path pq = new Path(p);
         Position qCopy = new Position(q);
-        qCopy.lock();
+        qCopy.lockX();
         pq.addPositionLast(qCopy);
 
+        validatedPaths[0]++;
         if (pq.valid()) {
           ArrayList<Integer> fingerprint = pq.fingerprint();
-          if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
+          if (!fingerprints.contains(fingerprint) && !pq.redundant(validatedPaths)) {
             fingerprints.add(fingerprint);
             if ((length == xs.length - 1))
               validPaths.add(pq);
@@ -208,15 +209,16 @@ public class InstanceSolver {
   }
 
   private static Path extendPath(Instance instance, Set<ArrayList<Integer>> fingerprints,
-      AbstractCollection<Path> paths, Path p) throws Exception {
+      AbstractCollection<Path> paths, Path p, int[] validatedPaths) throws Exception {
     for (Position q : instance.getValidGraph().getNeighbours(p.getLast())) {
       Path pq = new Path(p);
       pq.addPositionLast(q);
+      validatedPaths[0]++;
       if (pq.valid()) {
         if (pq.isSolutionCycle())
           return pq;
         ArrayList<Integer> fingerprint = pq.fingerprint();
-        if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
+        if (!fingerprints.contains(fingerprint) && !pq.redundant(validatedPaths)) {
           fingerprints.add(fingerprint);
           paths.add(pq);
         }
