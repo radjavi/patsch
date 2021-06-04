@@ -3,6 +3,7 @@ package models;
 public class Position implements Comparable<Position> {
   private final int x;
   private final int y;
+  private  boolean locked;
 
   /**
    * 
@@ -10,6 +11,7 @@ public class Position implements Comparable<Position> {
   public Position(int x, int y) {
     this.x = x;
     this.y = y;
+    locked = false;
   }
 
   /**
@@ -17,6 +19,14 @@ public class Position implements Comparable<Position> {
    */
   public int getX() {
     return this.x;
+  }
+
+  public boolean isLocked(){
+    return locked;
+  }
+
+  public void lock(){
+    locked = true;
   }
 
   /**

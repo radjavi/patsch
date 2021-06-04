@@ -44,6 +44,7 @@ public class InstanceSolver {
     HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
     while (!paths.isEmpty()) {
       Path p = paths.pop();
+      
       Path solution = extendPath(instance, fingerprints, paths, p);
       if (solution != null) {
         return solution;
@@ -119,6 +120,8 @@ public class InstanceSolver {
           continue;
         Path pq = new Path(p);
         pq.addPositionLast(q);
+        q.lock();
+        
         if (pq.valid()) {
           ArrayList<Integer> fingerprint = pq.fingerprint();
           if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
@@ -160,6 +163,8 @@ public class InstanceSolver {
         if (v.getX() != xs[1])
           continue;
         Path path = new Path(instance);
+        u.lock();
+        v.lock();
         path.addPositionLast(u);
         path.addPositionLast(v);
         paths.add(path);
