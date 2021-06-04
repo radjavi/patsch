@@ -40,7 +40,7 @@ public class RedundantPaths {
     Position antepenultimate = path.get(path.size() - 3);
     Position penultimate = path.get(path.size() - 2);
     Position q = pq.getLast();
-    if (antepenultimate.isLocked() || penultimate.isLocked() || q.isLocked())
+    if (penultimate.isLocked())
       return false;
     PositionGraph validGraph = instance.getValidGraph();
 
@@ -122,6 +122,8 @@ public class RedundantPaths {
     Position antepenultimate = path.get(path.size() - 3);
     Position penultimate = path.get(path.size() - 2);
     Position q = pq.getLast();
+    if (antepenultimate.isLocked() || penultimate.isLocked())
+      return false;
 
 
     String direction1 = direction(preantepenultimate, antepenultimate);
