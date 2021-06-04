@@ -104,9 +104,14 @@ public class InstanceSolver {
       for (Position v : instance.getValidGraph().getNeighbours(u)) {
         if (v.getY() != ys[1])
           continue;
+        Position uCopy = new Position(u);
+        Position vCopy = new Position(v);
+        uCopy.lock();
+        vCopy.lock();
+
         Path path = new Path(instance);
-        path.addPositionLast(u);
-        path.addPositionLast(v);
+        path.addPositionLast(uCopy);
+        path.addPositionLast(vCopy);
         paths.add(path);
       }
     }
@@ -119,8 +124,9 @@ public class InstanceSolver {
         if (q.getY() != ys[length])
           continue;
         Path pq = new Path(p);
-        pq.addPositionLast(q);
-        q.lock();
+        Position qCopy = new Position(q);
+        qCopy.lock();
+        pq.addPositionLast(qCopy);
         
         if (pq.valid()) {
           ArrayList<Integer> fingerprint = pq.fingerprint();
@@ -162,12 +168,15 @@ public class InstanceSolver {
       for (Position v : instance.getValidGraph().getNeighbours(u)) {
         if (v.getX() != xs[1])
           continue;
-        Path path = new Path(instance);
-        u.lock();
-        v.lock();
-        path.addPositionLast(u);
-        path.addPositionLast(v);
-        paths.add(path);
+          Position uCopy = new Position(u);
+          Position vCopy = new Position(v);
+          uCopy.lock();
+          vCopy.lock();
+  
+          Path path = new Path(instance);
+          path.addPositionLast(uCopy);
+          path.addPositionLast(vCopy);
+          paths.add(path);
       }
     }
 
@@ -179,7 +188,10 @@ public class InstanceSolver {
         if (q.getX() != xs[length])
           continue;
         Path pq = new Path(p);
-        pq.addPositionLast(q);
+        Position qCopy = new Position(q);
+        qCopy.lock();
+        pq.addPositionLast(qCopy);
+
         if (pq.valid()) {
           ArrayList<Integer> fingerprint = pq.fingerprint();
           if (!fingerprints.contains(fingerprint) && !pq.redundant()) {
