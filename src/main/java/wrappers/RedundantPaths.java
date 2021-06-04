@@ -31,7 +31,7 @@ public class RedundantPaths {
    * @param pq
    * @return
    */
-  public static boolean length2(Path pq, int[] validatedPaths) throws Exception {
+  public static boolean length2(Path pq) throws Exception {
     if (pq.getLength() < 2)
       return false;
 
@@ -113,7 +113,6 @@ public class RedundantPaths {
       ArrayList<Position> newPathPositions = new ArrayList<>(pq.getPath());
       newPathPositions.set(newPathPositions.size() - 2, intermediate);
       Path newPath = new Path(instance, newPathPositions);
-      validatedPaths[0]++;
       if (newPath.valid()){
         return true;
       }

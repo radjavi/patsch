@@ -273,8 +273,8 @@ public class Path {
     return true;
   }
 
-  public boolean redundant(int[] validatedPaths) throws Exception {
-    return RedundantPaths.length2(this, validatedPaths) || RedundantPaths.length3(this);
+  public boolean redundant() throws Exception {
+    return RedundantPaths.length2(this) || RedundantPaths.length3(this);
   }
 
   /**
