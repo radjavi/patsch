@@ -5,7 +5,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/radjavi/patsch">
-    <img src="images/PatschLogo.png" alt="Logo" width="240" height="80">
+    <img src="images/PatschLogo2.png" alt="Logo" width="240">
   </a>
 
   <h1 align="center">Patsch</h1>
