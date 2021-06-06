@@ -195,7 +195,7 @@ public class Instance {
     }
 
     public boolean isCritical() throws Exception {
-        if (this.solve() == null)
+        if (InstanceSolver.solveSafe(this) == null)
             return false;
         for (int i = 0; i <= m; i++) {
             int[] waitingTimesToTry = this.getWaitingTimes().clone();
@@ -203,7 +203,7 @@ public class Instance {
                 continue;
             waitingTimesToTry[i]--;
             Instance instanceToTry = new Instance(waitingTimesToTry);
-            if (instanceToTry.solve() != null)
+            if (InstanceSolver.solveSafe(instanceToTry) != null)
                 return false;
         }
         return true;
@@ -368,6 +368,8 @@ public class Instance {
     }
 
     public boolean lessThan(Instance ins) {
+        if (!this.lessThanOrEqualTo(ins))
+            return false;
         boolean componentLessThan = false;
         for (int i = 0; i <= m; i++) {
             if (this.waitingTimes[i] < ins.waitingTimes[i]) {
@@ -377,10 +379,6 @@ public class Instance {
         }
         if (!componentLessThan)
             return false;
-        for (int i = 0; i <= m; i++) {
-            if (!(this.waitingTimes[i] == ins.waitingTimes[i] || this.waitingTimes[i] < ins.waitingTimes[i]))
-                return false;
-        }
         return true;
     }
 

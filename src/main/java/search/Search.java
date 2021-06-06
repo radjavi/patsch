@@ -277,10 +277,10 @@ public class Search {
                 Instance greaterInfeasible = null;
                 Instance referenceInstance = u;
                 for (Instance greater : maximalInfeasibleInstances) {
-                    if (u.lessThan(greater)) {
+                    if (u.lessThanOrEqualTo(greater)) {
                         greaterInfeasible = greater;
                         break;
-                    } else if (uR.lessThan(greater)) {
+                    } else if (uR.lessThanOrEqualTo(greater)) {
                         greaterInfeasible = greater;
                         referenceInstance = uR;
                         break;
