@@ -13,7 +13,7 @@ public class Instance {
     private Integer b;
     private Property[] properties;
     private PositionGraph validGraph;
-    private DistanceCache shortestDistances;
+    private DistanceStorage shortestDistances;
 
     public Instance(int[] waitingTimes) {
         m = waitingTimes.length - 1;
@@ -109,7 +109,7 @@ public class Instance {
                     "'to' is not an instance of Position or Property, but rather: " + to.getClass().getName());
 
         if (shortestDistances == null)
-            shortestDistances = new DistanceCache();
+            shortestDistances = new DistanceStorage();
         Integer cachedDistance = shortestDistances.getDistance(from, to);
         if (cachedDistance != null)
             return cachedDistance;
@@ -203,7 +203,7 @@ public class Instance {
     }
 
     public boolean isCritical() throws Exception {
-        if (this.solve() == null)
+        if (InstanceSolver.solveSafe(this) == null)
             return false;
         for (int i = 0; i <= m; i++) {
             int[] waitingTimesToTry = this.getWaitingTimes().clone();
@@ -211,7 +211,7 @@ public class Instance {
                 continue;
             waitingTimesToTry[i]--;
             Instance instanceToTry = new Instance(waitingTimesToTry);
-            if (instanceToTry.solve() != null)
+            if (InstanceSolver.solveSafe(instanceToTry) != null)
                 return false;
         }
         return true;
@@ -377,6 +377,8 @@ public class Instance {
     }
 
     public boolean lessThan(Instance ins) {
+        if (!this.lessThanOrEqualTo(ins))
+            return false;
         boolean componentLessThan = false;
         for (int i = 0; i <= m; i++) {
             if (this.waitingTimes[i] < ins.waitingTimes[i]) {
@@ -386,10 +388,6 @@ public class Instance {
         }
         if (!componentLessThan)
             return false;
-        for (int i = 0; i <= m; i++) {
-            if (!(this.waitingTimes[i] == ins.waitingTimes[i] || this.waitingTimes[i] < ins.waitingTimes[i]))
-                return false;
-        }
         return true;
     }
 

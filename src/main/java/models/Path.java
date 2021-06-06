@@ -7,16 +7,18 @@ import wrappers.RedundantPaths;
 
 public class Path {
 
-  LinkedList<Position> path;
-  Instance instance;
+  private LinkedList<Position> path;
+  private Instance instance;
   /**
    * Maps property index to index of first position that has this property.
    */
-  int[] s_i;
+  private int[] s_i;
   /**
    * Maps property index to index of last position that has this property.
    */
-  int[] f_i;
+  private int[] f_i;
+
+  private Boolean valid;
 
   public Path(Instance instance) {
     this.instance = instance;
@@ -57,6 +59,7 @@ public class Path {
     }
     path.addLast(position);
     updateIndices(position, path.size() - 1);
+    valid = null;
   }
 
   public void addPositionFirst(Position position) throws Exception {
@@ -68,6 +71,7 @@ public class Path {
     }
     path.addFirst(position);
     updateIndices(position, 0);
+    valid = null;
   }
 
   public LinkedList<Position> getPath() {
@@ -79,8 +83,10 @@ public class Path {
   }
 
   public boolean valid() throws Exception {
-    Property[] properties = instance.getProperties();
+    if (valid != null)
+      return valid;
 
+    Property[] properties = instance.getProperties();
     Position s = this.getFirst();
     Position f = this.getLast();
     for (Property property : properties) {
@@ -89,19 +95,28 @@ public class Path {
       if (s_i[p] < 0 && f_i[p] < 0) {
         int propToS = instance.distance(property, s);
         int fToProp = instance.distance(f, property);
-        if (propToS + this.getLength() + fToProp > waitingTime)
+        if (propToS + this.getLength() + fToProp > waitingTime) {
+          valid = false;
           return false;
+        }
       } else {
         int propToSi = instance.distance(property, s) + s_i[p];
-        if (propToSi > waitingTime)
+        if (propToSi > waitingTime) {
+          valid = false;
           return false;
+        }
         int fiToProp = ((path.size() - 1) - f_i[p]) + instance.distance(f, property);
-        if (fiToProp > waitingTime)
+        if (fiToProp > waitingTime) {
+          valid = false;
           return false;
-        if (!consecutivePathsValid(property, waitingTime))
+        }
+        if (!consecutivePathsValid(property, waitingTime)) {
+          valid = false;
           return false;
+        }
       }
     }
+    valid = true;
     return true;
   }
 
@@ -220,10 +235,20 @@ public class Path {
     return instance;
   }
 
-  public boolean isValidCycle() {
+  public boolean isSolutionCycle() throws Exception {
     if (!this.isCycle())
       return false;
+    if (!this.valid())
+      return false;
+    if (!this.visitsAllProperties())
+      return false;
+    if (!this.validLoopCycle())
+      return false;
 
+    return true;
+  }
+
+  private boolean validLoopCycle() {
     Property[] properties = instance.getProperties();
     for (Property property : properties) {
       int p = property.getIndex();

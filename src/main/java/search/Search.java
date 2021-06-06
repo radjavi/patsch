@@ -15,7 +15,7 @@ public class Search {
     private static final Logger logger = LogManager.getLogger(Search.class);
 
     public static Map<Instance, Path> searchForCriticalInstances(int m, int r) throws Exception {
-        SingleExecutor executor = SingleExecutor.getInstance();
+        SingletonExecutor executor = SingletonExecutor.getInstance();
         if (executor == null) {
             return searchForCriticalInstancesSequential(m, r);
         }
@@ -30,7 +30,7 @@ public class Search {
     public static Map<Instance, Path> searchForCriticalInstancesSequential(int m, int r) throws Exception {
         if (m < 2)
             return null;
-        LinkedList<Instance> U = new LinkedList<>();
+        InstanceLevelBuckets U = new InstanceLevelBuckets();
         HashMap<Instance, Path> C = new HashMap<>();
         HashSet<Instance> visitedInstances = new HashSet<>();
 
@@ -54,12 +54,12 @@ public class Search {
             if (solution != null)
                 C.put(lowerBoundInstance, solution);
             else if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null) {
-                U.add(lowerBoundInstance);
+                U.add(lowerBoundInstance, lowerBoundInstance.level());
             }
         }
-        logger.debug("Proceeding with {} lower bound instances", U.size());
+        logger.debug("Proceeding with {} lower bound instances", U.allInstances().size());
         logger.trace("-------- U --------");
-        U.forEach(i -> logger.trace(i.waitingTimesToString()));
+        U.allInstances().forEach(i -> logger.trace(i.waitingTimesToString()));
         logger.trace("-------------------");
 
         // Generate a stock of instances
@@ -72,44 +72,53 @@ public class Search {
 
         // SEARCH
         logger.info("Searching for critical instances...");
+        int level = 0;
         while (!U.isEmpty()) {
-            Instance u = U.pop();
-            Instance uR = u.getReversed();
-            Instance greaterInfeasible = null;
-            Instance referenceInstance = u;
-            for (Instance greater : maximalInfeasibleInstances) {
-                if (u.lessThan(greater)) {
-                    greaterInfeasible = greater;
-                    break;
-                } else if (uR.lessThan(greater)) {
-                    greaterInfeasible = greater;
-                    referenceInstance = uR;
-                    break;
+            Set<Instance> levelInstances = U.poll(level);
+            if (levelInstances == null) {
+                level++;
+                continue;
+            }
+            logger.info("Level: {}, Size of U: {}", level, levelInstances.size());
+            for (Instance u : levelInstances) {
+                Instance uR = u.getReversed();
+                Instance greaterInfeasible = null;
+                Instance referenceInstance = u;
+                for (Instance greater : maximalInfeasibleInstances) {
+                    if (u.lessThanOrEqualTo(greater)) {
+                        greaterInfeasible = greater;
+                        break;
+                    } else if (uR.lessThanOrEqualTo(greater)) {
+                        greaterInfeasible = greater;
+                        referenceInstance = uR;
+                        break;
+                    }
+                }
+                ArrayList<Instance> vs = new ArrayList<>(m + 1);
+                for (int i = 0; i <= m; i++) {
+                    if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] >= r)
+                        continue;
+                    if (referenceInstance.getWaitingTimes()[i] >= r)
+                        continue;
+                    int[] newWaitingTimes = referenceInstance.getWaitingTimes().clone();
+                    newWaitingTimes[i]++;
+                    Instance v = new Instance(newWaitingTimes);
+                    if (!visitedInstances.add(v))
+                        continue;
+
+                    if (v.geqToSomeIn(C.keySet()) == null)
+                        vs.add(v);
+                }
+                for (Instance v : vs) {
+                    Path solution = new Instance(v.getWaitingTimes()).solve();
+                    if (solution != null) {
+                        C.put(v, solution);
+                        logger.info("Found critical instance {}: {}", v.waitingTimesToString(), solution);
+                    } else
+                        U.add(v, level + 1);
                 }
             }
-            ArrayList<Instance> vs = new ArrayList<>(m + 1);
-            for (int i = 0; i <= m; i++) {
-                if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] == r)
-                    continue;
-                if (referenceInstance.getWaitingTimes()[i] == r)
-                    continue;
-                int[] newWaitingTimes = referenceInstance.getWaitingTimes().clone();
-                newWaitingTimes[i]++;
-                Instance v = new Instance(newWaitingTimes);
-                if (!visitedInstances.add(v))
-                    continue;
-
-                if (v.geqToSomeIn(C.keySet()) == null)
-                    vs.add(v);
-            }
-            for (Instance v : vs) {
-                Path solution = new Instance(v.getWaitingTimes()).solve();
-                if (solution != null) {
-                    C.put(v, solution);
-                    logger.info("Found critical instance {}: {}", v.waitingTimesToString(), solution);
-                } else
-                    U.add(v);
-            }
+            level++;
         }
         logger.info("Found critical instances");
 
@@ -128,7 +137,6 @@ public class Search {
         }
 
         printResults(C, m, r);
-
         return C;
 
     }
@@ -155,7 +163,7 @@ public class Search {
             if (solution != null)
                 C.put(lowerBoundInstance, solution);
             else if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null) {
-                U.add(lowerBoundInstance);
+                U.add(lowerBoundInstance, lowerBoundInstance.level());
             }
         }
         // logger.debug("Proceeding with {} lower bound instances",
@@ -178,10 +186,11 @@ public class Search {
         logger.trace("--------------------------------------");
 
         // SEARCH
-        SingleExecutor executor = SingleExecutor.getInstance();
+        SingletonExecutor executor = SingletonExecutor.getInstance();
         logger.info("Searching for critical instances...");
         int level = 0;
         while (!U.isEmpty()) {
+            visitedInstances = ConcurrentHashMap.newKeySet();
             Set<Instance> levelInstances = U.poll(level);
             if (levelInstances == null) {
                 level++;
@@ -195,7 +204,7 @@ public class Search {
             List<Future<List<Instance>>> futures = executor.getExecutor().invokeAll(callables);
             for (Future<List<Instance>> future : futures) {
                 for (Instance i : future.get()) {
-                    U.add(i);
+                    U.add(i, level + 1);
                 }
             }
             level++;
@@ -263,7 +272,7 @@ public class Search {
                 }
                 maximalInfeasibleInstances.add(u);
                 for (int i = 0; i <= m; i++) {
-                    if (u.getWaitingTimes()[i] == r)
+                    if (u.getWaitingTimes()[i] >= r)
                         continue;
                     int[] waitingTimes = u.getWaitingTimes().clone();
                     waitingTimes[i]++;
@@ -366,12 +375,10 @@ public class Search {
                 currentTime = minTime;
                 // logger.log(RESULT, "-- Minimum Waiting Time: {} --", currentTime);
             }
-            Path solution = C.get(critical);
             int a = critical.getA();
             int b = critical.getB();
             String intervalString = a > b ? "[]" : "[" + a + "," + b + "]";
-            // logger.log(RESULT, "{} {} {}", critical.waitingTimesToString(),
-            // intervalString, solution != null ? solution : critical.solve());
+            logger.log(RESULT, "{} {} {}", critical.waitingTimesToString(), intervalString, critical.solve());
         }
         logger.info("---------------------------------");
     }
@@ -413,9 +420,9 @@ public class Search {
             }
             ArrayList<Instance> vs = new ArrayList<>(m + 1);
             for (int i = 0; i <= m; i++) {
-                if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] == r)
+                if (greaterInfeasible != null && greaterInfeasible.getWaitingTimes()[i] >= r)
                     continue;
-                if (referenceInstance.getWaitingTimes()[i] == r)
+                if (referenceInstance.getWaitingTimes()[i] >= r)
                     continue;
                 int[] newWaitingTimes = referenceInstance.getWaitingTimes().clone();
                 newWaitingTimes[i]++;
