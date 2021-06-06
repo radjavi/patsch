@@ -82,7 +82,7 @@ public class InstanceSolver {
     if (babysittingPaths == null) {
       after = System.nanoTime();
       et = (after - before) * 1E-6;
-      logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(), "feasible", et, nrOfPaths[0]);
+      logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(), "infeasible", et, nrOfPaths[0]);
       return null;
     }
 
