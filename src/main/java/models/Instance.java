@@ -198,6 +198,10 @@ public class Instance {
         return InstanceSolver.solve(this, nrOfPaths);
     }
 
+    public Path solveBenchmark() throws Exception {
+        return InstanceSolver.solveBenchmark(this);
+    }
+
     public boolean isCritical() throws Exception {
         if (InstanceSolver.solveSafe(this) == null)
             return false;

@@ -50,7 +50,7 @@ public class Search {
         logger.info("Generating lower bound instances...");
         HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
         for (Instance lowerBoundInstance : lowerBoundInstances) {
-            Path solution = new Instance(lowerBoundInstance.getWaitingTimes()).solve();
+            Path solution = new Instance(lowerBoundInstance.getWaitingTimes()).solveBenchmark();
             if (solution != null)
                 C.put(lowerBoundInstance, solution);
             else if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null) {
@@ -110,7 +110,7 @@ public class Search {
                         vs.add(v);
                 }
                 for (Instance v : vs) {
-                    Path solution = new Instance(v.getWaitingTimes()).solve();
+                    Path solution = new Instance(v.getWaitingTimes()).solveBenchmark();
                     if (solution != null) {
                         C.put(v, solution);
                         logger.info("Found critical instance {}: {}", v.waitingTimesToString(), solution);
@@ -136,7 +136,7 @@ public class Search {
             assert reversedCritical : reversed.waitingTimesToString() + " is NOT critical.";
         }
 
-        printResults(C, m, r);
+        // printResults(C, m, r);
         return C;
 
     }
@@ -159,7 +159,7 @@ public class Search {
         logger.info("Generating lower bound instances...");
         HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
         for (Instance lowerBoundInstance : lowerBoundInstances) {
-            Path solution = new Instance(lowerBoundInstance.getWaitingTimes()).solve();
+            Path solution = new Instance(lowerBoundInstance.getWaitingTimes()).solveBenchmark();
             if (solution != null)
                 C.put(lowerBoundInstance, solution);
             else if (lowerBoundInstance.geqToSomeIn(C.keySet()) == null) {
@@ -225,7 +225,7 @@ public class Search {
             assert reversedCritical : reversed.waitingTimesToString() + " is NOT critical.";
         }
 
-        printResults(C, m, r);
+        // printResults(C, m, r);
 
         return C;
 
@@ -247,7 +247,7 @@ public class Search {
             // maximalInfeasibleInstances.size(), visitedInstances.size());
             Instance u = U.pop();
             // logger.info("{}", u.waitingTimesToString());
-            Path solution = u.solve();
+            Path solution = u.solveBenchmark();
 
             if (solution != null) {
                 for (int i = 0; i <= m; i++) {
@@ -378,7 +378,9 @@ public class Search {
             int a = critical.getA();
             int b = critical.getB();
             String intervalString = a > b ? "[]" : "[" + a + "," + b + "]";
-            logger.log(RESULT, "{} {} {}", critical.waitingTimesToString(), intervalString, critical.solve());
+            critical.solveBenchmark();
+            // logger.log(RESULT, "{} {} {}", critical.waitingTimesToString(),
+            // intervalString, critical.solveBenchmark());
         }
         logger.info("---------------------------------");
     }
@@ -433,7 +435,7 @@ public class Search {
                     vs.add(v);
             }
             for (Instance v : vs) {
-                Path solution = new Instance(v.getWaitingTimes()).solve();
+                Path solution = new Instance(v.getWaitingTimes()).solveBenchmark();
 
                 if (solution != null) {
                     C.put(v, solution);

@@ -17,14 +17,10 @@ public class InstanceSolver {
   private static final Logger logger = LogManager.getLogger(InstanceSolver.class);
 
   public static Path solve(Instance instance) throws Exception {
-    return solveSequential(instance, new int[] { 0 });
+    return solve(instance, new int[] { 0 });
   }
 
   public static Path solve(Instance instance, int[] nrOfPaths) throws Exception {
-    return solveSequential(instance, nrOfPaths);
-  }
-
-  public static Path solveSequential(Instance instance, int[] nrOfPaths) throws Exception {
     int m = instance.getM();
     int a = instance.getA();
     int b = instance.getB();
@@ -60,6 +56,65 @@ public class InstanceSolver {
         return solution;
       }
     }
+    return null;
+  }
+
+  public static Path solveBenchmark(Instance instance) throws Exception {
+    int m = instance.getM();
+    int a = instance.getA();
+    int b = instance.getB();
+    if (a > b || (a == 0 && b == m) || (a == 0 && b == 0) || (a == m && b == m)) {
+      // Find correct d to return path from Proposition 1.
+      for (int d = 0; d <= m; d++) {
+        Instance critical = Search.criticalWithEmptyIntersection(m, d);
+        if (critical.lessThanOrEqualTo(instance))
+          return billiardBallPath(instance, d);
+      }
+      return null;
+    }
+    int[] nrOfPaths = new int[1];
+    long before = System.nanoTime();
+    long after = 0;
+    double et = 0;
+
+    LinkedList<Path> paths = new LinkedList<>();
+    LinkedList<Path> babysittingPaths = findBabysittingPaths(instance, nrOfPaths);
+    if (babysittingPaths == null) {
+      after = System.nanoTime();
+      et = (after - before) * 1E-6;
+      logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(), "feasible", et, nrOfPaths[0]);
+      return null;
+    }
+
+    else if (!babysittingPaths.isEmpty()) {
+      for (Path babysittingPath : babysittingPaths) {
+        if (babysittingPath.isSolutionCycle()) {
+          after = System.nanoTime();
+          et = (after - before) * 1E-6;
+          logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(), "feasible", et, nrOfPaths[0]);
+          return babysittingPath;
+        }
+
+        paths.add(babysittingPath);
+      }
+    } else
+      initPathsToSolve(instance, paths);
+
+    HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
+    while (!paths.isEmpty()) {
+      Path p = paths.pop();
+
+      Path solution = extendPath(instance, fingerprints, paths, p, nrOfPaths);
+      if (solution != null) {
+        after = System.nanoTime();
+        et = (after - before) * 1E-6;
+        logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(), "feasible", et, nrOfPaths[0]);
+        return solution;
+      }
+    }
+    after = System.nanoTime();
+    et = (after - before) * 1E-6;
+    logger.log(RESULT, "{} {} {} {}", instance.waitingTimesToString(), "infeasible", et, nrOfPaths[0]);
     return null;
   }
 
