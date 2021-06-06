@@ -198,10 +198,6 @@ public class Instance {
         return InstanceSolver.solve(this, nrOfPaths);
     }
 
-    public Path solveBASIC(int[] nrOfSolved) throws Exception {
-        return InstanceSolver.solveSequentialBASIC(this, nrOfSolved);
-    }
-
     public boolean isCritical() throws Exception {
         if (InstanceSolver.solveSafe(this) == null)
             return false;
