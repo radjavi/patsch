@@ -195,7 +195,7 @@ public class Instance {
     }
 
     public boolean isCritical() throws Exception {
-        if (this.solve() == null)
+        if (InstanceSolver.solveSafe(this) == null)
             return false;
         for (int i = 0; i <= m; i++) {
             int[] waitingTimesToTry = this.getWaitingTimes().clone();
@@ -203,7 +203,7 @@ public class Instance {
                 continue;
             waitingTimesToTry[i]--;
             Instance instanceToTry = new Instance(waitingTimesToTry);
-            if (instanceToTry.solve() != null)
+            if (InstanceSolver.solveSafe(instanceToTry) != null)
                 return false;
         }
         return true;
