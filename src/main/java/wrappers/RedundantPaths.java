@@ -56,8 +56,6 @@ public class RedundantPaths {
       // Square Diamond
       case "N,N":
       case "S,S":
-        if (penultimate.isLockedX())
-          return false;
         Position right = new Position(penultimate.getX() + 1, penultimate.getY());
         Position left = new Position(penultimate.getX() - 1, penultimate.getY());
         if (validGraph.hasPosition(right) || validGraph.hasPosition(left))
@@ -65,8 +63,6 @@ public class RedundantPaths {
         break;
       case "E,E":
       case "W,W":
-        if (penultimate.isLockedY())
-          return false;
         Position above = new Position(penultimate.getX(), penultimate.getY() + 1);
         Position under = new Position(penultimate.getX(), penultimate.getY() - 1);
         if (validGraph.hasPosition(above) || validGraph.hasPosition(under))
@@ -74,6 +70,7 @@ public class RedundantPaths {
         break;
     }
 
+<<<<<<< HEAD
     Position intermediate = null;
     switch (directionPath) {
       // Parallelogram
@@ -119,6 +116,8 @@ public class RedundantPaths {
         return true;
     }
 
+=======
+>>>>>>> bothWildcards
     return false;
   }
 
@@ -142,29 +141,21 @@ public class RedundantPaths {
     switch (directionPath) {
       case "E,NE,E":
       case "W,NW,W":
-        if (antepenultimate.isLockedY() || penultimate.isLockedY())
-          return false;
         intermediate1 = new Position(antepenultimate.getX(), antepenultimate.getY() + 1);
         intermediate2 = new Position(penultimate.getX(), penultimate.getY() - 1);
         break;
       case "E,SE,E":
       case "W,SW,W":
-        if (antepenultimate.isLockedY() || penultimate.isLockedY())
-          return false;
         intermediate1 = new Position(antepenultimate.getX(), antepenultimate.getY() - 1);
         intermediate2 = new Position(penultimate.getX(), penultimate.getY() + 1);
         break;
       case "N,NW,N":
       case "S,SW,S":
-        if (antepenultimate.isLockedX() || penultimate.isLockedX())
-          return false;
         intermediate1 = new Position(antepenultimate.getX() - 1, antepenultimate.getY());
         intermediate2 = new Position(penultimate.getX() + 1, penultimate.getY());
         break;
       case "N,NE,N":
       case "S,SE,S":
-        if (antepenultimate.isLockedX() || penultimate.isLockedX())
-          return false;
         intermediate1 = new Position(antepenultimate.getX() + 1, antepenultimate.getY());
         intermediate2 = new Position(penultimate.getX() - 1, penultimate.getY());
         break;
