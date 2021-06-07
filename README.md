@@ -8,7 +8,7 @@
     <img src="images/PatschLogo2.png" alt="Logo" width="240">
   </a>
 
-  <h1 align="center" style="font-size: 36px; font-family: serif;">P<span style="font-size: 26px; font-family: serif;">ATSCH</span></h1>
+  <h1 align="center">Patsch</h1>
 
   <h5 align="center">
     Critical Patrolling Schedules for Two Robots on a Line
