@@ -70,54 +70,6 @@ public class RedundantPaths {
         break;
     }
 
-<<<<<<< HEAD
-    Position intermediate = null;
-    switch (directionPath) {
-      // Parallelogram
-      case "NE,N": // Parallelogram
-      case "SE,S": // Parallelogram
-      case "NE,S": // Hourglass
-      case "SE,N": // Hourglass
-        if (penultimate.isLockedX())
-          return false;
-        intermediate = new Position(penultimate.getX() - 1, penultimate.getY());
-        break;
-      case "NW,N": // Parallelogram
-      case "SW,S": // Parallelogram
-      case "NW,S": // Hourglass
-      case "SW,N": // Hourglass
-        if (penultimate.isLockedX())
-          return false;
-        intermediate = new Position(penultimate.getX() + 1, penultimate.getY());
-        break;
-      case "NE,E": // Parallelogram
-      case "NW,W": // Parallelogram
-      case "NE,W": // Hourglass
-      case "NW,E": // Hourglass
-        if (penultimate.isLockedY())
-          return false;
-        intermediate = new Position(penultimate.getX(), penultimate.getY() - 1);
-        break;
-      case "SE,E": // Parallelogram
-      case "SW,W": // Parallelogram
-      case "SE,W": // Hourglass
-      case "SW,E": // Hourglass
-        if (penultimate.isLockedY())
-          return false;
-        intermediate = new Position(penultimate.getX(), penultimate.getY() + 1);
-        break;
-    }
-    if (intermediate != null && validGraph.hasPosition(intermediate)) {
-      ArrayList<Position> newPathPositions = new ArrayList<>(pq.getPath());
-      newPathPositions.set(newPathPositions.size() - 2, intermediate);
-      Path newPath = new Path(instance, newPathPositions);
-      nrOfPaths[0]++;
-      if (newPath.valid())
-        return true;
-    }
-
-=======
->>>>>>> bothWildcards
     return false;
   }
 
