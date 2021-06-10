@@ -31,6 +31,11 @@ public class SingletonExecutor {
     return instance;
   }
 
+  public  void setThreads(int threads){
+    this.nrThreads = threads;
+    this.executor = Executors.newWorkStealingPool(threads);
+  }
+
   public int getNrThreads() {
     return nrThreads;
   }

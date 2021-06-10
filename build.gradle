@@ -19,7 +19,7 @@ java {
 }
 
 application {
-    mainClass = 'app.roofValue3m' // Set App.java as entry-point
+    mainClass = 'app.parallelTest' // Set App.java as entry-point
     applicationDefaultJvmArgs = ['-ea'] // Enable assertions
 }
 
