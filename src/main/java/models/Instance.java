@@ -50,18 +50,6 @@ public class Instance {
         validGraph = new PositionGraph(validPositions(properties));
     }
 
-    /**
-     * Returns the vertices of a triangle graph.
-     */
-    private static HashSet<Position> trianglePositions(int m) {
-        HashSet<Position> vertices = new HashSet<>();
-        for (int x = 0; x <= m; x++) {
-            for (int y = 0; y <= x; y++) {
-                vertices.add(new Position(x, y));
-            }
-        }
-        return vertices;
-    }
 
     private static int computeA(Property[] properties) {
         int a = 0;
@@ -195,7 +183,7 @@ public class Instance {
     }
 
     public boolean isCritical() throws Exception {
-        if (InstanceSolver.solveSafe(this) == null)
+        if (this.solve() == null)
             return false;
         for (int i = 0; i <= m; i++) {
             int[] waitingTimesToTry = this.getWaitingTimes().clone();
@@ -203,7 +191,7 @@ public class Instance {
                 continue;
             waitingTimesToTry[i]--;
             Instance instanceToTry = new Instance(waitingTimesToTry);
-            if (InstanceSolver.solveSafe(instanceToTry) != null)
+            if (instanceToTry.solve() != null)
                 return false;
         }
         return true;

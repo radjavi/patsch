@@ -53,33 +53,6 @@ public class InstanceSolver {
     return null;
   }
 
-  public static Path solveSafe(Instance instance) throws Exception {
-    int m = instance.getM();
-    int a = instance.getA();
-    int b = instance.getB();
-    if (a > b || (a == 0 && b == m) || (a == 0 && b == 0) || (a == m && b == m)) {
-      // Find correct d to return path from Proposition 1.
-      for (int d = 0; d <= m; d++) {
-        Instance critical = Search.criticalWithEmptyIntersection(m, d);
-        if (critical.lessThanOrEqualTo(instance))
-          return billiardBallPath(instance, d);
-      }
-      return null;
-    }
-    LinkedList<Path> paths = new LinkedList<>();
-    initPathsToSolve(instance, paths);
-
-    HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
-    while (!paths.isEmpty()) {
-      Path p = paths.pop();
-      Path solution = extendPath(instance, fingerprints, paths, p);
-      if (solution != null) {
-        return solution;
-      }
-    }
-    return null;
-  }
-
   private static LinkedList<Path> findBabysittingPaths(Instance instance) throws Exception {
     int a = instance.getA();
     int b = instance.getB();
