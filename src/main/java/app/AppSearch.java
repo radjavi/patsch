@@ -16,7 +16,7 @@ public class AppSearch {
         }
         int r = args.length > 1 ? Integer.parseInt(args[1]) : 4 * m;
         if (r < 1) {
-            logger.fatal("Roof value must be greater than 1");
+            logger.fatal("Roof value must be greater than 0");
             return;
         }
         int nrThreads = args.length > 2 ? Integer.parseInt(args[2]) : 1;
