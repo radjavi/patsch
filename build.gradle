@@ -9,21 +9,19 @@
 plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
-    id 'application'
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
-    }
+task(search, dependsOn: 'classes', type: JavaExec) {
+    main = 'app.AppSearch'
+    classpath = sourceSets.main.runtimeClasspath
+    enableAssertions = true
 }
 
-application {
-    mainClass = 'app.App' // Set App.java as entry-point
-    applicationDefaultJvmArgs = ['-ea'] // Enable assertions
+task(solve, dependsOn: 'classes', type: JavaExec) {
+    main = 'app.AppSolve'
+    classpath = sourceSets.main.runtimeClasspath
+    enableAssertions = true
 }
-
-
 
 repositories {
     // Use jcenter for resolving dependencies.

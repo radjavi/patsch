@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 
 public class Search {
-    final static Level RESULT = Level.forName("RESULT", 350);
+    private final static Level RESULT = Level.forName("RESULT", 350);
     private static final Logger logger = LogManager.getLogger(Search.class);
 
     public static Map<Instance, Path> searchForCriticalInstances(int m, int r) throws Exception {
