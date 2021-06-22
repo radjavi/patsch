@@ -5,7 +5,7 @@ import wrappers.*;
 import java.util.*;
 import java.util.concurrent.*;
 import com.google.common.primitives.Ints;
-// Import log4j classes.
+
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -285,8 +285,7 @@ public class Search {
                 }
             }
         }
-        // Remove large lower bound instances
-        // May be improved (see mail)
+
         HashSet<Instance> lowerBoundInstances = new HashSet<>();
         for (Instance lowerBoundInstance : allLowerBoundInstances) {
             HashSet<Instance> comparisonSet = (HashSet<Instance>) allLowerBoundInstances.clone();
@@ -301,7 +300,7 @@ public class Search {
         HashMap<Instance, Path> C = new HashMap<>();
 
         if (m < 2)
-            return C; // may be improved.
+            return C; 
 
         for (int d = 0; d <= m - 1; d++) {
             Instance instance = criticalWithEmptyIntersection(m, d);
@@ -391,7 +390,7 @@ public class Search {
         @Override
         public List<Instance> call() throws Exception {
             List<Instance> U = new ArrayList<>();
-            // Instance u = U.poll();
+            
             Instance uR = u.getReversed();
             Instance greaterInfeasible = null;
             Instance referenceInstance = u;

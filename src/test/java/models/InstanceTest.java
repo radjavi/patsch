@@ -5,12 +5,7 @@ import static org.junit.Assert.*;
 import java.util.*;
 
 public class InstanceTest {
-  // @Test
-  // public void testLowerBoundInstance() throws Exception {
-  //   Instance[] expectedInstances = {
-      
-  //   };
-  // }
+ 
 
   @Test
   public void testEquals() {
