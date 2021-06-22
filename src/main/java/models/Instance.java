@@ -21,7 +21,7 @@ public class Instance {
         m = waitingTimes.length - 1;
         this.waitingTimes = waitingTimes.clone();
         for (int i = 0; i <= m; i++) {
-            assert waitingTimes[i] > 0 : "Waiting time must be greater than 0: " + this.waitingTimesToString();
+            assert waitingTimes[i] > 0 : "Waiting time must be greater than 0: " + this;
         }
     }
 
@@ -229,8 +229,9 @@ public class Instance {
     public int getM() {
         return m;
     }
-
-    public String waitingTimesToString() {
+    
+    @Override
+    public String toString() {
         return Arrays.toString(this.getWaitingTimes()).replaceAll("\\s+","").replaceAll("\\[","(").replaceAll("\\]",")");
     }
 

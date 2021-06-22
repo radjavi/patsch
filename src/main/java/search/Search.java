@@ -22,11 +22,6 @@ public class Search {
         return searchForCriticalInstancesParallel(m, r);
     }
 
-    /**
-     * @param m
-     * @return
-     * @throws Exception
-     */
     public static Map<Instance, Path> searchForCriticalInstancesSequential(int m, int r)
             throws Exception {
         if (m < 2)
@@ -39,15 +34,8 @@ public class Search {
         logger.info("Generating M_0...");
         HashMap<Instance, Path> m_0 = criticalsWithEmptyIntersection(m);
         logger.debug("Generated M_0 - {} instances", m_0.size());
-        C.putAll(m_0); // M_0
-        logger.trace("-------- C --------");
-        C.forEach((i, s) -> {
-            logger.trace(i.waitingTimesToString() + ": " + s);
-        });
-        logger.trace("-------------------");
-        // C.putAll(criticalsWithShortWaitingTimes(m)); // M_1
-
-        // Generate lower bound instances
+        C.putAll(m_0);
+        
         logger.info("Generating lower bound instances...");
         HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
         for (Instance lowerBoundInstance : lowerBoundInstances) {
@@ -58,18 +46,22 @@ public class Search {
                 U.add(lowerBoundInstance, lowerBoundInstance.level());
             }
         }
-        logger.debug("Proceeding with {} lower bound instances", U.allInstances().size());
+        logger.debug("Proceeding with {} lower bound instances in U", U.allInstances().size());
+        
         logger.trace("-------- U --------");
-        U.allInstances().forEach(i -> logger.trace(i.waitingTimesToString()));
+        U.allInstances().forEach(i -> logger.trace(i));
+        logger.trace("-------- C --------");
+        C.forEach((i, s) -> {
+            logger.trace(i + ": " + s);
+        });
         logger.trace("-------------------");
 
-        // Generate a stock of instances
         logger.info("Generating maximal infeasible instances...");
         HashSet<Instance> maximalInfeasibleInstances = generateMaximalInfeasible(m, r);
         logger.debug("Generated {} maximal infeasible instances",
                 maximalInfeasibleInstances.size());
         logger.trace("---- Maximal Infeasible Instances ----");
-        maximalInfeasibleInstances.forEach(i -> logger.trace(i.waitingTimesToString()));
+        maximalInfeasibleInstances.forEach(i -> logger.trace(i));
         logger.trace("--------------------------------------");
 
         // SEARCH
@@ -115,7 +107,7 @@ public class Search {
                     Path solution = new Instance(v.getWaitingTimes()).solve();
                     if (solution != null) {
                         C.put(v, solution);
-                        logger.info("Found critical instance {}: {}", v.waitingTimesToString(),
+                        logger.info("Found critical instance {}: {}", v,
                                 solution);
                     } else
                         U.add(v, level + 1);
@@ -124,19 +116,17 @@ public class Search {
             level++;
         }
         logger.info("Found critical instances");
-
-        // Test if critical
         logger.info("Testing if instances are critical...");
         for (Instance i : C.keySet()) {
             boolean critical = i.isCritical();
             if (!critical)
-                logger.trace("{} is NOT critical", i.waitingTimesToString());
-            assert critical : i.waitingTimesToString() + " is NOT critical.";
+                logger.trace("{} is NOT critical", i);
+            assert critical : i + " is NOT critical.";
             Instance reversed = i.getReversed();
             boolean reversedCritical = reversed.isCritical();
             if (!reversedCritical)
-                logger.trace("{} is NOT critical", reversed.waitingTimesToString());
-            assert reversedCritical : reversed.waitingTimesToString() + " is NOT critical.";
+                logger.trace("{} is NOT critical", reversed);
+            assert reversedCritical : reversed + " is NOT critical.";
         }
 
         printResults(C, m, r);
@@ -156,10 +146,8 @@ public class Search {
         logger.info("Generating M_0...");
         HashMap<Instance, Path> m_0 = criticalsWithEmptyIntersection(m);
         logger.debug("Generated M_0 - {} instances", m_0.size());
-        C.putAll(m_0); // M_0
-        // C.putAll(criticalsWithShortWaitingTimes(m)); // M_1
+        C.putAll(m_0); 
 
-        // Generate lower bound instances
         logger.info("Generating lower bound instances...");
         HashSet<Instance> lowerBoundInstances = lowerBoundInstances(C, m);
         for (Instance lowerBoundInstance : lowerBoundInstances) {
@@ -170,23 +158,21 @@ public class Search {
                 U.add(lowerBoundInstance, lowerBoundInstance.level());
             }
         }
-        // logger.debug("Proceeding with {} lower bound instances", U.allInstances().size());
+        logger.trace("Proceeding with {} lower bound instances in U", U.allInstances().size());
+        logger.trace("-------- U --------");
+        U.allInstances().forEach(i -> logger.trace(i));
         logger.trace("-------- C --------");
         C.forEach((i, s) -> {
-            logger.trace(i.waitingTimesToString() + ": " + s);
+            logger.trace(i + ": " + s);
         });
-        // logger.trace("-------------------");
-        logger.trace("-------- U --------");
-        U.allInstances().forEach(i -> logger.trace(i.waitingTimesToString()));
         logger.trace("-------------------");
 
-        // Generate a stock of instances
         logger.info("Generating maximal infeasible instances...");
         HashSet<Instance> maximalInfeasibleInstances = generateMaximalInfeasible(m, r);
         logger.debug("Generated {} maximal infeasible instances",
                 maximalInfeasibleInstances.size());
         logger.trace("---- Maximal Infeasible Instances ----");
-        maximalInfeasibleInstances.forEach(i -> logger.trace(i.waitingTimesToString()));
+        maximalInfeasibleInstances.forEach(i -> logger.trace(i));
         logger.trace("--------------------------------------");
 
         // SEARCH
@@ -215,19 +201,17 @@ public class Search {
             level++;
         }
         logger.info("Found critical instances");
-
-        // Test if critical
         logger.info("Testing if instances are critical...");
         for (Instance i : C.keySet()) {
             boolean critical = i.isCritical();
             if (!critical)
-                logger.trace("{} is NOT critical", i.waitingTimesToString());
-            assert critical : i.waitingTimesToString() + " is NOT critical.";
+                logger.trace("{} is NOT critical", i);
+            assert critical : i + " is NOT critical.";
             Instance reversed = i.getReversed();
             boolean reversedCritical = reversed.isCritical();
             if (!reversedCritical)
-                logger.trace("{} is NOT critical", reversed.waitingTimesToString());
-            assert reversedCritical : reversed.waitingTimesToString() + " is NOT critical.";
+                logger.trace("{} is NOT critical", reversed);
+            assert reversedCritical : reversed + " is NOT critical.";
         }
 
         printResults(C, m, r);
@@ -240,7 +224,6 @@ public class Search {
         HashSet<Instance> maximalInfeasibleInstances = new HashSet<>();
         HashSet<Instance> visitedInstances = new HashSet<>();
         LinkedList<Instance> U = new LinkedList<>();
-        // Initialize U with [r,...,r].
         int[] allR = new int[m + 1];
         Arrays.fill(allR, r);
         Instance allRInstance = new Instance(allR);
@@ -248,10 +231,7 @@ public class Search {
         visitedInstances.add(allRInstance);
 
         while (!U.isEmpty()) {
-            // logger.info("maximal size: {}, visited size: {}",
-            // maximalInfeasibleInstances.size(), visitedInstances.size());
             Instance u = U.pop();
-            // logger.info("{}", u.waitingTimesToString());
             Path solution = u.solve();
             if (solution != null) {
                 for (int i = 0; i <= m; i++) {
@@ -383,7 +363,7 @@ public class Search {
             int a = critical.getA();
             int b = critical.getB();
             String intervalString = a > b ? "[]" : "[" + a + "," + b + "]";
-            logger.log(RESULT, "{} {} {}", critical.waitingTimesToString(), intervalString,
+            logger.log(RESULT, "{} {} {}", critical, intervalString,
                     critical.solve());
         }
         logger.info("---------------------------------");
@@ -443,7 +423,7 @@ public class Search {
                 Path solution = new Instance(v.getWaitingTimes()).solve();
                 if (solution != null) {
                     C.put(v, solution);
-                    logger.info("Found critical instance {}: {}", v.waitingTimesToString(),
+                    logger.info("Found critical instance {}: {}", v,
                             solution);
                 } else
                     U.add(v);
