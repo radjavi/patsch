@@ -10,29 +10,47 @@
 
   <h1 align="center">Patsch</h1>
 
-  <h5 align="center">
-    Critical Patrolling Schedules for Two Robots on a Line
-  </h5>
-
   <p align="center">
-    About the project...
+    This repository contains an implementation that was part of our master's thesis [Critical Patrolling Schedules for Two Robots on a Line](https://github.com/radjavi/patsch) at Chalmers University of Technology.
     <br />
     <br />
   </p>
 </p>
 
+## Abstract
+
+Patrolling with unbalanced frequencies (PUF) involves scheduling mobile robots that continuously visit a finite number of fixed stations, with known individual maximal waiting times, placed on a line. Recent work demonstrates that PUF is a remarkably challenging problem. To advance current research in the best-known solution, we searched for *critical instances* of the integer patrolling problem (IntPUF). A solvable instance is critical if it becomes impossible to schedule the visits when any station's waiting time is decremented.
+
+Formulating IntPUF as a specific graph problem enabled several algorithms and heuristics to be developed, mainly for solving any instance of IntPUF and searching for critical instances.
+The algorithms were proved to be correct and implemented in a Java program to collect the critical instances. 
+Benchmarking the implementation shows that solving instances work well when the number of stations is relatively small while searching for critical instances turned out to be extremely difficult.
+However, numerous critical instances were found, which reveal interesting patterns that may be further analyzed and utilized to improve the search for additional critical instances. 
+
 ## Getting Started
-To get started with the project you will need ***JDK 11***. The project has been packaged using ***Gradle***. To test, compile and assemble the project, run the following command:
+
+The project has been packaged using ***Gradle***, which runs on all major operating systems and requires only a Java JDK version 8 or higher. On Windows, the following commands are run using `gradlew.bat` in cmd instead of `./gradlew`.
+
+### Search
+
+To run our application that searches for all critical instances for a given integer m > 1, roof value r > 0, using t > 0 threads:
+
+`./gradlew search --args="m r t"`
+
+For example: `./gradlew search --args="7 14 4"`
+
+### Solve
+
+To run our application that solves an instance (t_0,...,t_m), where every t_i is an integer > 0:
+
+`./gradlew solve --args="(t_0,...,t_m)"`
+
+For example: `./gradlew solve --args="(6,4,1,4,6)"`
+
+### Other tasks
+
+To test, compile and assemble the project, run the following command:
 
 `./gradlew build`
-
-To only run the tests:
-
-`./gradlew test`
-
-To run our application that searches for all critical instances for a given integer m, where m > 1 (defaults to m=4 if args not specified), using t threads:
-
-`./gradlew run --args="m t"`
 
 To list all available gradle tasks:
 
@@ -41,8 +59,6 @@ To list all available gradle tasks:
 <!-- LICENSE -->
 ## License
 Distributed under the GPL-3.0 License. See [LICENSE](LICENSE) for more information.
-
-
 
 <!-- CONTACT -->
 ## Contact
