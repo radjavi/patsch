@@ -11,6 +11,12 @@ plugins {
     id 'java-library'
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
 task(search, dependsOn: 'classes', type: JavaExec) {
     main = 'app.AppSearch'
     classpath = sourceSets.main.runtimeClasspath

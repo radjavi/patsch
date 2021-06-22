@@ -28,7 +28,7 @@ However, numerous critical instances were found, which reveal interesting patter
 
 ## Getting Started
 
-The project has been packaged using ***Gradle***, which runs on all major operating systems and requires only a Java JDK version 8 or higher. On Windows, the following commands are run using `gradlew.bat` in cmd instead of `./gradlew`.
+The project has been packaged using ***Gradle***, which runs on all major operating systems and requires only a Java JDK version 11 or higher. On Windows, the following commands are run using `gradlew.bat` in cmd instead of `./gradlew`.
 
 ### Search
 
