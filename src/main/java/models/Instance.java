@@ -50,18 +50,6 @@ public class Instance {
         validGraph = new PositionGraph(validPositions(properties));
     }
 
-    /**
-     * Returns the vertices of a triangle graph.
-     */
-    private static HashSet<Position> trianglePositions(int m) {
-        HashSet<Position> vertices = new HashSet<>();
-        for (int x = 0; x <= m; x++) {
-            for (int y = 0; y <= x; y++) {
-                vertices.add(new Position(x, y));
-            }
-        }
-        return vertices;
-    }
 
     private static int computeA(Property[] properties) {
         int a = 0;

@@ -44,6 +44,7 @@ public class InstanceSolver {
     HashSet<ArrayList<Integer>> fingerprints = new HashSet<>();
     while (!paths.isEmpty()) {
       Path p = paths.pop();
+      
       Path solution = extendPath(instance, fingerprints, paths, p);
       if (solution != null) {
         return solution;
@@ -77,7 +78,10 @@ public class InstanceSolver {
       if (babysittingPathsLeft == null)
         return null;
     }
-    return left >= right ? babysittingPathsLeft : babysittingPathsRight;
+    LinkedList<Path> allBabysittingPaths = new LinkedList<>();
+    allBabysittingPaths.addAll(babysittingPathsLeft);
+    allBabysittingPaths.addAll(babysittingPathsRight);
+    return allBabysittingPaths;
   }
 
   private static LinkedList<Path> findBabysittingPathsLeft(Instance instance) throws Exception {
@@ -103,6 +107,8 @@ public class InstanceSolver {
       for (Position v : instance.getValidGraph().getNeighbours(u)) {
         if (v.getY() != ys[1])
           continue;
+
+
         Path path = new Path(instance);
         path.addPositionLast(u);
         path.addPositionLast(v);
@@ -118,6 +124,7 @@ public class InstanceSolver {
         if (q.getY() != ys[length])
           continue;
         Path pq = new Path(p);
+      
         pq.addPositionLast(q);
         if (pq.valid()) {
           ArrayList<Integer> fingerprint = pq.fingerprint();
@@ -159,10 +166,12 @@ public class InstanceSolver {
       for (Position v : instance.getValidGraph().getNeighbours(u)) {
         if (v.getX() != xs[1])
           continue;
-        Path path = new Path(instance);
-        path.addPositionLast(u);
-        path.addPositionLast(v);
-        paths.add(path);
+         
+  
+          Path path = new Path(instance);
+          path.addPositionLast(u);
+          path.addPositionLast(v);
+          paths.add(path);
       }
     }
 
