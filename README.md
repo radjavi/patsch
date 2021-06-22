@@ -57,6 +57,10 @@ To list all available gradle tasks:
 
 `./gradlew tasks`
 
+### Logs
+
+After running Search or Solve, log and result files will be created in a `logs/` directory.
+
 <!-- LICENSE -->
 ## License
 Distributed under the GPL-3.0 License. See [LICENSE](LICENSE) for more information.
