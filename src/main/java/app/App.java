@@ -1,17 +1,11 @@
 package app;
 
 import search.*;
-import models.*;
 import wrappers.*;
-import java.util.*;
-
-// Import log4j classes.
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 public class App {
-    // Define a static logger variable so that it references the
-    // Logger instance named "App".
     private static final Logger logger = LogManager.getLogger(App.class);
 
     public static void main(String[] args) throws Exception {

@@ -1,19 +1,10 @@
 package wrappers;
 
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import search.Search;
 import models.*;
-import com.google.common.collect.Sets;
-
-// Import log4j classes.
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 public class InstanceSolver {
-
-  private static final Logger logger = LogManager.getLogger(InstanceSolver.class);
 
   public static Path solve(Instance instance) throws Exception {
     int m = instance.getM();
@@ -108,7 +99,6 @@ public class InstanceSolver {
         if (v.getY() != ys[1])
           continue;
 
-
         Path path = new Path(instance);
         path.addPositionLast(u);
         path.addPositionLast(v);
@@ -167,7 +157,6 @@ public class InstanceSolver {
         if (v.getX() != xs[1])
           continue;
          
-  
           Path path = new Path(instance);
           path.addPositionLast(u);
           path.addPositionLast(v);

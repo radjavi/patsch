@@ -3,14 +3,7 @@ package wrappers;
 import java.util.*;
 import models.*;
 
-// Import log4j classes.
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
-
 public class RedundantPaths {
-  // Define a static logger variable so that it references the
-  // Logger instance named "RedundantPaths".
-  private static final Logger logger = LogManager.getLogger(RedundantPaths.class);
 
   private static String direction(Position from, Position to) {
     String dir = "";
@@ -25,12 +18,6 @@ public class RedundantPaths {
     return dir;
   }
 
-  /**
-   * May be improved.
-   * 
-   * @param pq
-   * @return
-   */
   public static boolean length2(Path pq) throws Exception {
     if (pq.getLength() < 2)
       return false;
@@ -109,7 +96,6 @@ public class RedundantPaths {
         intermediate1 = new Position(antepenultimate.getX() + 1, antepenultimate.getY());
         intermediate2 = new Position(penultimate.getX() - 1, penultimate.getY());
         break;
-      // TODO: Add more cases
     }
     if (intermediate1 != null && intermediate2 != null) {
       Instance instance = pq.getInstance();

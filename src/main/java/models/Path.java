@@ -143,9 +143,6 @@ public class Path {
     return array;
   }
 
-  /**
-   * May be improved.
-   */
   private void computeIndices() {
     Property[] properties = instance.getProperties();
     for (Property property : properties) {
@@ -173,9 +170,6 @@ public class Path {
     }
   }
 
-  /**
-   * May be improved.
-   */
   private void updateIndices(Position newPosition, int positionIndex) {
     ArrayList<Integer> propertyIndices = new ArrayList<>();
     Property[] properties = instance.getProperties();
@@ -201,30 +195,18 @@ public class Path {
 
   }
 
-  /**
-   * Get s
-   */
   public Position getFirst() {
     return path.get(0);
   }
 
-  /**
-   * Get f
-   */
   public Position getLast() {
     return path.get(path.size() - 1);
   }
 
-  /**
-   * @return the s_i
-   */
   public int[] getS_i() {
     return s_i;
   }
 
-  /**
-   * @return the f_i
-   */
   public int[] getF_i() {
     return f_i;
   }

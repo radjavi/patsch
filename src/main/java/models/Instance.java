@@ -2,9 +2,6 @@ package models;
 
 import java.util.*;
 import wrappers.*;
-// Import log4j classes.
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 public class Instance {
     private int m;
@@ -15,7 +12,6 @@ public class Instance {
     private PositionGraph validGraph;
     private DistanceStorage shortestDistances;
 
-    private static final Logger logger = LogManager.getLogger(Instance.class);
 
     public Instance(int[] waitingTimes) {
         m = waitingTimes.length - 1;
@@ -27,9 +23,6 @@ public class Instance {
 
     private void initProperties() {
         properties = createProperties(waitingTimes);
-        // Arrays.sort(properties, (Property p1, Property p2) -> {
-        // return Integer.compare(p1.getWaitingTime(), p2.getWaitingTime());
-        // });
     }
 
     private void initA() {
@@ -74,7 +67,6 @@ public class Instance {
     /**
      * Returns the valid vertices, i.e., the set R.
      * 
-     * May be improved.
      */
     private static HashSet<Position> validPositions(Property[] properties) {
         HashSet<Position> vertices = new HashSet<>();
@@ -85,11 +77,6 @@ public class Instance {
         return vertices;
     }
 
-    /**
-     * May be improved (check if shortestPath == null)
-     * 
-     * @return the shortest distance to p
-     */
     public <F, T> int distance(F from, T to) throws Exception {
         if ((!(from instanceof Position) && !(from instanceof Property)))
             throw new IllegalArgumentException("'from' is not an instance of Position or Property, but rather: " + from.getClass().getName());
@@ -107,9 +94,6 @@ public class Instance {
         return distance;
     }
 
-    /**
-     * May be improved.
-     */
     public <F, T> Path shortestPath(F from, T to) throws Exception {
         if (from instanceof Position && to instanceof Position)
             return shortestPath((Position) from, (Position) to);
@@ -229,7 +213,7 @@ public class Instance {
     public int getM() {
         return m;
     }
-    
+
     @Override
     public String toString() {
         return Arrays.toString(this.getWaitingTimes()).replaceAll("\\s+","").replaceAll("\\[","(").replaceAll("\\]",")");
