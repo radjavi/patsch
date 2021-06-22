@@ -11,7 +11,8 @@
   <h1 align="center">Patsch</h1>
 
   <p align="center">
-    This repository contains an implementation that was part of our master's thesis [Critical Patrolling Schedules for Two Robots on a Line](https://github.com/radjavi/patsch) at Chalmers University of Technology.
+    This repository contains an implementation that was part of our master's thesis <br>
+    <a href="https://github.com/radjavi/patsch">Critical Patrolling Schedules for Two Robots on a Line</a> at Chalmers University of Technology.
     <br />
     <br />
   </p>
