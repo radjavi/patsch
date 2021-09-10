@@ -12,7 +12,7 @@
 
   <p align="center">
     This repository contains the implementation that was part of our master's thesis <br>
-    <a href="https://github.com/radjavi/patsch">Critical Patrolling Schedules for Two Robots on a Line</a> at Chalmers University of Technology.
+    <a href="https://odr.chalmers.se/handle/20.500.12380/304106">Critical Patrolling Schedules for Two Robots on a Line</a> at Chalmers University of Technology.
     <br />
     <br />
   </p>
